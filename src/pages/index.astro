@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import JourneyCard from "../components/JourneyCard.astro";
+import Callout from "../components/Callout.astro";
+import heroImage from "../assets/hero-terapia.jpg";
+import spaceImage from "../assets/espacio-terapeutico.jpg";
+---
+
+<BaseLayout
+  title="AISA Argentina"
+  description="Información, orientación y profesionales de Integración Sensorial en Argentina."
+>
+  <PageHero
+    title="Fortaleciendo la Integración Sensorial en Argentina"
+    lead="Promovemos la formación y desarrollo profesional para acercar tratamientos de calidad a más personas y familias en todo el país."
+    primaryHref="/buscar-profesional/"
+    primaryLabel="Encontrar un profesional"
+    secondaryHref="/acerca-de/"
+    secondaryLabel="Conocé AISA"
+    orbitImages={[heroImage, spaceImage]}
+    fullHeight={true}
+    landing={true}
+    flagWord="Argentina"
+  />
+
+  <section class="section-space" data-landing-journeys>
+    <div class="site-container">
+      <div class="max-w-3xl">
+        <h2
+          class="font-aisa-heading text-aisa-section-title font-bold text-aisa-ink"
+        >
+          Cómo podemos ayudarte?
+        </h2>
+      </div>
+      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+        <JourneyCard
+          eyebrow="Familias y escuelas"
+          title="Cuándo y por qué consultar con un profesional?"
+          body="Cuando las dificultades sensoriales afectan el aprendizaje, el juego o la vida diaria, un profesional certificado puede ayudarte."
+          href="/familias-y-escuelas/"
+          linkText="Buscá orientación"
+          tone="sky"
+          alignLinkBottom={true}
+        />
+        <JourneyCard
+          eyebrow="Profesionales"
+          title="Formación y certificación en un solo lugar"
+          body="Descubrí nuestra oferta de cursos y programas con certificaciones avaladas a nivel nacional para seguir desarrollándote como profesional."
+          href="/profesionales/"
+          linkText="Conocer los cursos"
+          tone="white"
+          alignLinkBottom={true}
+        />
+        <JourneyCard
+          eyebrow="Comunidad AISA"
+          title="Trabajá con nosotros"
+          body="Como socio de AISA, promocionamos tu perfil, información de contacto y tus certificaciones en nuestro repositorio público."
+          href="/profesionales/#solicitud"
+          linkText="Asociate"
+          tone="leaf"
+          alignLinkBottom={true}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white section-space">
+    <div class="site-container">
+      <Callout
+        title="Buscá un profesional cerca tuyo"
+        body="Nuestro directorio es una lista curada de profesionales asociados a AISA, junto con las certificaciones que validan su especialidad."
+        href="/buscar-profesional/"
+        linkText="Encontrá un profesional"
+        tone="sky"
+        motionKey="landing-callout"
+      />
+    </div>
+  </section>
+</BaseLayout>

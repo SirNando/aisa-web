@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Página no encontrada"
+  description="La página solicitada no existe o cambió de ubicación."
+  noindex={true}
+>
+  <section class="section-space min-h-[65vh]">
+    <div class="site-container max-w-3xl text-center">
+      <p class="eyebrow">Error 404</p>
+      <h1 class="mt-5 font-aisa-heading text-5xl font-extrabold text-aisa-ink sm:text-6xl">
+        No encontramos esa página.
+      </h1>
+      <p class="mx-auto mt-6 max-w-xl text-lg leading-8">
+        Puede haber cambiado de lugar. Volvé al inicio o elegí una de las tareas principales.
+      </p>
+      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <a class="button-primary" href="/">Volver al inicio</a>
+        <a class="button-secondary" href="/contacto/">Contactar a AISA</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

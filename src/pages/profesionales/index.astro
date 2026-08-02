@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import JourneyCard from "../../components/JourneyCard.astro";
+import Callout from "../../components/Callout.astro";
+import MembershipForm from "../../components/MembershipForm.astro";
+import heroImage from "../../assets/hero-terapia.jpg";
+import spaceImage from "../../assets/espacio-terapeutico.jpg";
+---
+
+<BaseLayout
+  title="Profesionales"
+  description="Certificación, formación avalada y participación profesional en AISA Argentina."
+>
+  <PageHero
+    title="Tu perfil profesional está a pasos de pegar un salto"
+    lead="En AISA ofrecemos cursos avalados a nuestros socios, y aumentamos tu exposición mediante nuestro directorio de profesionales para que potenciales pacientes te puedan contactar."
+    primaryHref="#solicitud"
+    primaryLabel="Asociate a AISA"
+    secondaryHref="/profesionales/formacion-y-cursos/"
+    secondaryLabel="Ver formación y cursos"
+    orbitImages={[heroImage, spaceImage]}
+  />
+
+  <section class="section-space bg-white">
+    <div class="site-container">
+      <div class="max-w-3xl">
+        <h2 class="font-aisa-heading text-aisa-section-title font-bold">
+          Cómo podemos ayudarte?
+        </h2>
+      </div>
+      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+        <JourneyCard
+          eyebrow="Formación"
+          title="Quiero hacer un curso"
+          body="Conocé los cursos avalados por AISA y el nivel con el que te certifican"
+          href="/profesionales/formacion-y-cursos/"
+          linkText="Explorá los cursos"
+          tone="sky"
+        />
+        <JourneyCard
+          eyebrow="Aval Institucional"
+          title="Ya hice los cursos"
+          body="Solicitá que AISA valide los cursos que hiciste para mejorar tu imagen profesional"
+          href="/profesionales/certificacion/"
+          linkText="Conocé los requisitos"
+          tone="white"
+        />
+        <JourneyCard
+          eyebrow="Formá parte"
+          title="Quiero ser socio AISA"
+          body="Como socio AISA, accedés a descuentos en cursos y aparecés en nuestro directorio web de profesionales junto a tus certificaciones"
+          href="#solicitud"
+          linkText="Quiero asociarme"
+          tone="leaf"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space">
+    <div class="site-container">
+      <Callout
+        eyebrow="Directorio público"
+        title="Así se presentarán los perfiles certificados"
+        body="Probá una versión con seis registros ficticios y filtros locales. No utiliza datos personales, base de datos ni servicios externos."
+        href="/buscar-profesional/"
+        linkText="Probar el directorio"
+        tone="sky"
+      />
+    </div>
+  </section>
+
+  <section class="section-space bg-aisa-sand">
+    <div class="site-container grid gap-12 lg:grid-cols-[.9fr_1.1fr]">
+      <div>
+        <p class="eyebrow">Antes de iniciar</p>
+        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+          Qué información debe estar vigente
+        </h2>
+      </div>
+      <ul class="grid gap-4">
+        <li class="surface-card p-5">
+          <strong class="text-aisa-ink">Definiciones públicas:</strong> qué significa
+          certificación completa y certificación en curso.
+        </li>
+        <li class="surface-card p-5">
+          <strong class="text-aisa-ink">Requisitos operativos:</strong> documentación,
+          ventanas de postulación, costos y responsables.
+        </li>
+        <li class="surface-card p-5">
+          <strong class="text-aisa-ink">Oferta formativa:</strong> proveedor, nivel,
+          vigencia, contacto y fecha de revisión.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <MembershipForm />
+</BaseLayout>

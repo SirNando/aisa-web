@@ -1,0 +1,72 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  body: string;
+  href: string;
+  linkText: string;
+  tone?: "sky" | "leaf" | "sand" | "white";
+  alignLinkBottom?: boolean;
+}
+
+const { eyebrow, title, body, href, linkText, tone = "white", alignLinkBottom = false } = Astro.props;
+const tones = {
+  sky: "bg-aisa-sky-wash",
+  leaf: "bg-aisa-leaf-wash",
+  sand: "bg-aisa-sand",
+  white: "bg-white",
+};
+---
+
+<article data-journey-card class:list={["flex h-full flex-col rounded-aisa-card border border-aisa-border p-6 sm:p-8", tones[tone]]}>
+  <p class="eyebrow">{eyebrow}</p>
+  <h3 class="mt-4 font-aisa-heading text-2xl font-bold text-aisa-ink">{title}</h3>
+  <p class="mt-3 leading-7 text-aisa-body">{body}</p>
+  <a
+    class:list={[
+      "text-link inline-flex min-h-11 items-center self-start",
+      alignLinkBottom ? "mt-auto pt-6" : "mt-6",
+    ]}
+    href={href}
+  >
+    {linkText} <span class="ml-2" aria-hidden="true">→</span>
+  </a>
+</article>
+
+<style>
+  [data-journey-card] {
+    --journey-spot-x: 50%;
+    --journey-spot-y: 50%;
+
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  [data-journey-card]::before {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at var(--journey-spot-x) var(--journey-spot-y),
+      rgb(255 255 255 / 0.48),
+      transparent 38%
+    );
+    content: "";
+    opacity: var(--journey-spot-opacity, 0);
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  [data-journey-card] > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-journey-card] {
+      will-change: auto;
+    }
+  }
+</style>

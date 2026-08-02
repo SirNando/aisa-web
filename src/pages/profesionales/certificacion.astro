@@ -1,0 +1,280 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import heroImage from "../../assets/hero-terapia.jpg";
+import spaceImage from "../../assets/espacio-terapeutico.jpg";
+
+const certificationLevels = [
+  {
+    level: "Nivel 1",
+    title: "Teoría de Integración Sensorial",
+    summary:
+      "Construye las bases para comprender el marco de referencia de Integración Sensorial y sus implicancias en la vida cotidiana.",
+    topics: [
+      "Teoría de Jean Ayres, sistemas sensoriales y neurociencias.",
+      "Percepción, modulación, discriminación y disfunciones de Integración Sensorial.",
+      "Introducción al proceso de evaluación y tratamiento, evidencia y equipamiento específico.",
+    ],
+    format:
+      "Modalidad virtual y/o presencial, con más del 50% sincrónica como referencia.",
+    hours: "Carga horaria mínima sugerida: 25–30 horas.",
+  },
+  {
+    level: "Nivel 2",
+    title: "Medición y evaluación",
+    summary:
+      "Desarrolla el proceso de evaluación y el razonamiento clínico para analizar perfiles y dificultades en la participación.",
+    topics: [
+      "Instrumentos de evaluación, entrevistas, cuestionarios y observaciones clínicas.",
+      "Tests estandarizados, análisis e interpretación de resultados.",
+      "Síntesis, diagnóstico, elaboración de informes y devolución del motivo de consulta.",
+    ],
+    format:
+      "Modalidad virtual y/o presencial, con más del 50% sincrónica como referencia.",
+    hours: "Carga horaria mínima sugerida: 25–30 horas.",
+  },
+  {
+    level: "Nivel 3",
+    title: "Intervención y tratamiento",
+    summary:
+      "Se centra en diseñar, implementar y revisar intervenciones basadas en el marco de referencia de Integración Sensorial.",
+    topics: [
+      "Razonamiento clínico, objetivos funcionales y diseño de planes de acción.",
+      "Actividades terapéuticas, respuestas adaptativas y reevaluación de resultados.",
+      "Aplicación en distintas poblaciones y contextos, incluyendo medidas de fidelidad.",
+    ],
+    format:
+      "Modalidad virtual y/o presencial, con más del 50% sincrónica como referencia.",
+    hours: "Carga horaria mínima sugerida: 25–30 horas.",
+  },
+  {
+    level: "Nivel 4",
+    title: "Práctica en Integración Sensorial",
+    summary:
+      "Es una capacitación clínica avanzada para integrar evaluación, razonamiento e intervención en la práctica profesional.",
+    topics: [
+      "Revisión de herramientas, construcción de hipótesis y planificación de la intervención.",
+      "Intervenciones directas e indirectas supervisadas y mentoría de casos.",
+      "Medidas de fidelidad, arte de la práctica, alcances y limitaciones.",
+    ],
+    format:
+      "Prioriza supervisión y devolución directa, preferentemente presencial y/o sincrónica (70%).",
+    hours:
+      "Carga horaria mínima sugerida: 100 horas; requiere recorrido previo en formación y práctica clínica de IS.",
+  },
+];
+---
+
+<BaseLayout
+  title="Certificación AISA"
+  description="Requisitos y proceso de certificación profesional AISA en Integración Sensorial."
+>
+  <PageHero
+    title="Certificá tu formación en Integración Sensorial."
+    lead="Si hiciste lo cursos avalados o cumplís con los requisitos de AISA, podés solicitar un certificado."
+    primaryHref="#requisitos"
+    primaryLabel="Conocé los requisitos"
+    secondaryHref="#proceso"
+    secondaryLabel="Certificá tu conocimiento"
+    orbitImages={[spaceImage, heroImage]}
+  />
+
+  <section
+    id="niveles-certificacion"
+    class="section-space scroll-mt-28 bg-white"
+  >
+    <div class="site-container">
+      <div class="max-w-3xl">
+        <h2
+          class="mt-4 font-aisa-heading text-aisa-section-title font-bold"
+          id="requisitos"
+        >
+          Requisitos de certificación
+        </h2>
+        <p class="mt-5 text-lg leading-8">
+          Estos son los contenidos mínimos y la carga horaria requerida para
+          cada nivel de certificación. Si ya realizaste otras formaciones, podés
+          compararlas con estos criterios y solicitar que AISA te certifique.
+        </p>
+      </div>
+
+      <div class="mt-10 grid gap-5 lg:grid-cols-2">
+        {
+          certificationLevels.map((level) => (
+            <article class="surface-card flex h-full flex-col p-6 sm:p-8">
+              <p class="eyebrow">{level.level}</p>
+              <h3 class="mt-3 font-aisa-heading text-2xl font-bold text-aisa-ink">
+                {level.title}
+              </h3>
+              <p class="mt-4 leading-7">{level.summary}</p>
+              <ul class="mt-5 grid gap-3 text-sm leading-6">
+                {level.topics.map((topic) => (
+                  <li class="flex gap-3">
+                    <span
+                      class="mt-2 h-2 w-2 shrink-0 rounded-full bg-aisa-green-strong"
+                      aria-hidden="true"
+                    />
+                    <span>{topic}</span>
+                  </li>
+                ))}
+              </ul>
+              <div class="mt-auto border-t border-aisa-border pt-5">
+                <p class="text-sm leading-6">
+                  <strong class="text-aisa-ink">Modalidad:</strong>{" "}
+                  {level.format}
+                </p>
+                <p class="mt-2 text-sm leading-6">
+                  <strong class="text-aisa-ink">Referencia:</strong>{" "}
+                  {level.hours}
+                </p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <div id="proceso" class="mt-12 scroll-mt-28">
+        <div class="max-w-3xl">
+          <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+            Proceso de certificación
+          </h2>
+          <p class="mt-4 text-lg leading-8">
+            Si cumplís con los requisitos listados más arriba o hiciste alguno
+            de nuestros cursos, seguí estos pasos para certificarte.
+          </p>
+        </div>
+
+        <ol class="mt-8 grid gap-5 lg:grid-cols-2">
+          <li
+            class="surface-card grid gap-5 p-6 sm:grid-cols-[4rem_1fr] sm:p-8"
+          >
+            <span
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-aisa-sky-wash font-aisa-heading text-xl font-extrabold text-aisa-sky-strong"
+            >
+              01
+            </span>
+            <div>
+              <h3
+                class="mt-3 font-aisa-heading text-2xl font-bold text-aisa-ink"
+              >
+                Asociate con AISA
+              </h3>
+              <p class="mt-4 leading-7">
+                Si todavía no te asociaste,
+                <a
+                  class="font-semibold text-aisa-green-strong underline underline-offset-4"
+                  href="/profesionales/#solicitud"
+                >
+                  completá el formulario
+                </a>
+                para dar de alta tu usuario. Para acceder a la certificación
+                debés contar con un mínimo de 6 meses de membresía activa y
+                tener la cuota al día.
+              </p>
+            </div>
+          </li>
+
+          <li
+            class="surface-card grid gap-5 p-6 sm:grid-cols-[4rem_1fr] sm:p-8"
+          >
+            <span
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-aisa-sky-wash font-aisa-heading text-xl font-extrabold text-aisa-sky-strong"
+            >
+              02
+            </span>
+            <div>
+              <h3
+                class="mt-3 font-aisa-heading text-2xl font-bold text-aisa-ink"
+              >
+                Solicitá la certificación
+              </h3>
+              <p class="mt-4 leading-7">
+                Enviá un mail a
+                <a
+                  class="font-semibold text-aisa-green-strong underline underline-offset-4"
+                  href="mailto:certificación.aisa@gmail.com"
+                >
+                  certificación.aisa@gmail.com
+                </a>
+                solicitando la certificación de tu nivel según los requisitos. Abrimos
+                tres períodos al año: marzo, julio y noviembre. Luego recibirás un
+                link para adjuntar los certificados correspondientes a los cursos
+                realizados para cada nivel. Una vez adjunta la documentación, se validarán
+                todos los datos presentados y se contactará a la persona solicitante
+                para informarle el importe a abonar.
+              </p>
+            </div>
+          </li>
+
+          <li
+            class="surface-card grid gap-5 p-6 sm:grid-cols-[4rem_1fr] sm:p-8"
+          >
+            <span
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-aisa-sky-wash font-aisa-heading text-xl font-extrabold text-aisa-sky-strong"
+            >
+              03
+            </span>
+            <div>
+              <h3
+                class="mt-3 font-aisa-heading text-2xl font-bold text-aisa-ink"
+              >
+                Aboná la certificación
+              </h3>
+              <p class="mt-4 leading-7">
+                Se establece para certificar en <strong>Nivel 3</strong> el valor
+                vigente correspondiente a 3 UTO, y en <strong
+                  >Nivel 4 – Certificación Completa
+                </strong>
+                el valor vigente correspondiente a 5 UTO.
+              </p>
+            </div>
+          </li>
+
+          <li
+            class="surface-card grid gap-5 p-6 sm:grid-cols-[4rem_1fr] sm:p-8"
+          >
+            <span
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-aisa-sky-wash font-aisa-heading text-xl font-extrabold text-aisa-sky-strong"
+            >
+              04
+            </span>
+            <div>
+              <h3
+                class="mt-3 font-aisa-heading text-2xl font-bold text-aisa-ink"
+              >
+                Recibís el certificado
+              </h3>
+              <p class="mt-4 leading-7">
+                Recibirás un certificado y se te asignará un logotipo con tu
+                número de registro si alcanzaste <strong>Nivel 4</strong>. Si
+                certificaste <strong>Nivel 3</strong>, recibirás un certificado
+                de AISA acreditando tu formación en proceso.
+              </p>
+            </div>
+          </li>
+        </ol>
+
+        <div
+          class="mt-8 rounded-[var(--radius-card)] bg-aisa-leaf-wash p-6 sm:p-8"
+        >
+          <div class="grid items-center gap-6 md:grid-cols-[1fr_auto]">
+            <div>
+              <h3 class="font-aisa-heading text-2xl font-bold text-aisa-ink">
+                ¿Querés empezar?
+              </h3>
+              <p class="mt-3 leading-7">
+                Completá el formulario de alta para incorporarte como socio.
+              </p>
+            </div>
+            <a
+              class="button-primary"
+              href="/profesionales/#solicitud"
+            >
+              Completar formulario
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

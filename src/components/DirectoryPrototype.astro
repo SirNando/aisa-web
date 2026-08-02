@@ -1,0 +1,200 @@
+---
+import { demoProfessionals } from "../data/demoProfessionals";
+
+const provinces = [...new Set(demoProfessionals.map((person) => person.province))].sort(
+  (a, b) => a.localeCompare(b, "es-AR"),
+);
+const localities = [...new Set(demoProfessionals.map((person) => person.locality))].sort(
+  (a, b) => a.localeCompare(b, "es-AR"),
+);
+---
+
+<div class="grid gap-8 lg:grid-cols-[20rem_1fr]">
+  <form class="h-fit rounded-aisa-card bg-aisa-sky-wash p-6" data-directory-form>
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="eyebrow">Filtros de muestra</p>
+        <h2 class="mt-2 font-aisa-heading text-2xl font-bold text-aisa-ink">Acotá la búsqueda</h2>
+      </div>
+      <span class="rounded-full bg-white px-3 py-1 text-xs font-bold text-aisa-sky-strong">Demo</span>
+    </div>
+
+    <div class="mt-6 grid gap-5">
+      <label class="grid gap-2 font-semibold text-aisa-ink" for="directory-query">
+        Nombre o localidad
+        <input
+          id="directory-query"
+          name="query"
+          type="search"
+          placeholder="Ej.: Córdoba"
+          autocomplete="off"
+          class="min-h-12 rounded-aisa-control border border-aisa-border-strong bg-white px-4 font-normal text-aisa-ink placeholder:text-aisa-muted"
+        />
+      </label>
+
+      <label class="grid gap-2 font-semibold text-aisa-ink" for="directory-province">
+        Provincia
+        <select
+          id="directory-province"
+          name="province"
+          class="min-h-12 rounded-aisa-control border border-aisa-border-strong bg-white px-4 font-normal text-aisa-ink"
+        >
+          <option value="">Todas las provincias</option>
+          {provinces.map((province) => <option value={province}>{province}</option>)}
+        </select>
+      </label>
+
+      <label class="grid gap-2 font-semibold text-aisa-ink" for="directory-locality">
+        Localidad
+        <select
+          id="directory-locality"
+          name="locality"
+          class="min-h-12 rounded-aisa-control border border-aisa-border-strong bg-white px-4 font-normal text-aisa-ink"
+        >
+          <option value="">Todas las localidades</option>
+          {localities.map((locality) => <option value={locality}>{locality}</option>)}
+        </select>
+      </label>
+
+      <label class="grid gap-2 font-semibold text-aisa-ink" for="directory-status">
+        Estado de certificación
+        <select
+          id="directory-status"
+          name="certificationStatus"
+          class="min-h-12 rounded-aisa-control border border-aisa-border-strong bg-white px-4 font-normal text-aisa-ink"
+        >
+          <option value="">Todos los estados</option>
+          <option value="complete">Certificación completa</option>
+          <option value="in-progress">Certificación en curso</option>
+        </select>
+      </label>
+
+      <button type="button" class="button-quiet w-full bg-white" data-directory-reset>
+        Limpiar filtros
+      </button>
+    </div>
+  </form>
+
+  <section aria-labelledby="directory-results-title">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-aisa-border pb-5">
+      <div>
+        <p class="eyebrow">Resultados ficticios</p>
+        <h2 id="directory-results-title" class="mt-2 font-aisa-heading text-3xl font-bold text-aisa-ink">
+          Profesionales de muestra
+        </h2>
+      </div>
+      <p class="font-bold text-aisa-ink" aria-live="polite">
+        <span data-directory-count>{demoProfessionals.length}</span>
+        <span data-directory-count-label> resultados</span>
+      </p>
+    </div>
+
+    <div class="mt-6 grid gap-4" data-directory-results>
+      {
+        demoProfessionals.map((person) => (
+          <article
+            class="surface-card p-5 sm:p-6"
+            data-directory-card
+            data-name={person.name}
+            data-province={person.province}
+            data-locality={person.locality}
+            data-status={person.certificationStatus}
+          >
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <span class="rounded-full bg-aisa-sand px-3 py-1 text-xs font-bold text-aisa-warning">
+                  Perfil ficticio
+                </span>
+                <h3 class="mt-3 font-aisa-heading text-xl font-bold text-aisa-ink">{person.name}</h3>
+                <p class="mt-2 text-sm text-aisa-body">{person.locality}, {person.province}</p>
+              </div>
+              <p class="w-fit rounded-full border border-aisa-border px-3 py-2 text-sm font-bold text-aisa-ink">
+                {person.certificationStatus === "complete"
+                  ? "Certificación completa"
+                  : "Certificación en curso"}
+              </p>
+            </div>
+            <p class="mt-5 border-t border-aisa-border pt-4 text-sm text-aisa-muted">
+              Sin datos de contacto. La versión futura utilizará únicamente información autorizada.
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="mt-6 rounded-aisa-card border border-dashed border-aisa-border-strong bg-white p-8 text-center" hidden data-directory-empty>
+      <h3 class="font-aisa-heading text-2xl font-bold text-aisa-ink">No hay resultados de muestra</h3>
+      <p class="mt-2">Probá con otra combinación o limpiá los filtros.</p>
+    </div>
+
+    <noscript>
+      <p class="mt-6 rounded-aisa-control bg-aisa-sand p-4 text-sm text-aisa-ink">
+        Los seis perfiles ficticios se muestran completos. Activá JavaScript para probar los filtros.
+      </p>
+    </noscript>
+  </section>
+</div>
+
+<script>
+  import { matchesProfessional } from "../lib/directoryFilters";
+
+  const initializeDirectory = () => {
+    const form = document.querySelector<HTMLFormElement>("[data-directory-form]");
+    if (!form || form.dataset.directoryInitialized === "true") return;
+    form.dataset.directoryInitialized = "true";
+
+    const resetButton = document.querySelector<HTMLButtonElement>("[data-directory-reset]");
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-directory-card]"),
+    );
+    const count = document.querySelector<HTMLElement>("[data-directory-count]");
+    const countLabel = document.querySelector<HTMLElement>("[data-directory-count-label]");
+    const empty = document.querySelector<HTMLElement>("[data-directory-empty]");
+
+    const applyFilters = () => {
+      if (!count || !countLabel || !empty) return;
+      const fields = new FormData(form);
+      const filters = {
+        query: String(fields.get("query") ?? ""),
+        province: String(fields.get("province") ?? ""),
+        locality: String(fields.get("locality") ?? ""),
+        certificationStatus: String(fields.get("certificationStatus") ?? ""),
+      };
+
+      let visibleCount = 0;
+      cards.forEach((card) => {
+        const matches = matchesProfessional(
+          {
+            name: card.dataset.name ?? "",
+            province: card.dataset.province ?? "",
+            locality: card.dataset.locality ?? "",
+            certificationStatus:
+              card.dataset.status === "complete" ? "complete" : "in-progress",
+          },
+          filters,
+        );
+        card.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+
+      count.textContent = String(visibleCount);
+      countLabel.textContent = visibleCount === 1 ? " resultado" : " resultados";
+      empty.hidden = visibleCount !== 0;
+    };
+
+    form.addEventListener("input", applyFilters);
+    form.addEventListener("change", applyFilters);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      applyFilters();
+    });
+    resetButton?.addEventListener("click", () => {
+      form.reset();
+      applyFilters();
+      form.querySelector<HTMLInputElement>("#directory-query")?.focus();
+    });
+  };
+
+  initializeDirectory();
+  document.addEventListener("astro:page-load", initializeDirectory);
+</script>

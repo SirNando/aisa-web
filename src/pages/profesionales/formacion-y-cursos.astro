@@ -1,0 +1,276 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import JourneyCard from "../../components/JourneyCard.astro";
+import { Image } from "astro:assets";
+import heroImage from "../../assets/hero-terapia.jpg";
+import spaceImage from "../../assets/espacio-terapeutico.jpg";
+
+const courseLevels = [
+  {
+    level: "Nivel 1",
+    courses: [
+      {
+        provider: "Actualizaciones Terapéuticas",
+        title: "Introducción a la Teoría de Integración Sensorial",
+        href: "http://www.actualizacionesterapeuticas.com/",
+        image: heroImage,
+      },
+      {
+        provider: "Ideas Argentinas A.I.",
+        title:
+          "Fundamentos teóricos de Integración Sensorial: de la teoría a la integración",
+        href: "mailto:cursosideasargentinas@gmail.com",
+        image: spaceImage,
+      },
+      {
+        provider: "Equipo en Vuelo",
+        title:
+          "Módulo 1 – CLASI · Curso 1 de IS: Principios teóricos y fundamentos neurocientíficos de la práctica clínica",
+        href: "mailto:formacion@equipoenvuelo.com",
+        image: heroImage,
+      },
+      {
+        provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
+        title: "Teoría de Integración Sensorial",
+        href: "mailto:info.isuba@gmail.com",
+        image: spaceImage,
+      },
+    ],
+  },
+  {
+    level: "Nivel 2",
+    courses: [
+      {
+        provider: "Actualizaciones Terapéuticas",
+        title:
+          "Evaluación y tratamiento de los Desórdenes de Modulación y Motores de base sensorial (DMS + DMBS)",
+        href: "http://www.actualizacionesterapeuticas.com/",
+        image: spaceImage,
+      },
+      {
+        provider: "Ideas Argentinas",
+        title:
+          "Evaluación y razonamiento clínico de Integración Sensorial · USC",
+        href: "mailto:cursosideasargentinas@gmail.com",
+        image: heroImage,
+      },
+      {
+        provider: "Equipo en Vuelo",
+        title: "Módulos 2 y 3 – CLASI",
+        href: "mailto:formacion@equipoenvuelo.com",
+        image: spaceImage,
+      },
+      {
+        provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
+        title: "Evaluación en Integración Sensorial",
+        href: "mailto:info.isuba@gmail.com",
+        image: heroImage,
+      },
+    ],
+  },
+  {
+    level: "Nivel 3",
+    courses: [
+      {
+        provider: "Actualizaciones Terapéuticas",
+        title:
+          "Evaluación y tratamiento de los Desórdenes de Modulación y Motores de base sensorial (DMS + DMBS)",
+        href: "http://www.actualizacionesterapeuticas.com/",
+        image: heroImage,
+      },
+      {
+        provider: "Ideas Argentinas",
+        title: "Tratamiento en Integración Sensorial · USC",
+        href: "mailto:cursosideasargentinas@gmail.com",
+        image: spaceImage,
+      },
+      {
+        provider: "Equipo en Vuelo",
+        title: "Módulos 4 y 5 – CLASI",
+        href: "mailto:formacion@equipoenvuelo.com",
+        image: heroImage,
+      },
+      {
+        provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
+        title: "Tratamiento en Integración Sensorial",
+        href: "mailto:info.isuba@gmail.com",
+        image: spaceImage,
+      },
+    ],
+  },
+  {
+    level: "Nivel 4",
+    courses: [
+      {
+        provider: "Actualizaciones Terapéuticas",
+        title:
+          "Entrenamiento clínico intensivo de Integración Sensorial (ECIS)",
+        href: "http://www.actualizacionesterapeuticas.com/",
+        image: spaceImage,
+      },
+      {
+        provider: "Ideas Argentinas",
+        title:
+          "Excelencia en la evaluación e intervención en Integración Sensorial",
+        href: "mailto:cursosideasargentinas@gmail.com",
+        image: heroImage,
+      },
+      {
+        provider: "Equipo en Vuelo",
+        title: "Módulos 3 y 6 – CLASI",
+        href: "mailto:formacion@equipoenvuelo.com",
+        image: spaceImage,
+      },
+      {
+        provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
+        title: "Práctica clínica intensiva en Integración Sensorial",
+        href: "mailto:info.isuba@gmail.com",
+        image: heroImage,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Formación y cursos avalados"
+  description="Cursos y programas avalados por AISA para cada nivel de formación en Integración Sensorial."
+>
+  <PageHero
+    title="Conocé los cursos avalados por AISA"
+    lead="Te acercamos un conjunto de cursos separados por nivel que cuentan con nuestro aval."
+    primaryHref="#cursos"
+    primaryLabel="Ver cursos"
+    primaryScrollSnap
+    secondaryHref="/profesionales/certificacion/#requisitos"
+    secondaryLabel="Ver requisitos"
+    orbitImages={[heroImage, spaceImage]}
+  />
+
+  <section id="cursos" class="section-space scroll-mt-28">
+    <div class="site-container">
+      <div class="max-w-3xl">
+        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+          Cursos avalados por AISA
+        </h2>
+        <p class="mt-5 text-lg leading-8">
+          Estos cursos cumplen con los estándares definidos por AISA y son
+          válidas para el proceso de certificación.
+        </p>
+      </div>
+      <div class="mt-10 grid gap-10">
+        {
+          courseLevels.map((courseLevel) => (
+            <section
+              aria-labelledby={`curso-${courseLevel.level.replace(" ", "-")}`}
+            >
+              <h3
+                id={`curso-${courseLevel.level.replace(" ", "-")}`}
+                class="font-aisa-heading text-2xl font-bold text-aisa-ink"
+              >
+                {courseLevel.level}
+              </h3>
+              <div class="mt-5 grid gap-5 md:grid-cols-2">
+                {courseLevel.courses.map((course) => (
+                  <article class="surface-card grid h-full min-h-56 grid-cols-[minmax(0,1fr)_7rem] overflow-hidden sm:grid-cols-[minmax(0,1fr)_9rem]">
+                    <div class="flex min-w-0 flex-col p-4 sm:p-6">
+                      <p class="text-sm font-bold uppercase tracking-[0.08em] text-aisa-sky-strong">
+                        {course.provider}
+                      </p>
+                      <h4 class="mt-4 font-aisa-heading text-2xl font-bold text-aisa-ink">
+                        {course.title}
+                      </h4>
+                      <a
+                        class="mt-auto inline-flex min-h-11 items-center gap-2 pt-8 font-semibold text-aisa-green-strong underline underline-offset-4 hover:text-aisa-ink"
+                        href={course.href}
+                        target={
+                          course.href.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          course.href.startsWith("http")
+                            ? "noreferrer"
+                            : undefined
+                        }
+                      >
+                        {course.href.startsWith("http") ? (
+                          <svg
+                            class="h-4 w-4 shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                          >
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+                          </svg>
+                        ) : (
+                          <svg
+                            class="h-4 w-4 shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                          >
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="m4 7 8 6 8-6" />
+                          </svg>
+                        )}
+                        {course.href.startsWith("http")
+                          ? "Sitio web"
+                          : "Enviar mail"}
+                      </a>
+                    </div>
+                    <div class="min-h-full bg-aisa-sky-wash">
+                      <Image
+                        src={course.image}
+                        alt="Actividad de Integración Sensorial"
+                        widths={[180, 280, 360]}
+                        sizes="(min-width: 768px) 9rem, 7rem"
+                        class="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space bg-aisa-sand">
+    <div class="site-container">
+      <div class="max-w-3xl">
+        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+          ¿Ya contás con formación en Integración Sensorial?
+        </h2>
+      </div>
+
+      <div class="mt-10 grid gap-6 lg:grid-cols-2">
+        <JourneyCard
+          eyebrow="¿Ya hiciste alguno de estos cursos?"
+          title="Certificá tu formación"
+          body="Compará los cursos que realizaste con los requisitos de cada nivel y solicitá su reconocimiento ante AISA."
+          href="/profesionales/certificacion/#requisitos"
+          linkText="Ver requisitos"
+          tone="sky"
+          alignLinkBottom={true}
+        />
+        <JourneyCard
+          eyebrow="¿Ya tenés formación previa?"
+          title="Conocé cómo certificarla"
+          body="Seguí los pasos para presentar tus certificados e iniciar el proceso de certificación AISA."
+          href="/profesionales/certificacion/#proceso"
+          linkText="Ver el proceso"
+          tone="leaf"
+          alignLinkBottom={true}
+        />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

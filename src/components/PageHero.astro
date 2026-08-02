@@ -1,0 +1,474 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import defaultHeroImage from "../assets/hero-terapia.jpg";
+import defaultSpaceImage from "../assets/espacio-terapeutico.jpg";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead: string;
+  primaryHref?: string;
+  primaryLabel?: string;
+  primaryScrollSnap?: boolean;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  orbitImages?: ImageMetadata[];
+  compact?: boolean;
+  fullHeight?: boolean;
+  landing?: boolean;
+  flagWord?: string;
+  strengthWord?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  lead,
+  primaryHref,
+  primaryLabel,
+  primaryScrollSnap = false,
+  secondaryHref,
+  secondaryLabel,
+  image,
+  imageAlt = "",
+  orbitImages,
+  compact = false,
+  fullHeight = false,
+  landing = false,
+  flagWord,
+  strengthWord,
+} = Astro.props;
+
+const defaultOrbitImages = [defaultHeroImage, defaultSpaceImage];
+const pageOrbitImages =
+  orbitImages && orbitImages.length > 0
+    ? orbitImages
+    : image
+      ? [image, ...defaultOrbitImages.filter((defaultImage) => defaultImage.src !== image.src)]
+      : defaultOrbitImages;
+const cropPositions = ["50% 35%", "38% 50%", "50% 70%", "72% 50%", "50% 22%", "18% 50%"];
+const orbitSlots = Array.from({ length: 6 }, (_, index) => ({
+  image: pageOrbitImages[index % pageOrbitImages.length],
+  cropPosition: cropPositions[index],
+  loading: index < 2 ? ("eager" as const) : ("lazy" as const),
+}));
+---
+
+<section
+  data-page-hero
+  data-landing-hero={landing ? "" : undefined}
+  data-hero-flip
+  data-flip-id="hero-shell"
+  class:list={[
+    "orbit-hero",
+    compact && "orbit-hero--compact",
+    fullHeight && "orbit-hero--full",
+  ]}
+>
+  <div class="orbit-hero__stage" data-hero-stage>
+  <div class="orbit-hero__orbit" aria-hidden="true">
+    {
+      orbitSlots.map((slot, index) => (
+        <div class:list={["orbit-hero__orb", `orbit-hero__orb--${index + 1}`]}>
+          <div class="orbit-hero__motion" data-hero-shape>
+            <div class="orbit-hero__float" data-hero-float>
+              <div class="orbit-hero__counter">
+                <div class="orbit-hero__picture">
+                  <Image
+                    src={slot.image}
+                    alt={imageAlt || "Escena decorativa de una actividad de Integración Sensorial."}
+                    widths={[280, 420, 560]}
+                    sizes="(min-width: 768px) 24vw, 11rem"
+                    class="h-full w-full object-cover"
+                    style={`object-position: ${slot.cropPosition};`}
+                    loading={slot.loading}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="orbit-hero__wash" aria-hidden="true"></div>
+
+  <div
+    class="orbit-hero__content"
+    data-hero-content
+    data-hero-flip
+    data-flip-id="hero-content"
+  >
+    <div data-hero-scroll-content>
+    {eyebrow && (
+      <p
+        class="eyebrow"
+        data-hero-eyebrow
+        data-hero-flip
+        data-flip-id="hero-eyebrow"
+      >
+        {eyebrow}
+      </p>
+    )}
+    <h1
+      data-hero-title
+      data-hero-flag-word={flagWord}
+      data-hero-strength-word={strengthWord}
+      data-hero-flip
+      data-flip-id="hero-title"
+      class:list={[
+        "font-aisa-heading font-extrabold tracking-[-0.025em] text-aisa-ink",
+        compact ? "text-4xl sm:text-5xl" : "text-aisa-display",
+        eyebrow && "mt-5",
+      ]}
+    >
+      {title}
+    </h1>
+    <p
+      class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-aisa-body sm:text-xl"
+      data-hero-lead
+      data-hero-flip
+      data-flip-id="hero-lead"
+    >
+      {lead}
+    </p>
+    {
+      (primaryHref || secondaryHref) && (
+        <div
+          class="mt-8 flex flex-col justify-center gap-3 sm:flex-row"
+          data-hero-flip
+          data-flip-id="hero-actions"
+        >
+          {primaryHref && primaryLabel && (
+            <a
+              class="button-primary"
+              href={primaryHref}
+              data-hero-scroll-snap={primaryScrollSnap ? "" : undefined}
+              data-hero-flip
+              data-flip-id="hero-cta-primary"
+            >
+              <span class="whitespace-nowrap" data-hero-cta-text>{primaryLabel}</span>
+            </a>
+          )}
+          {secondaryHref && secondaryLabel && (
+            <a
+              class="button-secondary"
+              href={secondaryHref}
+              data-hero-flip
+              data-flip-id="hero-cta-secondary"
+            >
+              <span class="whitespace-nowrap" data-hero-cta-text>{secondaryLabel}</span>
+            </a>
+          )}
+        </div>
+      )
+    }
+    </div>
+  </div>
+  </div>
+</section>
+
+<div class="orbit-hero__transition" aria-hidden="true">
+  <svg
+    class="orbit-hero__curve"
+    viewBox="0 0 1440 120"
+    preserveAspectRatio="none"
+  >
+    <path d="M0 0C360 94 1080 94 1440 0V120H0Z"></path>
+  </svg>
+</div>
+
+<style>
+  .orbit-hero {
+    position: sticky;
+    z-index: 0;
+    top: 0;
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
+    box-sizing: border-box;
+    isolation: isolate;
+    margin-top: -6rem;
+    overflow: hidden;
+    background: var(--color-mist);
+  }
+
+  .orbit-hero__stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    box-sizing: border-box;
+    place-items: center;
+    overflow: hidden;
+    background: var(--color-mist);
+    padding: clamp(7.5rem, 16vh, 10rem) 1rem clamp(5rem, 12vh, 8rem);
+  }
+
+  .orbit-hero--compact .orbit-hero__stage {
+    padding-block: clamp(7.5rem, 15vh, 9rem) clamp(5rem, 11vh, 7rem);
+  }
+
+  .orbit-hero--full {
+    min-height: 100svh;
+  }
+
+  .orbit-hero__content {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 48rem);
+    text-align: center;
+  }
+
+  .orbit-hero__content h1 {
+    max-width: 18ch;
+    margin-inline: auto;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  :global(.hero-flag-word) {
+    --hero-flag-opacity: 0;
+    --hero-flag-position: 0rem;
+    --hero-flag-glow: 0;
+
+    position: relative;
+    display: inline-block;
+    color: var(--color-ink);
+    filter: drop-shadow(
+      0 0 0.22em rgb(246 180 14 / var(--hero-flag-glow))
+    );
+  }
+
+  :global(.hero-flag-word)::after {
+    position: absolute;
+    inset: 0;
+    content: attr(data-flag-label);
+    color: transparent;
+    pointer-events: none;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 120' preserveAspectRatio='none'%3E%3Crect width='360' height='120' fill='%2374acdf'/%3E%3Cpath fill='%23fff' d='M0 52C45 44 90 60 135 52S225 44 270 52S315 60 360 52V78C315 86 270 70 225 78S135 86 90 78S45 70 0 78Z'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: var(--hero-flag-position) center;
+    background-size: 12rem 112%;
+    opacity: var(--hero-flag-opacity);
+    filter: drop-shadow(0 0.018em 0 rgb(24 50 58 / 0.28));
+    will-change: opacity, background-position;
+  }
+
+  :global(.hero-strength-word),
+  :global(.hero-strength-char) {
+    display: inline-block;
+  }
+
+  :global(.hero-strength-word) {
+    transform-origin: center bottom;
+    white-space: nowrap;
+  }
+
+  :global(.hero-strength-char) {
+    transform-origin: center bottom;
+    will-change: transform, font-weight;
+  }
+
+  .orbit-hero__orbit {
+    position: absolute;
+    z-index: 0;
+    top: 48%;
+    left: 50%;
+    width: clamp(64rem, 80vw, 96rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    animation: orbit-hero-spin 100s linear infinite;
+    animation-delay: -12.5s;
+    pointer-events: none;
+  }
+
+  .orbit-hero__orb {
+    position: absolute;
+    width: clamp(14.5rem, 24vw, 24rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .orbit-hero__motion {
+    width: 100%;
+    height: 100%;
+    will-change: transform, opacity;
+  }
+
+  .orbit-hero__float {
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .orbit-hero__counter {
+    width: 100%;
+    height: 100%;
+    animation: orbit-hero-counter-spin 100s linear infinite;
+    animation-delay: -12.5s;
+  }
+
+  .orbit-hero__picture {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 50%;
+    filter: drop-shadow(0 20px 28px rgb(24 50 58 / 0.14));
+  }
+
+  .orbit-hero__orb--1 {
+    top: 50%;
+    left: 9%;
+  }
+
+  .orbit-hero__orb--2 {
+    top: 9%;
+    left: 29%;
+  }
+
+  .orbit-hero__orb--3 {
+    top: 9%;
+    left: 71%;
+  }
+
+  .orbit-hero__orb--4 {
+    top: 50%;
+    left: 91%;
+  }
+
+  .orbit-hero__orb--5 {
+    top: 91%;
+    left: 71%;
+  }
+
+  .orbit-hero__orb--6 {
+    top: 91%;
+    left: 29%;
+  }
+
+  .orbit-hero__wash {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      rgb(243 250 249 / 0.99) 0 24%,
+      rgb(243 250 249 / 0.9) 36%,
+      rgb(243 250 249 / 0) 58%
+    );
+    pointer-events: none;
+  }
+
+  .orbit-hero__transition {
+    --orbit-hero-curve-height: clamp(4rem, 8vw, 7.5rem);
+    --orbit-hero-header-clearance: 6rem;
+
+    position: relative;
+    z-index: 1;
+    height: calc(
+      var(--orbit-hero-curve-height) + var(--orbit-hero-header-clearance)
+    );
+    margin-top: calc(var(--orbit-hero-curve-height) * -1);
+    background: linear-gradient(
+      to bottom,
+      transparent 0 var(--orbit-hero-curve-height),
+      var(--color-white) var(--orbit-hero-curve-height) 100%
+    );
+    pointer-events: none;
+  }
+
+  .orbit-hero__curve {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: var(--orbit-hero-curve-height);
+    fill: var(--color-white);
+    filter: drop-shadow(0 -12px 18px rgb(24 50 58 / 0.13));
+  }
+
+  @keyframes orbit-hero-spin {
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  @keyframes orbit-hero-counter-spin {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  @media (max-width: 47.999rem) {
+    .orbit-hero,
+    .orbit-hero--full {
+      height: 100svh;
+      min-height: 100svh;
+    }
+
+    .orbit-hero__stage {
+      padding-inline: 1rem;
+    }
+
+    .orbit-hero--compact {
+      min-height: 100svh;
+    }
+
+    .orbit-hero__orbit {
+      top: 50%;
+      width: 44rem;
+    }
+
+    .orbit-hero__orb {
+      width: 11rem;
+    }
+
+    .orbit-hero__orb--1 {
+      top: 50%;
+      left: 20%;
+    }
+
+    .orbit-hero__orb--2 {
+      top: 14%;
+      left: 28%;
+    }
+
+    .orbit-hero__orb--3 {
+      top: 14%;
+      left: 72%;
+    }
+
+    .orbit-hero__orb--4 {
+      top: 50%;
+      left: 80%;
+    }
+
+    .orbit-hero__orb--5,
+    .orbit-hero__orb--6 {
+      display: none;
+    }
+
+    .orbit-hero__wash {
+      background: radial-gradient(
+        ellipse at center,
+        rgb(243 250 249 / 0.99) 0 36%,
+        rgb(243 250 249 / 0.9) 50%,
+        rgb(243 250 249 / 0) 72%
+      );
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-hero__orbit,
+    .orbit-hero__counter {
+      animation: none;
+    }
+  }
+</style>

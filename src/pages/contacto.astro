@@ -1,0 +1,107 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import StatusNotice from "../components/StatusNotice.astro";
+import heroImage from "../assets/hero-terapia.jpg";
+import spaceImage from "../assets/espacio-terapeutico.jpg";
+
+const email = "integracion.sensorialargentina@gmail.com";
+const topics = [
+  {
+    label: "Directorio profesional",
+    body: "Consultas generales sobre búsqueda y publicación futura de perfiles.",
+    subject: "Consulta sobre el directorio de profesionales",
+  },
+  {
+    label: "Certificación",
+    body: "Preguntas sobre niveles, requisitos y situación profesional.",
+    subject: "Consulta sobre certificación profesional",
+  },
+  {
+    label: "Formación y avales",
+    body: "Consultas sobre cursos o evaluación de una propuesta formativa.",
+    subject: "Consulta sobre formación o aval de cursos",
+  },
+  {
+    label: "Asociación",
+    body: "Información vigente para iniciar o comprender el alta como socio/a.",
+    subject: "Consulta para asociarme a AISA",
+  },
+  {
+    label: "Familias y escuelas",
+    body: "Orientación institucional; este canal no brinda diagnóstico ni atención de urgencia.",
+    subject: "Consulta de familia o escuela",
+  },
+  {
+    label: "Consulta general",
+    body: "Institución, proyectos, vínculos u otros temas públicos.",
+    subject: "Consulta general desde el sitio de AISA",
+  },
+];
+---
+
+<BaseLayout
+  title="Contacto"
+  description="Canales de contacto de AISA Argentina organizados por motivo de consulta."
+>
+  <PageHero
+    eyebrow="Contacto"
+    title="Contanos qué necesitás para orientar mejor tu consulta."
+    lead="Elegí un motivo y se abrirá un correo dirigido a AISA con el asunto preparado. Este sitio no almacena datos ni envía formularios."
+    orbitImages={[heroImage, spaceImage]}
+    compact={true}
+  />
+
+  <section class="bg-white py-8">
+    <div class="site-container">
+      <StatusNotice title="Canal y plazo de respuesta">
+        El correo publicado es el canal funcional de este MVP. AISA todavía debe confirmar y publicar un plazo estimado de respuesta para cada tipo de consulta.
+      </StatusNotice>
+    </div>
+  </section>
+
+  <section class="section-space">
+    <div class="site-container">
+      <p class="eyebrow">Motivo de consulta</p>
+      <h2 class="mt-4 max-w-3xl font-aisa-heading text-aisa-section-title font-bold">
+        Elegí la opción más cercana
+      </h2>
+      <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {
+          topics.map((topic) => (
+            <article class="surface-card flex h-full flex-col p-6">
+              <h3 class="font-aisa-heading text-2xl font-bold">{topic.label}</h3>
+              <p class="mt-3 flex-1 leading-7">{topic.body}</p>
+              <a
+                class="text-link mt-6 inline-flex min-h-11 items-center self-start"
+                href={`mailto:${email}?subject=${encodeURIComponent(topic.subject)}`}
+              >
+                Escribir sobre este tema <span class="ml-2" aria-hidden="true">→</span>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space bg-aisa-sky-wash">
+    <div class="site-container grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
+      <div>
+        <p class="eyebrow">Antes de escribir</p>
+        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+          Una consulta clara ayuda a responder mejor
+        </h2>
+      </div>
+      <div class="rich-copy">
+        <ul class="mt-0">
+          <li>Indicá el motivo principal en las primeras líneas.</li>
+          <li>No envíes historias clínicas, documentación personal ni comprobantes hasta recibir instrucciones.</li>
+          <li>Para una urgencia de salud, utilizá los servicios de emergencia de tu localidad.</li>
+          <li>AISA no realiza diagnósticos ni selecciona profesionales por una persona.</li>
+        </ul>
+        <p class="mt-6 font-semibold text-aisa-ink">{email}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
