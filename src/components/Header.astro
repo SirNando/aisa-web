@@ -4,16 +4,16 @@ import logo from "../assets/aisa-logo.png";
 
 const pathname = Astro.url.pathname;
 const navItems = [
-  { label: "Inicio", href: "/" },
-  { label: "Familias y Escuelas", href: "/familias-y-escuelas/" },
-  { label: "Acerca de", href: "/acerca-de/" },
+  { label: "Inicio", href: "/", key: "home" },
+  { label: "Familias y Escuelas", href: "/familias-y-escuelas/", key: "families" },
+  { label: "Profesionales", href: "/profesionales/", key: "professionals" },
+  { label: "Acerca de", href: "/acerca-de/", key: "aisa" },
 ];
 
 const professionalLinks = [
-  { label: "Profesionales", href: "/profesionales/" },
-  { label: "Formación y cursos", href: "/profesionales/formacion-y-cursos/" },
-  { label: "Certificación", href: "/profesionales/certificacion/" },
-  { label: "Asociate", href: "/profesionales/#solicitud" },
+  { label: "Cursos", href: "/profesionales/formacion-y-cursos/", section: "courses" },
+  { label: "Certificación", href: "/profesionales/certificacion/", section: "certification" },
+  { label: "Asociate", href: "/profesionales/#solicitud", section: "membership", featured: true },
 ];
 
 const isActive = (href: string) => {
@@ -22,61 +22,94 @@ const isActive = (href: string) => {
   return pathname.startsWith(href);
 };
 
-const professionalsActive = pathname.startsWith("/profesionales") || pathname.startsWith("/buscar-profesional");
+const professionalsActive = pathname.startsWith("/profesionales");
+const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-y-cursos")
+  ? "courses"
+  : pathname.startsWith("/profesionales/certificacion")
+    ? "certification"
+    : null;
 ---
 
-<header class="site-header" data-site-header>
+<header class="site-header" data-site-header transition:persist="site-header">
   <div class="site-header__shell">
     <a class="site-header__brand" href="/" aria-label="AISA Argentina, inicio">
       <Image src={logo} alt="AISA Argentina" width={176} height={60} loading="eager" />
     </a>
 
-    <nav class="site-nav" aria-label="Navegación principal">
+    <nav class="site-nav" aria-label="Navegación principal" data-desktop-nav>
+      <span class="site-nav__active-pill" aria-hidden="true" data-nav-pill></span>
       {
-        navItems.slice(0, 2).map((item) => (
-          <a
-            class="site-nav__link"
-            href={item.href}
-            aria-current={isActive(item.href) ? "page" : undefined}
-          >
-            {item.label}
-          </a>
-        ))
-      }
-
-      <div class="site-nav__group">
-        <a
-          class="site-nav__toggle"
-          href="/profesionales/"
-          aria-haspopup="true"
-          aria-current={professionalsActive ? "page" : undefined}
-        >
-          Profesionales
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-            <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </a>
-        <div class="site-nav__dropdown">
-          {professionalLinks.map((item) => <a href={item.href}>{item.label}</a>)}
-        </div>
-      </div>
-
-      {
-        navItems.slice(2).map((item) => (
-          <a
-            class="site-nav__link"
-            href={item.href}
-            aria-current={isActive(item.href) ? "page" : undefined}
-          >
-            {item.label}
-          </a>
-        ))
+        navItems.map((item) =>
+          item.key === "professionals" ? (
+            <div
+              class:list={["site-nav__group", professionalsActive && "is-active"]}
+              data-nav-professionals
+            >
+              <span class="site-nav__group-hover-pill" aria-hidden="true"></span>
+              <div class="site-nav__group-primary" data-nav-pill-target>
+                <a
+                  class="site-nav__toggle"
+                  href={item.href}
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-current={professionalsActive ? "page" : undefined}
+                  data-nav-link
+                  data-nav-key={item.key}
+                >
+                  <span>{item.label}</span>
+                  <svg class="site-nav__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                    <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </a>
+              </div>
+              <div class="site-nav__dropdown">
+                <span class="site-nav__section-pill" aria-hidden="true" data-professionals-section-pill></span>
+                <span class="site-nav__section-hover-pill" aria-hidden="true" data-professionals-section-hover-pill></span>
+                {
+                  professionalLinks.map((link) => (
+                    <a
+                      href={link.href}
+                      aria-current={activeProfessionalSection === link.section ? "page" : undefined}
+                      data-professionals-menu-link
+                      data-professional-section={link.section}
+                      class:list={["site-nav__dropdown-option", link.featured && "is-featured"]}
+                    >
+                      <span>{link.label}</span>
+                    </a>
+                  ))
+                }
+              </div>
+            </div>
+          ) : (
+            <a
+              class="site-nav__link"
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              data-nav-link
+              data-nav-key={item.key}
+              data-nav-pill-target
+            >
+              <span class="site-nav__hover-pill" aria-hidden="true"></span>
+              <span class="site-nav__link-label">{item.label}</span>
+            </a>
+          ),
+        )
       }
     </nav>
 
     <div class="site-header__actions">
-      <a class="button-secondary" href="/contacto/">Contacto</a>
-      <a class="button-primary" href="/buscar-profesional/">Buscar profesional</a>
+      <a
+        class="button-secondary"
+        href="/contacto/"
+        aria-current={pathname.startsWith("/contacto") ? "page" : undefined}
+        data-nav-action="contact"
+      >Contacto</a>
+      <a
+        class="button-primary"
+        href="/buscar-profesional/"
+        aria-current={pathname.startsWith("/buscar-profesional") ? "page" : undefined}
+        data-nav-action="search"
+      >Buscar profesional</a>
     </div>
 
     <button
@@ -96,21 +129,29 @@ const professionalsActive = pathname.startsWith("/profesionales") || pathname.st
 
     <div class="mobile-nav" id="mobile-menu" data-mobile-menu hidden>
       <div class="mobile-nav__actions">
-        <a class="button-primary" href="/buscar-profesional/">Buscar profesional</a>
+        <a class="button-primary" href="/buscar-profesional/" data-nav-action="search">Buscar profesional</a>
         <a class="button-secondary" href="/profesionales/#solicitud">Asociate</a>
       </div>
       <nav aria-label="Navegación móvil">
         {
           navItems.slice(0, 2).map((item) => (
-            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>
+            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined} data-nav-link data-nav-key={item.key}>{item.label}</a>
           ))
         }
-        <a href="/profesionales/" aria-current={professionalsActive ? "page" : undefined}>Profesionales</a>
+        <a href="/profesionales/" aria-current={professionalsActive ? "page" : undefined} data-nav-link data-nav-key="professionals">Profesionales</a>
         <div class="mobile-nav__subnav">
-          {professionalLinks.slice(1).map((item) => <a href={item.href}>{item.label}</a>)}
+          {
+            professionalLinks.map((link) => (
+              <a
+                href={link.href}
+                aria-current={activeProfessionalSection === link.section ? "page" : undefined}
+                data-professional-section={link.section}
+              >{link.label}</a>
+            ))
+          }
         </div>
-        {navItems.slice(2).map((item) => <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>)}
-        <a href="/contacto/" aria-current={pathname.startsWith("/contacto") ? "page" : undefined}>Contacto</a>
+        {navItems.slice(3).map((item) => <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined} data-nav-link data-nav-key={item.key}>{item.label}</a>)}
+        <a href="/contacto/" aria-current={pathname.startsWith("/contacto") ? "page" : undefined} data-nav-action="contact">Contacto</a>
       </nav>
     </div>
   </div>

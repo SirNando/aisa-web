@@ -52,7 +52,11 @@ for (const [route, html] of pages) {
 
   const imageTags = html.match(/<img\b[^>]*>/gi) ?? [];
   for (const tag of imageTags) {
-    if (!/\balt="[^"]*"/i.test(tag)) failures.push(`${route} contiene una imagen sin alt.`);
+    // HTML permits an empty attribute to serialize as bare `alt`; Astro uses
+    // that valid form for decorative images passed as alt="".
+    if (!/\s+alt(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?(?=\s|>)/i.test(tag)) {
+      failures.push(`${route} contiene una imagen sin alt.`);
+    }
     if (!/\bwidth="\d+"/i.test(tag) || !/\bheight="\d+"/i.test(tag)) {
       failures.push(`${route} contiene una imagen sin dimensiones.`);
     }

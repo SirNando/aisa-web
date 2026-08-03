@@ -32,6 +32,55 @@ const {
 
 const firstImage = orbitImages[0];
 const secondImage = orbitImages[1] ?? orbitImages[0];
+const thirdImage = orbitImages[2] ?? secondImage;
+const fourthImage = orbitImages[3] ?? firstImage;
+
+const visuals = [
+  {
+    kind: "image" as const,
+    modifier: "one",
+    source: firstImage,
+    widths: [240, 360, 520],
+    sizes: "(max-width: 768px) 160px, 19vw",
+    loading: "eager" as const,
+    parallax: 0.1,
+    depth: 0.72,
+  },
+  {
+    kind: "image" as const,
+    modifier: "two",
+    source: secondImage,
+    widths: [260, 420, 600],
+    sizes: "(max-width: 768px) 180px, 22vw",
+    loading: "eager" as const,
+    parallax: -0.12,
+    depth: 0.88,
+  },
+  { kind: "shape" as const, modifier: "three", parallax: 0.17, depth: 0.46 },
+  { kind: "shape" as const, modifier: "four", parallax: -0.08, depth: 0.55 },
+  {
+    kind: "image" as const,
+    modifier: "five",
+    source: thirdImage,
+    widths: [120, 180, 260],
+    sizes: "9vw",
+    loading: "lazy" as const,
+    parallax: -0.06,
+    depth: 1,
+  },
+  {
+    kind: "image" as const,
+    modifier: "six",
+    source: fourthImage,
+    widths: [120, 180, 260],
+    sizes: "8vw",
+    loading: "lazy" as const,
+    parallax: 0.08,
+    depth: 0.95,
+  },
+  { kind: "shape" as const, modifier: "seven", parallax: 0.05, depth: 1.08 },
+  { kind: "shape" as const, modifier: "eight", parallax: -0.05, depth: 0.64 },
+];
 ---
 
 <section
@@ -43,38 +92,38 @@ const secondImage = orbitImages[1] ?? orbitImages[0];
   data-page-hero
   data-landing-hero={landing ? "true" : undefined}
 >
-  <div class="page-hero__shapes" aria-hidden="true">
-    <div class="page-hero__shape page-hero__shape--one" data-parallax="0.1">
-      {
-        firstImage && (
-          <Image
-            src={firstImage}
-            alt={imageAlt || "Actividad terapéutica de Integración Sensorial"}
-            widths={[240, 360, 520]}
-            sizes="(max-width: 768px) 160px, 19vw"
-            loading="eager"
-          />
-        )
-      }
-    </div>
-    <div class="page-hero__shape page-hero__shape--two" data-parallax="-0.12">
-      {
-        secondImage && (
-          <Image
-            src={secondImage}
-            alt="Espacio preparado para actividades de Integración Sensorial"
-            widths={[260, 420, 600]}
-            sizes="(max-width: 768px) 180px, 22vw"
-            loading="eager"
-          />
-        )
-      }
-    </div>
-    <span class="page-hero__shape page-hero__shape--three" data-parallax="0.17"></span>
-    <span class="page-hero__shape page-hero__shape--four" data-parallax="-0.08"></span>
+  <div class="page-hero__shapes">
+    {
+      visuals.map((visual) => (
+        <div
+          class:list={["page-hero__shape", `page-hero__shape--${visual.modifier}`]}
+          data-parallax={visual.parallax}
+        >
+          <div class="page-hero__shape-reveal" data-hero-reveal>
+            <div class="page-hero__shape-float" data-hero-idle>
+              <div class="page-hero__shape-drift" data-hero-drift data-depth={visual.depth}>
+                <div class="page-hero__shape-artwork">
+                  {
+                    visual.kind === "image" && visual.source && (
+                      <Image
+                        src={visual.source}
+                        alt={visual.modifier === "one" ? imageAlt : ""}
+                        widths={visual.widths}
+                        sizes={visual.sizes}
+                        loading={visual.loading}
+                      />
+                    )
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    }
   </div>
 
-  <div class="page-hero__content" data-hero-content>
+  <div class="page-hero__content" data-hero-content data-hero-drift data-depth="0.18">
     <h1 class="page-hero__title" data-hero-title>{title}</h1>
     <p class="page-hero__lead">{lead}</p>
     {
@@ -89,7 +138,6 @@ const secondImage = orbitImages[1] ?? orbitImages[0];
         </div>
       )
     }
-    {imageAlt && <span class="sr-only">{imageAlt}</span>}
   </div>
   <div class="page-hero__curve" aria-hidden="true"></div>
 </section>
