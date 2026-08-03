@@ -1204,7 +1204,7 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
 /* Scroll-controlled card stack */
 .stacked-story {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   background:
     radial-gradient(circle at 12% 18%, rgb(76 167 81 / 0.13), transparent 28rem),
     var(--color-leaf-wash);
