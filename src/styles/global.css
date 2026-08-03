@@ -1995,8 +1995,17 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
     align-self: start;
   }
 
+  .stacked-story {
+    padding-bottom: 0;
+  }
+
   .stacked-story__cards {
-    padding-bottom: 16vh;
+    padding-bottom: 0;
+  }
+
+  .stacked-story__cards::after {
+    height: calc(16vh + var(--section-space));
+    content: "";
   }
 
   .stack-card {
