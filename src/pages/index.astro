@@ -5,7 +5,6 @@ import JourneyCard from "../components/JourneyCard.astro";
 import Callout from "../components/Callout.astro";
 import CardGrid from "../components/design-system/CardGrid.astro";
 import CardRail from "../components/design-system/CardRail.astro";
-import MediaFeature from "../components/design-system/MediaFeature.astro";
 import SectionHeading from "../components/design-system/SectionHeading.astro";
 import StackedCards from "../components/design-system/StackedCards.astro";
 import heroImage from "../assets/hero-terapia.jpg";
@@ -117,15 +116,6 @@ const resources = [
     items={pathways}
   />
 
-  <MediaFeature
-    title="Conocé a la comunidad detrás de AISA"
-    body="Somos una asociación civil sin fines de lucro formada por Terapistas Ocupacionales argentinos especializados en Integración Sensorial. En nuestro canal compartimos encuentros, formación y experiencias de la comunidad."
-    href="/acerca-de/#equipo"
-    linkText="Conocer a AISA"
-    embedUrl="https://www.youtube-nocookie.com/embed/videoseries?list=UUeTP2z-Rt7LlbwQlChQRb6g"
-    videoTitle="Videos de AISA Argentina"
-  />
-
   <CardRail
     title="Explorá a tu ritmo"
     body="Recursos concretos para llegar directamente a la información que necesitás."
@@ -136,7 +126,7 @@ const resources = [
     <div class="site-container">
       <Callout
         title="Encontrá orientación profesional cerca tuyo"
-        body="Nuestro directorio será una lista curada de profesionales asociados a AISA, junto con las certificaciones que validan su especialidad. Hoy podés explorar una demostración con perfiles ficticios."
+        body="Explorá profesionales por provincia y localidad, consultá el estado de sus certificaciones y encontrá opciones cercanas desde el mapa."
         href="/buscar-profesional/"
         linkText="Explorar el directorio"
         tone="dark"

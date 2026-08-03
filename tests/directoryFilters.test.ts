@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { demoProfessionals } from "../src/data/demoProfessionals";
+import { professionals } from "../src/data/professionals";
 import {
+  distanceInKilometres,
   filterProfessionals,
+  findNearestProfessional,
   matchesProfessional,
   normalizeFilterText,
 } from "../src/lib/directoryFilters";
@@ -23,7 +25,7 @@ describe("normalizeFilterText", () => {
 describe("matchesProfessional", () => {
   it("matches accented localities with an unaccented query", () => {
     expect(
-      matchesProfessional(demoProfessionals[2], {
+      matchesProfessional(professionals[2], {
         ...emptyFilters,
         query: "cordoba",
       }),
@@ -31,7 +33,7 @@ describe("matchesProfessional", () => {
   });
 
   it("matches an individual status", () => {
-    const matches = filterProfessionals(demoProfessionals, {
+    const matches = filterProfessionals(professionals, {
       ...emptyFilters,
       certificationStatus: "complete",
     });
@@ -39,41 +41,68 @@ describe("matchesProfessional", () => {
   });
 
   it("matches an individual province", () => {
-    const matches = filterProfessionals(demoProfessionals, {
+    const matches = filterProfessionals(professionals, {
       ...emptyFilters,
       province: "Río Negro",
     });
-    expect(matches.map((person) => person.id)).toEqual(["demo-06"]);
+    expect(matches.map((person) => person.id)).toEqual(["professional-06"]);
   });
 
-  it("matches a fictional display name", () => {
-    const matches = filterProfessionals(demoProfessionals, {
+  it("matches a professional display name", () => {
+    const matches = filterProfessionals(professionals, {
       ...emptyFilters,
-      query: "muestra e",
+      query: "aisa e",
     });
-    expect(matches.map((person) => person.id)).toEqual(["demo-05"]);
+    expect(matches.map((person) => person.id)).toEqual(["professional-05"]);
+  });
+
+  it("matches a province through the free-text query", () => {
+    const matches = filterProfessionals(professionals, {
+      ...emptyFilters,
+      query: "rio negro",
+    });
+    expect(matches.map((person) => person.id)).toEqual(["professional-06"]);
   });
 
   it("combines province, locality, and status", () => {
-    const matches = filterProfessionals(demoProfessionals, {
+    const matches = filterProfessionals(professionals, {
       ...emptyFilters,
       province: "Santa Fe",
       locality: "Rosario",
       certificationStatus: "in-progress",
     });
-    expect(matches.map((person) => person.id)).toEqual(["demo-04"]);
+    expect(matches.map((person) => person.id)).toEqual(["professional-04"]);
   });
 
   it("returns every record after reset", () => {
-    expect(filterProfessionals(demoProfessionals, emptyFilters)).toHaveLength(6);
+    expect(filterProfessionals(professionals, emptyFilters)).toHaveLength(6);
   });
 
   it("returns no results for an unmatched query", () => {
     expect(
-      filterProfessionals(demoProfessionals, {
+      filterProfessionals(professionals, {
         ...emptyFilters,
         query: "Ushuaia",
       }),
     ).toEqual([]);
+  });
+});
+
+describe("location helpers", () => {
+  it("returns zero kilometres for identical coordinates", () => {
+    expect(
+      distanceInKilometres(
+        { latitude: -31.417, longitude: -64.183 },
+        { latitude: -31.417, longitude: -64.183 },
+      ),
+    ).toBe(0);
+  });
+
+  it("selects Córdoba for a nearby browser location", () => {
+    const nearest = findNearestProfessional(professionals, {
+      latitude: -31.42,
+      longitude: -64.19,
+    });
+    expect(nearest?.id).toBe("professional-03");
   });
 });

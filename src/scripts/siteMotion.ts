@@ -24,7 +24,9 @@ const cleanup = () => {
   listenerCleanups.splice(0).forEach((remove) => remove());
   motionContext?.revert();
   motionContext = null;
-  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  gsap.killTweensOf(
+    "[data-mobile-menu], [data-mobile-menu] a, [data-menu-line], .site-header__shell",
+  );
 };
 
 const setupMenu = () => {
@@ -33,15 +35,55 @@ const setupMenu = () => {
   if (!toggle || !menu) return;
 
   const links = Array.from(menu.querySelectorAll<HTMLAnchorElement>("a"));
+  const topLine = toggle.querySelector<SVGPathElement>("[data-menu-line='top']");
+  const middleLine = toggle.querySelector<SVGPathElement>("[data-menu-line='middle']");
+  const bottomLine = toggle.querySelector<SVGPathElement>("[data-menu-line='bottom']");
+  const iconLines = [topLine, middleLine, bottomLine].filter(
+    (line): line is SVGPathElement => line !== null,
+  );
+  const menuTargets = [menu, ...links, ...iconLines];
+
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-label", "Abrir menú");
+  menu.hidden = true;
+  gsap.set(menuTargets, { clearProps: "all" });
+
   const setOpen = (open: boolean, returnFocus = false) => {
-    gsap.killTweensOf([menu, ...links]);
+    gsap.killTweensOf(menuTargets);
     toggle.setAttribute("aria-expanded", String(open));
     toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
 
     if (reducedMotion.matches) {
       menu.hidden = !open;
+      if (topLine && middleLine && bottomLine) {
+        gsap.set(topLine, { y: open ? 5 : 0, rotation: open ? 45 : 0, transformOrigin: "50% 50%" });
+        gsap.set(middleLine, { autoAlpha: open ? 0 : 1, scaleX: open ? 0 : 1, transformOrigin: "50% 50%" });
+        gsap.set(bottomLine, { y: open ? -5 : 0, rotation: open ? -45 : 0, transformOrigin: "50% 50%" });
+      }
       if (!open && returnFocus) toggle.focus();
       return;
+    }
+
+    if (topLine && middleLine && bottomLine) {
+      const iconMotion = { duration: 0.28, ease: "power2.out", overwrite: "auto" as const };
+      gsap.to(topLine, {
+        y: open ? 5 : 0,
+        rotation: open ? 45 : 0,
+        transformOrigin: "50% 50%",
+        ...iconMotion,
+      });
+      gsap.to(middleLine, {
+        autoAlpha: open ? 0 : 1,
+        scaleX: open ? 0 : 1,
+        transformOrigin: "50% 50%",
+        ...iconMotion,
+      });
+      gsap.to(bottomLine, {
+        y: open ? -5 : 0,
+        rotation: open ? -45 : 0,
+        transformOrigin: "50% 50%",
+        ...iconMotion,
+      });
     }
 
     if (open) {
@@ -80,6 +122,38 @@ const setupMenu = () => {
     if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
       setOpen(false, true);
     }
+  });
+};
+
+const setupDesktopNavigation = () => {
+  document.querySelectorAll<HTMLElement>(".site-nav__group").forEach((group) => {
+    const toggle = group.querySelector<HTMLAnchorElement>(".site-nav__toggle");
+    const dropdownLinks = Array.from(
+      group.querySelectorAll<HTMLAnchorElement>(".site-nav__dropdown a"),
+    );
+    if (!toggle) return;
+
+    const dismiss = () => {
+      group.classList.add("is-dismissed");
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && group.contains(active)) active.blur();
+    };
+
+    addListener(group, "pointerleave", () => group.classList.remove("is-dismissed"));
+    addListener(group, "focusin", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && target.matches(":focus-visible")) {
+        group.classList.remove("is-dismissed");
+      }
+    });
+    addListener(toggle, "click", dismiss);
+    dropdownLinks.forEach((link) => addListener(link, "click", dismiss));
+    addListener(group, "keydown", (event) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      toggle.focus();
+      group.classList.add("is-dismissed");
+    });
   });
 };
 
@@ -142,6 +216,7 @@ const setupTiltCards = () => {
 const initialize = () => {
   cleanup();
   setupMenu();
+  setupDesktopNavigation();
   setupRails();
   setupTiltCards();
 
@@ -149,6 +224,7 @@ const initialize = () => {
     const hero = document.querySelector<HTMLElement>("[data-page-hero]");
     const heroContent = hero?.querySelector<HTMLElement>("[data-hero-content]");
     const heroShapes = hero ? Array.from(hero.querySelectorAll<HTMLElement>(".page-hero__shape")) : [];
+    const headerShell = document.querySelector<HTMLElement>(".site-header__shell");
 
     if (reducedMotion.matches) {
       gsap.set("[data-reveal], [data-reveal-item], main .surface-card, main section h2", {
@@ -176,6 +252,35 @@ const initialize = () => {
           ease: "back.out(1.35)",
           clearProps: "opacity,visibility",
         }, 0.08);
+
+      heroShapes.forEach((shape, index) => {
+        const direction = index % 2 === 0 ? 1 : -1;
+        gsap.to(shape, {
+          x: direction * (finePointer.matches ? 12 + index * 2 : 6 + index),
+          y: direction * (8 + index * 1.5),
+          rotation: direction * (1.8 + index * 0.45),
+          duration: 5.5 + index * 0.85,
+          delay: 0.35 + index * 0.12,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+    }
+
+    if (headerShell) {
+      gsap.fromTo(
+        headerShell,
+        { autoAlpha: 0, y: -16, scale: 0.985 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.58,
+          ease: "power3.out",
+          clearProps: "transform,opacity,visibility",
+        },
+      );
     }
 
     const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(
@@ -222,7 +327,6 @@ const initialize = () => {
       const amount = Number(element.dataset.parallax ?? 0.1);
       gsap.to(element, {
         yPercent: amount * 120,
-        rotation: amount * 12,
         ease: "none",
         scrollTrigger: {
           trigger: element.closest("section") ?? element,
@@ -292,9 +396,3 @@ document.addEventListener("astro:before-swap", cleanup);
 document.addEventListener("astro:page-load", initialize);
 reducedMotion.addEventListener("change", initialize);
 desktop.addEventListener("change", initialize);
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initialize, { once: true });
-} else {
-  initialize();
-}

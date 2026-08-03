@@ -1,0 +1,114 @@
+---
+import type { Professional } from "../../data/professionals";
+
+interface Props {
+  professionals: Professional[];
+}
+
+const { professionals } = Astro.props;
+const longitudeMinimum = -73.5;
+const longitudeMaximum = -53;
+const latitudeMaximum = -21;
+const latitudeMinimum = -55;
+const clamp = (value: number, minimum: number, maximum: number) =>
+  Math.min(Math.max(value, minimum), maximum);
+
+const markers = professionals.map((professional) => {
+  let x =
+    ((professional.longitude - longitudeMinimum) /
+      (longitudeMaximum - longitudeMinimum)) *
+    100;
+  let y =
+    ((latitudeMaximum - professional.latitude) /
+      (latitudeMaximum - latitudeMinimum)) *
+    100;
+
+  if (professional.locality === "Caballito") {
+    x -= 2.2;
+    y -= 1.5;
+  }
+  if (professional.locality === "La Plata") {
+    x += 1.8;
+    y += 2.2;
+  }
+
+  x = clamp(x, 7, 93);
+  y = clamp(y, 7, 93);
+
+  return {
+    ...professional,
+    mapX: x,
+    mapY: y,
+    desktopX: 34 + x * 0.62,
+    mobileY: 40 + y * 0.57,
+  };
+});
+---
+
+<div class="directory-map" data-directory-map aria-label="Mapa interactivo de profesionales en Argentina">
+  <div class="directory-map__art" aria-hidden="true">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="argentina-map-fill" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#dff1df" />
+          <stop offset="0.52" stop-color="#c8e8e5" />
+          <stop offset="1" stop-color="#8dcac8" />
+        </linearGradient>
+        <clipPath id="argentina-map-clip">
+          <path d="M26 3 45 5 55 12 74 9 79 15 92 16 97 27 88 34 80 35C79 44 73 51 70 60 67 70 61 79 57 87L51 98 43 95 37 86 30 79 22 69 8 58 12 45 9 37 14 28 20 20 21 10Z" />
+        </clipPath>
+        <filter id="argentina-map-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#18323a" flood-opacity=".18" />
+        </filter>
+      </defs>
+      <path
+        d="M26 3 45 5 55 12 74 9 79 15 92 16 97 27 88 34 80 35C79 44 73 51 70 60 67 70 61 79 57 87L51 98 43 95 37 86 30 79 22 69 8 58 12 45 9 37 14 28 20 20 21 10Z"
+        fill="url(#argentina-map-fill)"
+        stroke="#4e9387"
+        stroke-width=".7"
+        vector-effect="non-scaling-stroke"
+        filter="url(#argentina-map-shadow)"
+      />
+      <g clip-path="url(#argentina-map-clip)" fill="none" stroke="#ffffff" stroke-opacity=".72" stroke-width=".35" vector-effect="non-scaling-stroke">
+        <path d="M13 25C34 29 58 27 90 22M10 39C32 43 55 38 84 35M11 53C30 52 48 54 73 49M13 64C31 61 48 65 66 61M23 76C35 72 48 75 61 72M33 88C42 84 50 86 56 84" />
+        <path d="M25 5C30 24 26 43 20 61M45 6C43 25 39 43 37 62M61 12C59 28 56 46 52 68M76 12C72 29 69 43 65 56" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="directory-map__filter-panel">
+    <slot name="filters" />
+  </div>
+
+  {
+    markers.map((professional) => (
+      <button
+        class="directory-map__marker"
+        type="button"
+        style={`--marker-x:${professional.mapX}%;--marker-y:${professional.mapY}%;--marker-desktop-x:${professional.desktopX}%;--marker-mobile-y:${professional.mobileY}%`}
+        data-map-marker
+        data-professional-id={professional.id}
+        aria-label={`Ver ${professional.name} en ${professional.locality}, ${professional.province}`}
+        aria-pressed="false"
+      >
+        <span aria-hidden="true"></span>
+      </button>
+    ))
+  }
+
+  <article class="directory-map__popup" data-map-popup hidden aria-live="polite">
+    <button class="directory-map__popup-close" type="button" data-map-popup-close aria-label="Cerrar detalle">
+      <span aria-hidden="true">×</span>
+    </button>
+    <p data-map-popup-location></p>
+    <h3 data-map-popup-name></h3>
+    <p class="directory-map__popup-status" data-map-popup-status></p>
+    <a
+      class="arrow-link"
+      href="mailto:integracion.sensorialargentina@gmail.com?subject=Consulta%20sobre%20un%20perfil%20del%20directorio"
+    >
+      Consultar a AISA
+      <span class="arrow-link__icon" aria-hidden="true">→</span>
+    </a>
+  </article>
+</div>

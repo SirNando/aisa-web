@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
-import StatusNotice from "../components/StatusNotice.astro";
 import heroImage from "../assets/hero-terapia.jpg";
 import spaceImage from "../assets/espacio-terapeutico.jpg";
 
@@ -50,14 +49,6 @@ const topics = [
     orbitImages={[heroImage, spaceImage]}
     compact={true}
   />
-
-  <section class="bg-white py-8">
-    <div class="site-container">
-      <StatusNotice title="Canal y plazo de respuesta">
-        El correo publicado es el canal funcional de este MVP. AISA todavía debe confirmar y publicar un plazo estimado de respuesta para cada tipo de consulta.
-      </StatusNotice>
-    </div>
-  </section>
 
   <section class="section-space">
     <div class="site-container">
