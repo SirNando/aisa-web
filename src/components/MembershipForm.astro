@@ -1180,11 +1180,13 @@ const provinces = [
   }
 
   .membership-type__label {
+    display: inline-flex;
+    border-radius: var(--radius-pill);
+    background: var(--color-leaf-wash);
     color: var(--color-aisa-green-strong);
+    padding: 0.25rem 0.65rem;
     font-size: var(--text-xs);
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 700;
   }
 
   .membership-types h4 {
@@ -1265,7 +1267,7 @@ const provinces = [
     font-weight: 800;
   }
 
-  .form-complete > p:not(.eyebrow) {
+  .form-complete > p {
     width: min(100%, 38rem);
     margin: 0.7rem auto 1.3rem;
   }

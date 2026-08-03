@@ -1,0 +1,45 @@
+---
+import ArrowLink from "./ArrowLink.astro";
+import SectionHeading from "./SectionHeading.astro";
+
+interface StackItem {
+  title: string;
+  body: string;
+  href: string;
+  linkText: string;
+}
+
+interface Props {
+  title: string;
+  body: string;
+  items: StackItem[];
+}
+
+const { title, body, items } = Astro.props;
+---
+
+<section class="stacked-story section-space" data-stack-section>
+  <div class="site-container stacked-story__layout">
+    <div class="stacked-story__intro">
+      <SectionHeading title={title} body={body} />
+    </div>
+    <div class="stacked-story__cards" data-card-stack>
+      {
+        items.map((item, index) => (
+          <article
+            class="stack-card"
+            style={`--stack-index: ${index}`}
+            data-stack-card
+          >
+            <div>
+              <span class="stack-card__number">{String(index + 1).padStart(2, "0")}</span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </div>
+            <ArrowLink href={item.href} label={item.linkText} />
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

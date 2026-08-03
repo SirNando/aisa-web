@@ -142,7 +142,6 @@ const courseLevels = [
     lead="Te acercamos un conjunto de cursos separados por nivel que cuentan con nuestro aval."
     primaryHref="#cursos"
     primaryLabel="Ver cursos"
-    primaryScrollSnap
     secondaryHref="/profesionales/certificacion/#requisitos"
     secondaryLabel="Ver requisitos"
     orbitImages={[heroImage, spaceImage]}
@@ -173,9 +172,9 @@ const courseLevels = [
               </h3>
               <div class="mt-5 grid gap-5 md:grid-cols-2">
                 {courseLevel.courses.map((course) => (
-                  <article class="surface-card grid h-full min-h-56 grid-cols-[minmax(0,1fr)_7rem] overflow-hidden sm:grid-cols-[minmax(0,1fr)_9rem]">
+                  <article class="course-card surface-card grid h-full min-h-56 grid-cols-[minmax(0,1fr)_7rem] overflow-hidden sm:grid-cols-[minmax(0,1fr)_9rem]">
                     <div class="flex min-w-0 flex-col p-4 sm:p-6">
-                      <p class="text-sm font-bold uppercase tracking-[0.08em] text-aisa-sky-strong">
+                      <p class="inline-flex w-fit rounded-full bg-aisa-sky-wash px-3 py-1 text-sm font-semibold text-aisa-sky-strong">
                         {course.provider}
                       </p>
                       <h4 class="mt-4 font-aisa-heading text-2xl font-bold text-aisa-ink">
@@ -253,8 +252,7 @@ const courseLevels = [
 
       <div class="mt-10 grid gap-6 lg:grid-cols-2">
         <JourneyCard
-          eyebrow="¿Ya hiciste alguno de estos cursos?"
-          title="Certificá tu formación"
+          title="¿Ya hiciste alguno de estos cursos? Certificá tu formación"
           body="Compará los cursos que realizaste con los requisitos de cada nivel y solicitá su reconocimiento ante AISA."
           href="/profesionales/certificacion/#requisitos"
           linkText="Ver requisitos"
@@ -262,8 +260,7 @@ const courseLevels = [
           alignLinkBottom={true}
         />
         <JourneyCard
-          eyebrow="¿Ya tenés formación previa?"
-          title="Conocé cómo certificarla"
+          title="¿Ya tenés formación previa? Conocé cómo certificarla"
           body="Seguí los pasos para presentar tus certificados e iniciar el proceso de certificación AISA."
           href="/profesionales/certificacion/#proceso"
           linkText="Ver el proceso"

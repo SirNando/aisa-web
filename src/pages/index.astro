@@ -3,8 +3,61 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import JourneyCard from "../components/JourneyCard.astro";
 import Callout from "../components/Callout.astro";
+import CardGrid from "../components/design-system/CardGrid.astro";
+import CardRail from "../components/design-system/CardRail.astro";
+import MediaFeature from "../components/design-system/MediaFeature.astro";
+import SectionHeading from "../components/design-system/SectionHeading.astro";
+import StackedCards from "../components/design-system/StackedCards.astro";
 import heroImage from "../assets/hero-terapia.jpg";
 import spaceImage from "../assets/espacio-terapeutico.jpg";
+
+const pathways = [
+  {
+    title: "Entender con información clara",
+    body: "Acercamos orientación general para reconocer cuándo una dificultad sensorial está afectando la vida cotidiana y cómo conversar con el equipo de salud o educativo.",
+    href: "/familias-y-escuelas/",
+    linkText: "Leer la guía",
+  },
+  {
+    title: "Crecer con formación avalada",
+    body: "Reunimos cursos, recorridos de certificación y criterios institucionales para acompañar el desarrollo de Terapistas Ocupacionales.",
+    href: "/profesionales/formacion-y-cursos/",
+    linkText: "Explorar la formación",
+  },
+  {
+    title: "Conectar con la comunidad AISA",
+    body: "Fortalecemos una red federal de profesionales especializados y preparamos un directorio público con información clara sobre sus certificaciones.",
+    href: "/profesionales/",
+    linkText: "Conocer la comunidad",
+  },
+];
+
+const resources = [
+  {
+    title: "Qué es la Integración Sensorial",
+    body: "Una explicación accesible sobre cómo recibimos, organizamos y usamos la información de los sentidos en la vida cotidiana.",
+    href: "/familias-y-escuelas/#que-es",
+    linkText: "Empezar por acá",
+  },
+  {
+    title: "Cuándo conviene consultar",
+    body: "Señales orientativas para observar con cuidado, sin convertirlas en diagnósticos ni reemplazar una evaluación profesional.",
+    href: "/familias-y-escuelas/#proximos-pasos",
+    linkText: "Ver próximos pasos",
+  },
+  {
+    title: "Cursos avalados por AISA",
+    body: "Programas organizados por nivel para que cada profesional encuentre con claridad el recorrido que necesita.",
+    href: "/profesionales/formacion-y-cursos/#cursos",
+    linkText: "Ver los cursos",
+  },
+  {
+    title: "Certificación profesional",
+    body: "Requisitos, niveles y proceso para solicitar el reconocimiento de tu formación en Integración Sensorial.",
+    href: "/profesionales/certificacion/#requisitos",
+    linkText: "Conocer el proceso",
+  },
+];
 ---
 
 <BaseLayout
@@ -13,7 +66,7 @@ import spaceImage from "../assets/espacio-terapeutico.jpg";
 >
   <PageHero
     title="Fortaleciendo la Integración Sensorial en Argentina"
-    lead="Promovemos la formación y desarrollo profesional para acercar tratamientos de calidad a más personas y familias en todo el país."
+    lead="Promovemos la formación y el desarrollo profesional para acercar tratamientos de calidad a más personas y familias en todo el país."
     primaryHref="/buscar-profesional/"
     primaryLabel="Encontrar un profesional"
     secondaryHref="/acerca-de/"
@@ -21,59 +74,72 @@ import spaceImage from "../assets/espacio-terapeutico.jpg";
     orbitImages={[heroImage, spaceImage]}
     fullHeight={true}
     landing={true}
-    flagWord="Argentina"
   />
 
-  <section class="section-space" data-landing-journeys>
+  <section class="section-space bg-aisa-sand">
     <div class="site-container">
-      <div class="max-w-3xl">
-        <h2
-          class="font-aisa-heading text-aisa-section-title font-bold text-aisa-ink"
-        >
-          Cómo podemos ayudarte?
-        </h2>
-      </div>
-      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+      <SectionHeading
+        title="Cómo podemos acompañarte"
+        body="Tres puertas de entrada para encontrar orientación, formación y comunidad desde un mismo lugar."
+      />
+      <CardGrid>
         <JourneyCard
-          eyebrow="Familias y escuelas"
-          title="Cuándo y por qué consultar con un profesional?"
-          body="Cuando las dificultades sensoriales afectan el aprendizaje, el juego o la vida diaria, un profesional certificado puede ayudarte."
+          number="01"
+          title="Familias y escuelas"
+          body="Información clara para comprender señales, preparar una consulta y acompañar la participación cotidiana."
           href="/familias-y-escuelas/"
           linkText="Buscá orientación"
           tone="sky"
-          alignLinkBottom={true}
         />
         <JourneyCard
-          eyebrow="Profesionales"
-          title="Formación y certificación en un solo lugar"
-          body="Descubrí nuestra oferta de cursos y programas con certificaciones avaladas a nivel nacional para seguir desarrollándote como profesional."
+          number="02"
+          title="Profesionales"
+          body="Cursos avalados, certificación y recursos para seguir desarrollándote en Integración Sensorial."
           href="/profesionales/"
-          linkText="Conocer los cursos"
+          linkText="Conocé los recorridos"
           tone="white"
-          alignLinkBottom={true}
         />
         <JourneyCard
-          eyebrow="Comunidad AISA"
-          title="Trabajá con nosotros"
-          body="Como socio de AISA, promocionamos tu perfil, información de contacto y tus certificaciones en nuestro repositorio público."
+          number="03"
+          title="Comunidad AISA"
+          body="Una red federal que comparte conocimiento, sostiene criterios de calidad y amplía el acceso a profesionales especializados."
           href="/profesionales/#solicitud"
-          linkText="Asociate"
+          linkText="Asociate a AISA"
           tone="leaf"
-          alignLinkBottom={true}
         />
-      </div>
+      </CardGrid>
     </div>
   </section>
 
-  <section class="bg-white section-space">
+  <StackedCards
+    title="Un recorrido que transforma información en acción"
+    body="Cada experiencia del sitio está pensada para que el siguiente paso sea fácil de reconocer, tanto para la comunidad como para profesionales."
+    items={pathways}
+  />
+
+  <MediaFeature
+    title="Conocé a la comunidad detrás de AISA"
+    body="Somos una asociación civil sin fines de lucro formada por Terapistas Ocupacionales argentinos especializados en Integración Sensorial. En nuestro canal compartimos encuentros, formación y experiencias de la comunidad."
+    href="/acerca-de/#equipo"
+    linkText="Conocer a AISA"
+    embedUrl="https://www.youtube-nocookie.com/embed/videoseries?list=UUeTP2z-Rt7LlbwQlChQRb6g"
+    videoTitle="Videos de AISA Argentina"
+  />
+
+  <CardRail
+    title="Explorá a tu ritmo"
+    body="Recursos concretos para llegar directamente a la información que necesitás."
+    items={resources}
+  />
+
+  <section class="section-space bg-white">
     <div class="site-container">
       <Callout
-        title="Buscá un profesional cerca tuyo"
-        body="Nuestro directorio es una lista curada de profesionales asociados a AISA, junto con las certificaciones que validan su especialidad."
+        title="Encontrá orientación profesional cerca tuyo"
+        body="Nuestro directorio será una lista curada de profesionales asociados a AISA, junto con las certificaciones que validan su especialidad. Hoy podés explorar una demostración con perfiles ficticios."
         href="/buscar-profesional/"
-        linkText="Encontrá un profesional"
-        tone="sky"
-        motionKey="landing-callout"
+        linkText="Explorar el directorio"
+        tone="dark"
       />
     </div>
   </section>

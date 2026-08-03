@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap");
+
+@theme {
+  --color-aisa-green: #5fa05a;
+  --color-aisa-green-strong: #2e6d42;
+  --color-aisa-green-dark: #1e5131;
+  --color-aisa-sky: #028bb3;
+  --color-aisa-sky-strong: #086b88;
+  --color-aisa-cyan: #00aee7;
+
+  --color-aisa-ink: #18323a;
+  --color-aisa-body: #49636a;
+  --color-aisa-muted: #6c858a;
+  --color-aisa-mist: #f5faf8;
+  --color-aisa-sky-wash: #e6f5f8;
+  --color-aisa-leaf-wash: #edf6eb;
+  --color-aisa-sand: #fbf7ef;
+  --color-aisa-border: #d8e6e4;
+  --color-aisa-border-strong: #afcac7;
+  --color-aisa-focus: #005fcc;
+  --color-aisa-success: #2e6d42;
+  --color-aisa-warning: #9a6513;
+  --color-aisa-danger: #a33a3a;
+
+  --font-aisa-heading: "Newsreader", Iowan Old Style, Baskerville, Georgia, serif;
+  --font-aisa-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --text-aisa-xs: 0.75rem;
+  --text-aisa-sm: 0.875rem;
+  --text-aisa-base: 1rem;
+  --text-aisa-lead: 1.25rem;
+  --text-aisa-card-title: clamp(1.65rem, 2.3vw, 2.15rem);
+  --text-aisa-section-title: clamp(2.55rem, 5.25vw, 4.85rem);
+  --text-aisa-display: clamp(3.35rem, 7.8vw, 7.4rem);
+
+  --spacing-aisa-section: clamp(5rem, 10vw, 9rem);
+  --container-aisa-page: 78rem;
+  --container-aisa-reading: 47rem;
+
+  --radius-aisa-card: 2rem;
+  --radius-aisa-control: 1rem;
+  --radius-aisa-pill: 999px;
+  --shadow-aisa-card: 0 18px 60px rgb(24 50 58 / 0.08);
+  --shadow-aisa-raised: 0 30px 80px rgb(24 50 58 / 0.14);
+  --shadow-aisa-button: 0 12px 30px rgb(46 109 66 / 0.2);
+}
+
+:root {
+  --color-aisa-green: #5fa05a;
+  --color-aisa-green-strong: #2e6d42;
+  --color-aisa-green-dark: #1e5131;
+  --color-aisa-sky: #028bb3;
+  --color-aisa-sky-strong: #086b88;
+  --color-aisa-cyan: #00aee7;
+
+  --color-ink: #18323a;
+  --color-body: #49636a;
+  --color-muted: #6c858a;
+  --color-mist: #f5faf8;
+  --color-sky-wash: #e6f5f8;
+  --color-leaf-wash: #edf6eb;
+  --color-sand: #fbf7ef;
+  --color-white: #ffffff;
+  --color-border: #d8e6e4;
+  --color-border-strong: #afcac7;
+  --color-focus: #005fcc;
+  --color-success: #2e6d42;
+  --color-warning: #9a6513;
+  --color-danger: #a33a3a;
+
+  --font-heading: "Newsreader", Iowan Old Style, Baskerville, Georgia, serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lead: 1.25rem;
+  --text-card-title: clamp(1.65rem, 2.3vw, 2.15rem);
+  --text-section-title: clamp(2.55rem, 5.25vw, 4.85rem);
+  --text-display: clamp(3.35rem, 7.8vw, 7.4rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --page-max-width: 78rem;
+  --reading-max-width: 47rem;
+  --section-space: clamp(5rem, 10vw, 9rem);
+  --radius-card: 2rem;
+  --radius-control: 1rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 18px 60px rgb(24 50 58 / 0.08);
+  --shadow-raised: 0 30px 80px rgb(24 50 58 / 0.14);
+  --shadow-button: 0 12px 30px rgb(46 109 66 / 0.2);
+  --header-height: 5.5rem;
+}

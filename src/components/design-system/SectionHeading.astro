@@ -1,0 +1,19 @@
+---
+interface Props {
+  title: string;
+  body?: string;
+  align?: "left" | "center";
+  level?: "h2" | "h3";
+}
+
+const { title, body, align = "left", level = "h2" } = Astro.props;
+const HeadingTag = level;
+---
+
+<header
+  class:list={["section-heading", align === "center" && "section-heading--center"]}
+  data-reveal
+>
+  <HeadingTag class="section-title">{title}</HeadingTag>
+  {body && <p class="section-copy">{body}</p>}
+</header>

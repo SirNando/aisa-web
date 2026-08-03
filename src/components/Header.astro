@@ -4,16 +4,16 @@ import logo from "../assets/aisa-logo.png";
 
 const pathname = Astro.url.pathname;
 const navItems = [
-  { label: "Inicio", href: "/", key: "home" },
-  { label: "Familias y Escuelas", href: "/familias-y-escuelas/", key: "families" },
-  { label: "Profesionales", href: "/profesionales/", key: "professionals" },
-  { label: "Acerca de", href: "/acerca-de/", key: "aisa" },
+  { label: "Inicio", href: "/" },
+  { label: "Familias y Escuelas", href: "/familias-y-escuelas/" },
+  { label: "Acerca de", href: "/acerca-de/" },
 ];
 
 const professionalLinks = [
-  { label: "Cursos", href: "/profesionales/formacion-y-cursos/", section: "courses" },
-  { label: "Certificación", href: "/profesionales/certificacion/", section: "certification" },
-  { label: "Asociate", href: "/profesionales/#solicitud", section: "membership", featured: true },
+  { label: "Profesionales", href: "/profesionales/" },
+  { label: "Formación y cursos", href: "/profesionales/formacion-y-cursos/" },
+  { label: "Certificación", href: "/profesionales/certificacion/" },
+  { label: "Asociate", href: "/profesionales/#solicitud" },
 ];
 
 const isActive = (href: string) => {
@@ -21,518 +21,94 @@ const isActive = (href: string) => {
   if (href.includes("#")) return false;
   return pathname.startsWith(href);
 };
+
+const professionalsActive = pathname.startsWith("/profesionales") || pathname.startsWith("/buscar-profesional");
 ---
 
-<header
-  transition:persist="site-header"
-  data-site-header
-  class="fixed left-1/2 top-4 z-50 w-[90%] -translate-x-1/2 overflow-visible rounded-[2rem] border border-white/70 bg-white/70 shadow-[0_8px_16px_rgb(24_50_58/0.08),0_32px_32px_rgb(24_50_58/0.04),0_60px_40px_rgb(24_50_58/0.02)] backdrop-blur-[40px] lg:w-[80%]"
->
-  <div class="flex min-h-20 items-center gap-4 px-4 sm:px-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-6">
-    <a href="/" class="nav-brand shrink-0 rounded-md" aria-label="AISA Argentina, inicio">
+<header class="site-header" data-site-header transition:persist="site-header">
+  <div class="site-header__shell">
+    <a class="site-header__brand" href="/" aria-label="AISA Argentina, inicio">
       <Image src={logo} alt="AISA Argentina" width={176} height={60} loading="eager" />
     </a>
 
-    <nav
-      class="relative isolate hidden items-center gap-3 lg:flex"
-      aria-label="Navegación principal"
-      data-desktop-nav
-    >
-      <span class="nav-active-pill" aria-hidden="true" data-nav-pill></span>
+    <nav class="site-nav" aria-label="Navegación principal">
       {
-        navItems.map((item, index) =>
-          item.key === "professionals" ? (
-            <div
-              class:list={[
-                "nav-professionals relative z-10 flex items-center rounded-full",
-                isActive(item.href) && "is-active",
-              ]}
-              data-nav-professionals
-            >
-              <span class="nav-professionals-hover-pill" aria-hidden="true"></span>
-              <div class="nav-professionals-primary relative z-10 flex items-center" data-nav-pill-target>
-                <a
-                  href={item.href}
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                  data-nav-link
-                  data-nav-key={item.key}
-                  data-nav-index={index}
-                  class:list={[
-                    "nav-item relative whitespace-nowrap rounded-l-full py-2.5 pl-3 pr-1 text-sm font-semibold no-underline",
-                    isActive(item.href) ? "text-aisa-green-dark" : "text-aisa-ink",
-                  ]}
-                >
-                  <span class="relative z-10">{item.label}</span>
-                </a>
-                <button
-                  type="button"
-                  class="nav-professionals-toggle relative inline-flex h-10 w-7 items-center justify-center rounded-r-full text-current"
-                  aria-expanded="false"
-                  aria-controls="professionals-menu"
-                  aria-label="Mostrar opciones para Profesionales"
-                  data-professionals-menu-toggle
-                >
-                  <svg class="nav-professionals-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              <div id="professionals-menu" class="nav-professionals-options" data-professionals-menu>
-                <span class="nav-professionals-section-pill" aria-hidden="true" data-professionals-section-pill></span>
-                <span class="nav-professionals-section-hover-pill" aria-hidden="true" data-professionals-section-hover-pill></span>
-                {
-                  professionalLinks.map((link) => (
-                    <a
-                      href={link.href}
-                      data-nav-target-link
-                      data-nav-key="professionals"
-                      data-professionals-menu-link
-                      data-professional-section={link.section}
-                      class:list={[
-                        "nav-professionals-option relative z-10 flex min-h-10 items-center rounded-full px-3 text-sm font-bold no-underline",
-                        link.featured
-                          ? "nav-professionals-option-featured"
-                          : "text-aisa-ink hover:text-aisa-green-dark",
-                      ]}
-                    >
-                      <span>{link.label}</span>
-                    </a>
-                  ))
-                }
-              </div>
-            </div>
-          ) : (
-            <a
-              href={item.href}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              data-nav-link
-              data-nav-key={item.key}
-              data-nav-index={index}
-              class:list={[
-                "nav-item relative whitespace-nowrap rounded-full px-3 py-2.5 text-sm font-semibold no-underline transition-[color,box-shadow] duration-200 hover:shadow-[0_6px_18px_rgb(24_50_58/0.12)]",
-                isActive(item.href) ? "text-aisa-green-dark" : "text-aisa-ink",
-              ]}
-            >
-              <span class="nav-hover-pill" aria-hidden="true" data-nav-hover-pill></span>
-              <span class="relative z-10">{item.label}</span>
-            </a>
-          ),
-        )
+        navItems.slice(0, 2).map((item) => (
+          <a
+            class="site-nav__link"
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+
+      <div class="site-nav__group">
+        <a
+          class="site-nav__toggle"
+          href="/profesionales/"
+          aria-current={professionalsActive ? "page" : undefined}
+        >
+          Profesionales
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+            <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <div class="site-nav__dropdown">
+          {professionalLinks.map((item) => <a href={item.href}>{item.label}</a>)}
+        </div>
+      </div>
+
+      {
+        navItems.slice(2).map((item) => (
+          <a
+            class="site-nav__link"
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
       }
     </nav>
 
-    <div class="ml-auto hidden items-center gap-2 xl:flex">
-      <button
-        type="button"
-        class="nav-cta button-secondary !min-h-11 !px-4 !text-sm"
-        disabled
-      >
-        Iniciar sesión
-      </button>
-      <a
-        class="nav-cta button-primary !min-h-11 !px-4 !text-sm"
-        href="/buscar-profesional/"
-        data-nav-target-link
-        data-nav-key="professionals"
-      >
-        Buscar profesional
-      </a>
+    <div class="site-header__actions">
+      <a class="button-secondary" href="/contacto/">Contacto</a>
+      <a class="button-primary" href="/buscar-profesional/">Buscar profesional</a>
     </div>
 
     <button
+      class="site-menu-toggle"
       type="button"
-      class="ml-auto inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-aisa-border bg-white px-3 font-bold text-aisa-ink lg:hidden"
       aria-expanded="false"
       aria-controls="mobile-menu"
+      aria-label="Abrir menú"
       data-menu-toggle
     >
-      <span data-menu-label>Menú</span>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-menu-icon />
+      </svg>
     </button>
-  </div>
 
-  <div
-    id="mobile-menu"
-    class="max-h-[calc(100dvh-7rem)] overflow-y-auto border-t border-aisa-border/80 bg-white/55 lg:hidden"
-    hidden
-    data-mobile-menu
-  >
-    <div class="px-4 py-5 sm:px-5">
-      <div class="grid gap-3 sm:grid-cols-2">
+    <div class="mobile-nav" id="mobile-menu" data-mobile-menu hidden>
+      <div class="mobile-nav__actions">
         <a class="button-primary" href="/buscar-profesional/">Buscar profesional</a>
-        <a class="button-secondary" href="/profesionales/#solicitud">Asociarse</a>
+        <a class="button-secondary" href="/profesionales/#solicitud">Asociate</a>
       </div>
-      <nav class="mt-5 grid border-t border-aisa-border pt-3" aria-label="Navegación móvil">
+      <nav aria-label="Navegación móvil">
         {
-          navItems.map((item, index) =>
-            item.key === "professionals" ? (
-              <div class="grid gap-1">
-                <a
-                  href={item.href}
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                  data-nav-link
-                  data-nav-key={item.key}
-                  data-nav-index={index}
-                  class:list={[
-                    "nav-mobile-item flex min-h-12 items-center rounded-lg px-3 font-semibold no-underline",
-                    isActive(item.href)
-                      ? "bg-aisa-leaf-wash text-aisa-green-dark"
-                      : "text-aisa-ink hover:bg-aisa-mist",
-                  ]}
-                >
-                  {item.label}
-                </a>
-                <div class="ml-3 grid gap-1 border-l border-aisa-border pl-3">
-                  {
-                    professionalLinks.map((link) => (
-                      <a
-                        href={link.href}
-                        data-nav-target-link
-                        data-nav-key="professionals"
-                        data-professional-section={link.section}
-                        class:list={[
-                          "flex min-h-10 items-center rounded-lg px-3 text-sm font-semibold no-underline",
-                          link.featured
-                            ? "bg-aisa-leaf-wash text-aisa-green-dark"
-                            : "text-aisa-ink hover:bg-aisa-mist",
-                        ]}
-                      >
-                        {link.label}
-                      </a>
-                    ))
-                  }
-                </div>
-              </div>
-            ) : (
-              <a
-                href={item.href}
-                aria-current={isActive(item.href) ? "page" : undefined}
-                data-nav-link
-                data-nav-key={item.key}
-                data-nav-index={index}
-                class:list={[
-                  "nav-mobile-item flex min-h-12 items-center rounded-lg px-3 font-semibold no-underline",
-                  isActive(item.href)
-                    ? "bg-aisa-leaf-wash text-aisa-green-dark"
-                    : "text-aisa-ink hover:bg-aisa-mist",
-                ]}
-              >
-                {item.label}
-              </a>
-            ),
-          )
+          navItems.slice(0, 2).map((item) => (
+            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>
+          ))
         }
+        <a href="/profesionales/" aria-current={professionalsActive ? "page" : undefined}>Profesionales</a>
+        <div class="mobile-nav__subnav">
+          {professionalLinks.slice(1).map((item) => <a href={item.href}>{item.label}</a>)}
+        </div>
+        {navItems.slice(2).map((item) => <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>)}
+        <a href="/contacto/" aria-current={pathname.startsWith("/contacto") ? "page" : undefined}>Contacto</a>
       </nav>
     </div>
   </div>
 </header>
-
-<script>
-  import { gsap } from "gsap";
-
-  const toggle = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
-  const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
-  const label = document.querySelector<HTMLElement>("[data-menu-label]");
-  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  const mobileMenuItems = () =>
-    menu ? Array.from(menu.querySelectorAll<HTMLElement>("a, button")) : [];
-
-  const finishMenuStyles = () => {
-    if (!menu) return;
-    gsap.set([menu, ...mobileMenuItems()], {
-      clearProps: "height,opacity,visibility,transform,overflow,willChange",
-    });
-  };
-
-  const setMenuOpen = (open: boolean, returnFocus = false) => {
-    if (!toggle || !menu || !label) return;
-    const items = mobileMenuItems();
-    gsap.killTweensOf([menu, ...items]);
-
-    toggle.setAttribute("aria-expanded", String(open));
-    label.textContent = open ? "Cerrar" : "Menú";
-
-    if (reducedMotionQuery.matches) {
-      menu.hidden = !open;
-      finishMenuStyles();
-      if (!open && returnFocus) toggle.focus();
-      return;
-    }
-
-    if (open) {
-      menu.hidden = false;
-      gsap.set(menu, { height: 0, autoAlpha: 0, overflow: "hidden" });
-      gsap.set(items, { y: -8, autoAlpha: 0 });
-      gsap
-        .timeline({
-          defaults: { ease: "power3.out" },
-          onComplete: finishMenuStyles,
-        })
-        .to(menu, { height: "auto", autoAlpha: 1, duration: 0.34 })
-        .to(
-          items,
-          { y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.035 },
-          "-=0.18",
-        );
-      return;
-    }
-
-    gsap
-      .timeline({
-        defaults: { ease: "power2.inOut" },
-        onComplete: () => {
-          menu.hidden = true;
-          finishMenuStyles();
-          if (returnFocus) toggle.focus();
-        },
-      })
-      .to(items, { y: -6, autoAlpha: 0, duration: 0.16, stagger: 0.02 })
-      .to(menu, { height: 0, autoAlpha: 0, duration: 0.22 }, "-=0.08");
-  };
-
-  const closeMenu = (returnFocus = false) => setMenuOpen(false, returnFocus);
-
-  toggle?.addEventListener("click", () => {
-    if (!menu || !label) return;
-    const shouldOpen = menu.hidden === true;
-    setMenuOpen(shouldOpen);
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && menu && !menu.hidden) closeMenu(true);
-  });
-
-  menu?.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => closeMenu());
-  });
-
-  const professionalsMenu = document.querySelector<HTMLElement>(
-    "[data-nav-professionals]",
-  );
-  const professionalsToggle = document.querySelector<HTMLButtonElement>(
-    "[data-professionals-menu-toggle]",
-  );
-
-  const setProfessionalsMenuOpen = (open: boolean) => {
-    if (!professionalsMenu || !professionalsToggle) return;
-    professionalsMenu.classList.toggle("is-open", open);
-    professionalsToggle.setAttribute("aria-expanded", String(open));
-    professionalsToggle.setAttribute(
-      "aria-label",
-      `${open ? "Ocultar" : "Mostrar"} opciones para Profesionales`,
-    );
-    document.dispatchEvent(new CustomEvent("professionals-menu-change", { detail: { open } }));
-  };
-
-  professionalsMenu?.addEventListener("mouseenter", () => setProfessionalsMenuOpen(true));
-  professionalsMenu?.addEventListener("mouseleave", () => setProfessionalsMenuOpen(false));
-  professionalsMenu?.addEventListener("focusin", (event) => {
-    if (event.target !== professionalsToggle) setProfessionalsMenuOpen(true);
-  });
-  professionalsMenu?.addEventListener("focusout", (event) => {
-    const nextTarget = event.relatedTarget;
-    if (!(nextTarget instanceof Node) || !professionalsMenu.contains(nextTarget)) {
-      setProfessionalsMenuOpen(false);
-    }
-  });
-
-  professionalsToggle?.addEventListener("click", () => {
-    setProfessionalsMenuOpen(!professionalsMenu?.classList.contains("is-open"));
-  });
-
-  document.addEventListener("click", (event) => {
-    const target = event.target instanceof Element ? event.target : null;
-    const clickedProfessionalsLink = target?.closest(
-      "[data-professionals-menu-link], [data-nav-pill-target] a",
-    );
-    if (clickedProfessionalsLink && !professionalsMenu?.classList.contains("is-active")) {
-      setProfessionalsMenuOpen(false);
-    }
-  }, true);
-
-  document.addEventListener("professionals-menu-close", () => setProfessionalsMenuOpen(false));
-</script>
-
-<style>
-  .nav-active-pill {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-radius: 999px;
-    background: #cfe8e3;
-    box-shadow: 0 6px 18px rgb(24 50 58 / 0.12);
-    opacity: 0;
-    pointer-events: none;
-    will-change: transform, width, height;
-  }
-
-  .nav-mobile-item[aria-current="page"] {
-    background: #cfe8e3;
-  }
-
-  .nav-hover-pill {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--color-sky-wash);
-    opacity: 0;
-    transform: scale(0.94);
-    transition:
-      opacity 160ms ease,
-      transform 180ms ease;
-    pointer-events: none;
-  }
-
-  .nav-item:hover .nav-hover-pill {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .nav-professionals {
-    isolation: isolate;
-  }
-
-  .nav-professionals-hover-pill {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--color-sky-wash);
-    opacity: 0;
-    transform: scale(0.94);
-    transition:
-      opacity 160ms ease,
-      transform 220ms ease;
-    pointer-events: none;
-  }
-
-  .nav-professionals:not(.is-active):hover .nav-professionals-hover-pill,
-  .nav-professionals:not(.is-active):focus-within .nav-professionals-hover-pill {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .nav-professionals-options {
-    position: absolute;
-    z-index: 0;
-    top: -0.3rem;
-    left: 0;
-    display: grid;
-    width: 100%;
-    min-width: 100%;
-    gap: 0.15rem;
-    padding: calc(2.5rem + 0.65rem) 0.35rem 0.35rem;
-    border: 1px solid rgb(255 255 255 / 0.8);
-    border-radius: 1.35rem;
-    background: var(--color-sky-wash);
-    box-shadow: 0 14px 30px rgb(24 50 58 / 0.14);
-    backdrop-filter: blur(20px);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-0.45rem) scale(0.97);
-    transform-origin: top center;
-    transition:
-      opacity 150ms ease,
-      transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      visibility 0s linear 240ms;
-    pointer-events: none;
-  }
-
-  .nav-professionals.is-open .nav-professionals-options {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-    transition-delay: 0s;
-    pointer-events: auto;
-  }
-
-  .nav-professionals.is-active .nav-professionals-options {
-    background: #cfe8e3;
-  }
-
-  .nav-professionals-section-pill,
-  .nav-professionals-section-hover-pill {
-    position: absolute;
-    z-index: 0;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-radius: 999px;
-    opacity: 0;
-    pointer-events: none;
-    will-change: transform, width, height;
-  }
-
-  .nav-professionals-section-pill {
-    background: #d9eee9;
-  }
-
-  .nav-professionals-section-hover-pill {
-    background: var(--color-sky-wash);
-  }
-
-  .nav-professionals-toggle {
-    transition: color 160ms ease;
-  }
-
-  .nav-professionals.is-active .nav-professionals-toggle {
-    color: var(--color-aisa-green-dark);
-  }
-
-  .nav-professionals-chevron {
-    width: 1rem;
-    height: 1rem;
-    transition: transform 220ms ease;
-  }
-
-  .nav-professionals.is-open .nav-professionals-chevron {
-    transform: rotate(180deg);
-  }
-
-  .nav-professionals-option-featured {
-    color: var(--color-aisa-green-dark);
-    box-shadow: inset 0 0 0 1px rgb(47 121 104 / 0.24);
-  }
-
-  .nav-professionals-option-featured:hover {
-    color: var(--color-aisa-green-dark);
-  }
-
-  .nav-brand,
-  .nav-cta {
-    transition: transform 180ms ease;
-  }
-
-  .nav-brand:hover {
-    transform: scale(1.025);
-  }
-
-  .nav-cta:hover {
-    transform: translateY(-1px) scale(1.025);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nav-brand,
-    .nav-cta,
-    .nav-item,
-    .nav-hover-pill,
-    .nav-professionals-hover-pill,
-    .nav-professionals-options,
-    .nav-professionals-section-pill,
-    .nav-professionals-section-hover-pill,
-    .nav-professionals-chevron,
-    .nav-professionals-toggle {
-      transition: none;
-    }
-
-    .nav-brand:hover,
-    .nav-cta:hover {
-      transform: none;
-    }
-  }
-</style>

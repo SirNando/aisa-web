@@ -1,0 +1,56 @@
+---
+import ArrowLink from "./ArrowLink.astro";
+import SectionHeading from "./SectionHeading.astro";
+
+interface RailItem {
+  title: string;
+  body: string;
+  href: string;
+  linkText: string;
+}
+
+interface Props {
+  title: string;
+  body?: string;
+  items: RailItem[];
+}
+
+const { title, body, items } = Astro.props;
+---
+
+<section class="resource-rail section-space" data-card-rail>
+  <div class="site-container">
+    <div class="resource-rail__topline">
+      <SectionHeading title={title} body={body} />
+      <div class="resource-rail__controls" aria-label="Controles del carrusel">
+        <button class="resource-rail__button" type="button" data-rail-prev aria-label="Ver tarjetas anteriores">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+            <path d="M19 12H6m5-6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button class="resource-rail__button" type="button" data-rail-next aria-label="Ver más tarjetas">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+            <path d="M5 12h13m-5-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="site-container">
+    <div class="resource-rail__viewport" data-rail-viewport tabindex="0" aria-label={title}>
+      <div class="resource-rail__track" data-reveal-group>
+        {
+          items.map((item) => (
+            <article class="resource-card" data-reveal-item>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+              <ArrowLink href={item.href} label={item.linkText} />
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

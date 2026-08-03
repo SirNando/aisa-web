@@ -1,49 +1,61 @@
 ---
+import ArrowLink from "./design-system/ArrowLink.astro";
+
 const year = new Date().getFullYear();
 const email = "integracion.sensorialargentina@gmail.com";
 ---
 
-<footer id="aisa" class="scroll-mt-28 border-t border-aisa-border bg-aisa-ink text-white">
-  <div class="site-container grid gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
-    <div>
-      <p class="font-aisa-heading text-2xl font-extrabold text-white">AISA Argentina</p>
-      <p class="mt-3 max-w-md text-sm leading-6 text-white/75">
-        Somos una asociación sin fines de lucro que reúne a terapistas ocupacionales
-        especializados en Integración Sensorial
+<footer id="aisa" class="site-footer" data-site-footer>
+  <div class="site-container site-footer__main">
+    <div class="site-footer__brand" data-reveal>
+      <h2>AISA Argentina</h2>
+      <p>
+        Una asociación sin fines de lucro que reúne a terapistas ocupacionales
+        especializados en Integración Sensorial.
       </p>
-      <a
-        class="mt-5 inline-flex min-h-11 items-center font-bold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+      <ArrowLink
         href={`mailto:${email}?subject=Consulta%20desde%20el%20sitio%20de%20AISA`}
-      >
-        Contactate con nosotros
-      </a>
+        label="Contactate con nosotros"
+      />
     </div>
 
-    <div>
-      <h2 class="font-aisa-heading text-lg font-bold text-white">Próximos pasos</h2>
-      <ul class="mt-3 grid gap-1 text-sm">
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/acerca-de/">Acerca de AISA</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/buscar-profesional/">Buscar profesional</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/familias-y-escuelas/">Orientación para familias y escuelas</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/profesionales/certificacion/">Conocé nuestras certificaciones</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/profesionales/#solicitud">Cómo asociarte</a></li>
-      </ul>
-    </div>
+    <nav class="site-footer__links" aria-label="Navegación del pie" data-reveal-group>
+      <div class="site-footer__column" data-reveal-item>
+        <h3>Explorá AISA</h3>
+        <ul>
+          <li><a href="/acerca-de/">Acerca de AISA</a></li>
+          <li><a href="/familias-y-escuelas/">Familias y escuelas</a></li>
+          <li><a href="/profesionales/">Profesionales</a></li>
+          <li><a href="/contacto/">Contacto</a></li>
+        </ul>
+      </div>
 
-    <div>
-      <h2 class="font-aisa-heading text-lg font-bold text-white">AISA en línea</h2>
-      <ul class="mt-3 grid gap-1 text-sm">
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="https://www.instagram.com/aisa_argentina/?hl=es" rel="noreferrer">Instagram</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="https://www.youtube.com/channel/UCeTP2z-Rt7LlbwQlChQRb6g" rel="noreferrer">YouTube</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="https://www.facebook.com/AsociacionDeIntegracionSensorialArgentina/" rel="noreferrer">Facebook</a></li>
-        <li><a class="inline-flex min-h-11 items-center text-white/80 hover:text-white" href="/contacto/">Contacto</a></li>
-      </ul>
-    </div>
+      <div class="site-footer__column" data-reveal-item>
+        <h3>Próximos pasos</h3>
+        <ul>
+          <li><a href="/buscar-profesional/">Buscar profesional</a></li>
+          <li><a href="/profesionales/formacion-y-cursos/">Formación y cursos</a></li>
+          <li><a href="/profesionales/certificacion/">Certificación</a></li>
+          <li><a href="/profesionales/#solicitud">Cómo asociarte</a></li>
+        </ul>
+      </div>
+
+      <div class="site-footer__column" data-reveal-item>
+        <h3>AISA en línea</h3>
+        <ul>
+          <li><a href="https://www.instagram.com/aisa_argentina/?hl=es" rel="noreferrer">Instagram</a></li>
+          <li><a href="https://www.youtube.com/channel/UCeTP2z-Rt7LlbwQlChQRb6g" rel="noreferrer">YouTube</a></li>
+          <li><a href="https://www.facebook.com/AsociacionDeIntegracionSensorialArgentina/" rel="noreferrer">Facebook</a></li>
+          <li><a href={`mailto:${email}`}>Correo electrónico</a></li>
+        </ul>
+      </div>
+    </nav>
   </div>
-  <div class="border-t border-white/15">
-    <div class="site-container flex flex-col gap-2 py-5 text-xs text-white/65 sm:flex-row sm:items-center sm:justify-between">
-      <p>© {year} AISA Argentina.</p>
-      <p>Prototipo público · Los contenidos operativos señalados son de muestra.</p>
+
+  <div class="site-footer__bottom">
+    <div class="site-container site-footer__bottom-inner">
+      <span>© {year} AISA Argentina</span>
+      <span>Información institucional y orientación general.</span>
     </div>
   </div>
 </footer>

@@ -1,24 +1,26 @@
 ---
+import ArrowLink from "./design-system/ArrowLink.astro";
+
 interface Props {
-  eyebrow?: string;
   title: string;
   body: string;
   href: string;
   linkText: string;
-  tone?: "sky" | "leaf";
+  tone?: "sky" | "leaf" | "sand" | "dark";
   motionKey?: string;
 }
 
-const { eyebrow, title, body, href, linkText, tone = "sky", motionKey } = Astro.props;
+const { title, body, href, linkText, tone = "leaf", motionKey } = Astro.props;
 ---
 
-<section data-motion={motionKey} class:list={["rounded-[2rem] p-7 sm:p-10", tone === "sky" ? "bg-aisa-sky-wash" : "bg-aisa-leaf-wash"]}>
-  <div class="grid items-end gap-8 md:grid-cols-[1fr_auto]">
-    <div class="max-w-3xl">
-      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-      <h2 class:list={["font-aisa-heading text-3xl font-bold text-aisa-ink sm:text-4xl", eyebrow && "mt-4"]}>{title}</h2>
-      <p class="mt-4 max-w-2xl text-lg leading-8 text-aisa-body">{body}</p>
-    </div>
-    <a class={tone === "sky" ? "button-secondary" : "button-primary"} href={href}>{linkText}</a>
+<aside
+  class:list={["callout-card", `callout-card--${tone}`]}
+  data-reveal
+  data-motion={motionKey}
+>
+  <div>
+    <h2>{title}</h2>
+    <p>{body}</p>
   </div>
-</section>
+  <ArrowLink href={href} label={linkText} className="callout-card__action" />
+</aside>
