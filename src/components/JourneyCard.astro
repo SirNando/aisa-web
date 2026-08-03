@@ -9,6 +9,7 @@ interface Props {
   tone?: "white" | "sky" | "leaf" | "sand" | "dark";
   number?: string;
   alignLinkBottom?: boolean;
+  featured?: boolean;
 }
 
 const {
@@ -19,15 +20,17 @@ const {
   tone = "white",
   number,
   alignLinkBottom = true,
+  featured = false,
 } = Astro.props;
 ---
 
 <article
-  class:list={["journey-card", `journey-card--${tone}`]}
+  class:list={["journey-card", `journey-card--${tone}`, featured && "journey-card--featured"]}
   data-reveal-item
   data-tilt-card
+  data-featured-card={featured ? "true" : undefined}
 >
-  <div>
+  <div class="journey-card__tilt" data-tilt-surface>
     {number && <span class="journey-card__number">{number}</span>}
     <h3 class="journey-card__title">{title}</h3>
     <p class="journey-card__body">{body}</p>
@@ -35,6 +38,6 @@ const {
   <ArrowLink
     href={href}
     label={linkText}
-    className={alignLinkBottom ? "journey-card__link" : undefined}
+    className={alignLinkBottom ? "journey-card__link stretched-card-link" : "stretched-card-link"}
   />
 </article>

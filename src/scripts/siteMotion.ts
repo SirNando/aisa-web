@@ -1,7 +1,10 @@
 import { gsap } from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import type { TransitionBeforePreparationEvent } from "astro:transitions/client";
+import type {
+  TransitionBeforePreparationEvent,
+  TransitionBeforeSwapEvent,
+} from "astro:transitions/client";
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -395,11 +398,12 @@ const setupTiltCards = () => {
   if (!finePointer.matches || reducedMotion.matches) return;
 
   document.querySelectorAll<HTMLElement>("[data-tilt-card]").forEach((card) => {
+    const surface = card.querySelector<HTMLElement>("[data-tilt-surface]") ?? card;
     const onMove = (event: PointerEvent) => {
       const bounds = card.getBoundingClientRect();
       const x = (event.clientX - bounds.left) / bounds.width - 0.5;
       const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-      gsap.to(card, {
+      gsap.to(surface, {
         rotationX: y * -3.5,
         rotationY: x * 3.5,
         transformPerspective: 900,
@@ -409,7 +413,7 @@ const setupTiltCards = () => {
         overwrite: "auto",
       });
     };
-    const reset = () => gsap.to(card, {
+    const reset = () => gsap.to(surface, {
       rotationX: 0,
       rotationY: 0,
       duration: 0.55,
@@ -650,8 +654,6 @@ const initialize = () => {
           const nextCard = cards[index + 1];
           gsap.to(card, {
             scale: 0.92 + index * 0.02,
-            autoAlpha: 0.62,
-            filter: "saturate(0.75)",
             ease: "none",
             scrollTrigger: {
               trigger: nextCard,
@@ -727,7 +729,14 @@ const handleBeforePreparation = (event: TransitionBeforePreparationEvent) => {
   placeProfessionalSectionPill(activeProfessionalSection(destination), true, "active");
 };
 
-document.addEventListener("astro:before-swap", cleanup);
+const handleBeforeSwap = (event: TransitionBeforeSwapEvent) => {
+  event.newDocument.documentElement.dataset.heroLayout = String(
+    Math.floor(Math.random() * 5) + 1,
+  );
+  cleanup();
+};
+
+document.addEventListener("astro:before-swap", handleBeforeSwap as EventListener);
 document.addEventListener("astro:page-load", initialize);
 document.addEventListener(
   "astro:before-preparation",

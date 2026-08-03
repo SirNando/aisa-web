@@ -14,6 +14,7 @@ interface Props {
   compact?: boolean;
   fullHeight?: boolean;
   landing?: boolean;
+  nextTone?: "white" | "mist" | "sand" | "leaf" | "sky";
 }
 
 const {
@@ -28,6 +29,7 @@ const {
   compact = false,
   fullHeight = false,
   landing = false,
+  nextTone = "mist",
 } = Astro.props;
 
 const firstImage = orbitImages[0];
@@ -91,6 +93,7 @@ const visuals = [
   ]}
   data-page-hero
   data-landing-hero={landing ? "true" : undefined}
+  data-next-tone={nextTone}
 >
   <div class="page-hero__shapes">
     {

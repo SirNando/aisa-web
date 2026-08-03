@@ -46,7 +46,7 @@ const { title, body, items } = Astro.props;
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
               </div>
-              <ArrowLink href={item.href} label={item.linkText} />
+              <ArrowLink href={item.href} label={item.linkText} className="resource-card__link stretched-card-link" />
             </article>
           ))
         }

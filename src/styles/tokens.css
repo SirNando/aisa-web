@@ -1,9 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap");
 
 @theme {
-  --color-aisa-green: #5fa05a;
+  --color-aisa-green: #4CA751;
   --color-aisa-green-strong: #2e6d42;
-  --color-aisa-green-dark: #1e5131;
+  --color-aisa-green-dark: #276d32;
+  --color-aisa-on-primary: #102c18;
+  --color-aisa-footer: #dff0df;
   --color-aisa-sky: #028bb3;
   --color-aisa-sky-strong: #086b88;
   --color-aisa-cyan: #00aee7;
@@ -41,13 +43,15 @@
   --radius-aisa-pill: 999px;
   --shadow-aisa-card: 0 18px 60px rgb(24 50 58 / 0.08);
   --shadow-aisa-raised: 0 30px 80px rgb(24 50 58 / 0.14);
-  --shadow-aisa-button: 0 12px 30px rgb(46 109 66 / 0.2);
+  --shadow-aisa-button: 0 12px 30px rgb(76 167 81 / 0.22);
 }
 
 :root {
-  --color-aisa-green: #5fa05a;
+  --color-aisa-green: #4CA751;
   --color-aisa-green-strong: #2e6d42;
-  --color-aisa-green-dark: #1e5131;
+  --color-aisa-green-dark: #276d32;
+  --color-on-primary: #102c18;
+  --color-footer: #dff0df;
   --color-aisa-sky: #028bb3;
   --color-aisa-sky-strong: #086b88;
   --color-aisa-cyan: #00aee7;
@@ -98,6 +102,6 @@
   --radius-pill: 999px;
   --shadow-card: 0 18px 60px rgb(24 50 58 / 0.08);
   --shadow-raised: 0 30px 80px rgb(24 50 58 / 0.14);
-  --shadow-button: 0 12px 30px rgb(46 109 66 / 0.2);
+  --shadow-button: 0 12px 30px rgb(76 167 81 / 0.22);
   --header-height: 5.5rem;
 }

@@ -17,10 +17,13 @@ const socialImage = new URL("/og.png", Astro.site);
 ---
 
 <!doctype html>
-<html lang="es-AR">
+<html lang="es-AR" data-hero-layout="1">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      document.documentElement.dataset.heroLayout = String(Math.floor(Math.random() * 5) + 1);
+    </script>
     <ClientRouter fallback="swap" />
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
