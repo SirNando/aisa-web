@@ -1,0 +1,29 @@
+---
+interface Props {
+  variant?: "cluster" | "orbit" | "trail";
+  tone?: "leaf" | "sky" | "sand" | "inverse";
+  className?: string;
+}
+
+const {
+  variant = "cluster",
+  tone = "leaf",
+  className,
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    "organic-shapes",
+    `organic-shapes--${variant}`,
+    `organic-shapes--${tone}`,
+    className,
+  ]}
+  aria-hidden="true"
+>
+  <span class="organic-shapes__shape organic-shapes__shape--one"></span>
+  <span class="organic-shapes__shape organic-shapes__shape--two"></span>
+  <span class="organic-shapes__shape organic-shapes__shape--three"></span>
+  <span class="organic-shapes__shape organic-shapes__shape--four"></span>
+  <span class="organic-shapes__shape organic-shapes__shape--five"></span>
+</div>

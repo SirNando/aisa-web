@@ -800,6 +800,7 @@ const provinces = [
   }
 
   .membership-form {
+    position: relative;
     width: min(100%, 58rem);
     margin-inline: auto;
     overflow: visible;
@@ -807,6 +808,42 @@ const provinces = [
     border-radius: var(--radius-card);
     background: var(--color-white);
     box-shadow: var(--shadow-raised);
+    isolation: isolate;
+  }
+
+  .membership-form::before,
+  .membership-form::after {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    content: "";
+  }
+
+  .membership-form::before {
+    top: -2.5rem;
+    right: -2rem;
+    width: 9rem;
+    aspect-ratio: 1;
+    border: 1.75rem solid var(--color-aisa-green);
+    border-radius: var(--radius-organic-a);
+    opacity: 0.08;
+    transform: rotate(18deg);
+  }
+
+  .membership-form::after {
+    bottom: 1.5rem;
+    left: -1.8rem;
+    width: 7rem;
+    height: 2.15rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-aisa-cyan);
+    opacity: 0.07;
+    transform: rotate(-20deg);
+  }
+
+  .membership-form > * {
+    position: relative;
+    z-index: 1;
   }
 
   .membership-form__header {

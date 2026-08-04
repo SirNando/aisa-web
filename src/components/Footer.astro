@@ -1,5 +1,6 @@
 ---
 import ArrowLink from "./design-system/ArrowLink.astro";
+import OrganicShapes from "./design-system/OrganicShapes.astro";
 
 const year = new Date().getFullYear();
 const email = "integracion.sensorialargentina@gmail.com";
@@ -7,10 +8,11 @@ const email = "integracion.sensorialargentina@gmail.com";
 
 <footer id="aisa" class="site-footer" data-site-footer>
   <div class="site-container site-footer__main">
+    <OrganicShapes variant="trail" tone="leaf" className="site-footer__shapes" />
     <div class="site-footer__brand" data-reveal>
       <h2>AISA Argentina</h2>
       <p>
-        Una asociación sin fines de lucro que reúne a terapistas ocupacionales
+        Somos una asociación sin fines de lucro que reúne a terapistas ocupacionales
         especializados en Integración Sensorial.
       </p>
       <ArrowLink
@@ -33,10 +35,10 @@ const email = "integracion.sensorialargentina@gmail.com";
       <div class="site-footer__column" data-reveal-item>
         <h3>Próximos pasos</h3>
         <ul>
-          <li><a href="/buscar-profesional/">Buscar profesional</a></li>
+          <li><a href="/buscar-profesional/">Encontrá un profesional</a></li>
           <li><a href="/profesionales/formacion-y-cursos/">Formación y cursos</a></li>
-          <li><a href="/profesionales/certificacion/">Certificación</a></li>
-          <li><a href="/profesionales/#solicitud">Cómo asociarte</a></li>
+          <li><a href="/profesionales/certificacion/">Certificaciones</a></li>
+          <li><a href="/profesionales/#solicitud">Asociate</a></li>
         </ul>
       </div>
 

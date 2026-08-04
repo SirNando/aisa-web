@@ -1,0 +1,34 @@
+---
+import ArrowLink from "./ArrowLink.astro";
+
+interface Props {
+  title: string;
+  body: string;
+  href?: string;
+  linkText?: string;
+  external?: boolean;
+  tone?: "white" | "sky" | "leaf" | "sand" | "dark";
+}
+
+const {
+  title,
+  body,
+  href,
+  linkText = "Visitar sitio",
+  external = true,
+  tone = "white",
+} = Astro.props;
+---
+
+<article class:list={["info-card", `info-card--${tone}`]} data-reveal-item>
+  <h3 class="info-card__title">{title}</h3>
+  <p class="info-card__body">{body}</p>
+  {href && (
+    <ArrowLink
+      href={href}
+      label={linkText}
+      external={external}
+      className="info-card__link"
+    />
+  )}
+</article>

@@ -1,10 +1,20 @@
-import type { Professional } from "../data/professionals";
+import type {
+  Professional,
+  ProfessionalOffice,
+} from "../data/professionals";
 
 export interface DirectoryFilters {
   query: string;
   province: string;
   locality: string;
   certificationStatus: string;
+  careMode: string;
+  equipped: boolean;
+}
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
 }
 
 export const normalizeFilterText = (value: string) =>
@@ -14,47 +24,54 @@ export const normalizeFilterText = (value: string) =>
     .toLocaleLowerCase("es-AR")
     .trim();
 
+export const matchesOfficeFilters = (
+  office: Pick<ProfessionalOffice, "province" | "locality" | "equipped">,
+  filters: Pick<DirectoryFilters, "province" | "locality" | "equipped">,
+) =>
+  (filters.province === "" || office.province === filters.province) &&
+  (filters.locality === "" || office.locality === filters.locality) &&
+  (!filters.equipped || office.equipped);
+
 export const matchesProfessional = (
-  professional: Pick<
-    Professional,
-    "name" | "province" | "locality" | "certificationStatus"
-  >,
+  professional: Professional,
   filters: DirectoryFilters,
 ) => {
   const normalizedQuery = normalizeFilterText(filters.query);
-  const matchesQuery =
-    normalizedQuery === "" ||
-    normalizeFilterText(professional.name).includes(normalizedQuery) ||
-    normalizeFilterText(professional.locality).includes(normalizedQuery) ||
-    normalizeFilterText(professional.province).includes(normalizedQuery);
+  const searchableText = normalizeFilterText(
+    [
+      professional.name,
+      professional.profession,
+      ...professional.populations,
+      ...professional.offices.flatMap((office) => [
+        office.label,
+        office.address,
+        office.locality,
+        office.province,
+      ]),
+    ].join(" "),
+  );
 
   return (
-    matchesQuery &&
-    (filters.province === "" || professional.province === filters.province) &&
-    (filters.locality === "" || professional.locality === filters.locality) &&
+    (normalizedQuery === "" || searchableText.includes(normalizedQuery)) &&
     (filters.certificationStatus === "" ||
-      professional.certificationStatus === filters.certificationStatus)
+      professional.certificationStatus === filters.certificationStatus) &&
+    (filters.careMode === "" ||
+      professional.careModes.includes(filters.careMode as "in-person" | "virtual")) &&
+    professional.offices.some((office) => matchesOfficeFilters(office, filters))
   );
 };
 
-export const filterProfessionals = <
-  T extends Pick<
-    Professional,
-    "name" | "province" | "locality" | "certificationStatus"
-  >,
->(
-  professionals: T[],
+export const filterProfessionals = (
+  records: Professional[],
   filters: DirectoryFilters,
-) => professionals.filter((professional) => matchesProfessional(professional, filters));
-
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
+) => records.filter((professional) => matchesProfessional(professional, filters));
 
 const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
-export const distanceInKilometres = (origin: Coordinates, destination: Coordinates) => {
+export const distanceInKilometres = (
+  origin: Coordinates,
+  destination: Coordinates,
+) => {
   const earthRadius = 6371;
   const latitudeDelta = toRadians(destination.latitude - origin.latitude);
   const longitudeDelta = toRadians(destination.longitude - origin.longitude);
@@ -69,13 +86,37 @@ export const distanceInKilometres = (origin: Coordinates, destination: Coordinat
   return 2 * earthRadius * Math.asin(Math.sqrt(haversine));
 };
 
-export const findNearestProfessional = <T extends Coordinates>(
-  records: T[],
+export const findNearestOffice = (
+  professional: Professional,
   origin: Coordinates,
 ) =>
-  records.reduce<T | null>((nearest, record) => {
-    if (!nearest) return record;
-    return distanceInKilometres(origin, record) < distanceInKilometres(origin, nearest)
-      ? record
+  professional.offices.reduce<ProfessionalOffice | null>((nearest, office) => {
+    if (!nearest) return office;
+    return distanceInKilometres(origin, office) <
+      distanceInKilometres(origin, nearest)
+      ? office
       : nearest;
   }, null);
+
+export const professionalDistanceInKilometres = (
+  professional: Professional,
+  origin: Coordinates,
+) => {
+  const office = findNearestOffice(professional, origin);
+  return office ? distanceInKilometres(origin, office) : Number.POSITIVE_INFINITY;
+};
+
+export const sortProfessionalsByDistance = (
+  records: Professional[],
+  origin: Coordinates,
+) =>
+  [...records].sort(
+    (first, second) =>
+      professionalDistanceInKilometres(first, origin) -
+      professionalDistanceInKilometres(second, origin),
+  );
+
+export const findNearestProfessional = (
+  records: Professional[],
+  origin: Coordinates,
+) => sortProfessionalsByDistance(records, origin)[0] ?? null;

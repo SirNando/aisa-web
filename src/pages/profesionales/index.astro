@@ -4,8 +4,115 @@ import PageHero from "../../components/PageHero.astro";
 import JourneyCard from "../../components/JourneyCard.astro";
 import Callout from "../../components/Callout.astro";
 import MembershipForm from "../../components/MembershipForm.astro";
+import InfoCard from "../../components/design-system/InfoCard.astro";
+import SectionHeading from "../../components/design-system/SectionHeading.astro";
 import heroImage from "../../assets/hero-terapia.jpg";
 import spaceImage from "../../assets/espacio-terapeutico.jpg";
+
+const benefits = [
+  {
+    title: "Praxis Médica",
+    body: "20% de descuento",
+    href: "https://tienda.praxis-art.com/",
+    tone: "sky",
+  },
+  {
+    title: "Zona de sentidos",
+    body: "10% de descuento",
+    href: "https://zonadesentidos.com/",
+    tone: "leaf",
+  },
+  {
+    title: "Ad",
+    body: "10% de descuento",
+    href: "https://www.activosydivertidos.com/",
+    tone: "sand",
+  },
+  {
+    title: "Mundo Lua",
+    body: "10% de descuento",
+    href: "https://mundolua.com.ar/",
+    tone: "white",
+  },
+  {
+    title: "Ludme",
+    body: "10% de descuento",
+    href: "https://www.tienda.ludme.com.ar/",
+    tone: "sky",
+  },
+  {
+    title: "Sens Argentina",
+    body: "10% de descuento",
+    href: "https://www.instagram.com/sensargentina/",
+    tone: "leaf",
+  },
+];
+
+const interestLinkGroups = [
+  {
+    title: "Asociaciones internacionales de Integración Sensorial",
+    links: [
+      { label: "Corporación Chilena de IS", href: "https://www.ischile.cl/" },
+      {
+        label: "Asociación Peruana de IS",
+        href: "mailto:integracionsensorial_peru@hotmail.com",
+      },
+      {
+        label: "Asociación Venezolana de IS",
+        href: "mailto:isvenezuela@yahoo.es",
+      },
+      {
+        label: "Asociación Española de IS",
+        href: "https://integracionsensorial.es/",
+      },
+      {
+        label: "Red Global de Integración Sensorial (SIGN)",
+        href: "https://www.siglobalnetwork.org/",
+      },
+      {
+        label: "Red de Integración Sensorial del Reino Unido e Irlanda",
+        href: "https://www.sensoryintegration.org.uk/",
+      },
+    ],
+  },
+  {
+    title: "Equipamiento terapéutico",
+    links: [
+      { label: "7 Sentidos", href: "https://www.7-sentidos.com.ar/index.php" },
+      { label: "Equito Equipamientos" },
+    ],
+  },
+  {
+    title: "Otros sitios relacionados con la I.S.",
+    links: [
+      {
+        label: "Actualizaciones Terapéuticas",
+        href: "http://www.actualizacionesterapeuticas.com/",
+      },
+      {
+        label: "Sensory Processing Disorder Foundation",
+        href: "https://spdfoundation.net/",
+      },
+      { label: "Historias Sensoriales" },
+      { label: "Alert Program", href: "https://alertprogram.com/" },
+      { label: "Henry OT Services" },
+      { label: "Pediatric Therapy Network" },
+    ],
+  },
+  {
+    title: "Asociaciones profesionales de Terapia Ocupacional",
+    links: [
+      {
+        label: "Asociación Argentina de Terapia Ocupacional",
+        href: "https://terapia-ocupacional.org.ar/",
+      },
+      {
+        label: "Federación Mundial de Terapeutas Ocupacionales (WFOT)",
+        href: "https://wfot.org/",
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
@@ -20,6 +127,7 @@ import spaceImage from "../../assets/espacio-terapeutico.jpg";
     secondaryHref="/profesionales/formacion-y-cursos/"
     secondaryLabel="Ver formación y cursos"
     orbitImages={[heroImage, spaceImage]}
+    fullHeight={true}
     nextTone="white"
   />
 
@@ -66,6 +174,78 @@ import spaceImage from "../../assets/espacio-terapeutico.jpg";
         linkText="Explorar el directorio"
         tone="sky"
       />
+    </div>
+  </section>
+
+  <section id="beneficios" class="section-space bg-white scroll-mt-28">
+    <div class="site-container">
+      <SectionHeading
+        title="Beneficios exclusivos para socios y socias"
+        body="Con la cuota social al día podés acceder a descuentos en material y equipamiento para tu consultorio, cursos y otros recursos profesionales."
+      />
+
+      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+        {benefits.map((benefit) => (
+          <InfoCard
+            title={benefit.title}
+            body={benefit.body}
+            href={benefit.href}
+            linkText="Visitar sitio"
+            tone={benefit.tone as "white" | "sky" | "leaf" | "sand"}
+          />
+        ))}
+      </div>
+
+      <div class="mt-10">
+        <Callout
+          title="Sumate para acceder a estos beneficios"
+          body="Completá el formulario de asociación y empezá a formar parte de la comunidad profesional de AISA."
+          href="#solicitud"
+          linkText="Quiero asociarme"
+          tone="leaf"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section id="links-de-interes" class="section-space scroll-mt-28">
+    <div class="site-container">
+      <SectionHeading
+        title="Links de interés"
+        body="Una selección de asociaciones, equipamiento y recursos para seguir formándote en Integración Sensorial y Terapia Ocupacional."
+      />
+
+      <div class="mt-10 grid gap-5 lg:grid-cols-2" data-reveal-group>
+        {interestLinkGroups.map((group) => (
+          <article class="surface-card p-6 sm:p-8" data-reveal-item>
+            <h3 class="font-aisa-heading text-2xl font-bold text-aisa-ink">
+              {group.title}
+            </h3>
+            <ul class="mt-6 grid gap-3">
+              {group.links.map((link) => (
+                <li class="flex gap-3 leading-7">
+                  <span
+                    class="mt-3 h-2 w-2 shrink-0 rounded-full bg-aisa-green"
+                    aria-hidden="true"
+                  />
+                  {link.href ? (
+                    <a
+                      class="font-semibold text-aisa-green-strong underline underline-offset-4 hover:text-aisa-ink"
+                      href={link.href}
+                      target={link.href.startsWith("http") ? "_blank" : undefined}
+                      rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <span>{link.label}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
     </div>
   </section>
 

@@ -3,21 +3,75 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import JourneyCard from "../components/JourneyCard.astro";
 import Callout from "../components/Callout.astro";
+import CardGrid from "../components/design-system/CardGrid.astro";
+import InfoCard from "../components/design-system/InfoCard.astro";
 import spaceImage from "../assets/espacio-terapeutico.jpg";
 import heroImage from "../assets/hero-terapia.jpg";
+
+const audiences = [
+  {
+    title: "Familias",
+    body: "Encontrá una orientación inicial para ordenar lo que observás, conversar con el equipo de salud y acompañar el proceso de evaluación.",
+    href: "#familias",
+    linkText: "Orientación para familias",
+    tone: "leaf" as const,
+  },
+  {
+    title: "Docentes y educadores",
+    body: "Reconocé cómo algunas diferencias en el procesamiento sensorial pueden afectar la participación, la atención y el aprendizaje en el aula.",
+    href: "#docentes",
+    linkText: "Orientación para docentes",
+    tone: "sand" as const,
+  },
+  {
+    title: "Profesionales de la salud",
+    body: "Conocé el aporte de la Integración Sensorial y cómo articular una mirada funcional con la familia, la escuela y otros profesionales.",
+    href: "#salud",
+    linkText: "Orientación para salud",
+    tone: "sky" as const,
+  },
+];
+
+const signals = [
+  {
+    title: "Regulación y descanso",
+    body: "Se irrita fácilmente, llora sin un motivo claro o le cuesta llegar a la calma y conciliar el sueño aun cuando está cansado/a.",
+  },
+  {
+    title: "Cuidado personal y tacto",
+    body: "Se angustia durante la higiene, rechaza ciertas prendas o materiales, o evita el contacto físico y algunas texturas.",
+  },
+  {
+    title: "Alimentación",
+    body: "Tiene preferencias muy marcadas, rechaza alimentos por su textura, temperatura, sabor u olor, o cuenta con un repertorio especialmente limitado.",
+  },
+  {
+    title: "Movimiento y coordinación",
+    body: "Busca intensamente girar o hamacarse, evita ciertos movimientos, se cansa rápido en actividades físicas o parece más torpe que otros niños/as de su edad.",
+  },
+  {
+    title: "Comunicación y vínculos",
+    body: "Se retrasa en algunos logros del habla y el lenguaje, tiene pocas amistades o le cuesta participar en juegos y actividades compartidas.",
+  },
+  {
+    title: "Sonidos y luz",
+    body: "Se abruma en ambientes ruidosos, reacciona ante sonidos inesperados o tiene dificultades para adaptarse a la luz del sol y a la oscuridad.",
+  },
+];
 ---
 
 <BaseLayout
-  title="Para familias y escuelas"
+  title="Familias y escuelas"
   description="Orientación clara y no diagnóstica sobre Integración Sensorial para familias, docentes, escuelas y equipos de salud."
 >
   <PageHero
-    title="Entender lo que pasa es el primer paso para acompañar."
-    lead="Conocé qué puede motivar una consulta, qué esperar de una evaluación y cómo conversar con el equipo educativo o de salud sin convertir señales orientativas en diagnósticos."
+    title="Entender es el primer paso para acompañar."
+    lead="Conocé razones para realizar una consulta, qué esperar de una evaluación y cómo conversar con la familia, la escuela y el equipo de salud."
     primaryHref="/buscar-profesional/"
-    primaryLabel="Buscar profesional"
+    primaryLabel="Encontrá un profesional"
     secondaryHref="#que-es"
     secondaryLabel="Leé nuestra guía"
+    fullHeight={true}
     orbitImages={[spaceImage, heroImage]}
     imageAlt="Espacio terapéutico equipado para actividades de movimiento y participación."
     nextTone="white"
@@ -32,11 +86,11 @@ import heroImage from "../assets/hero-terapia.jpg";
       </div>
       <div class="rich-copy reading-container">
         <p class="mt-0 text-lg leading-8">
-          La Integración Sensorial (IS) ayuda a comprender cómo una persona
-          recibe, organiza y utiliza la información de sus sentidos para
-          participar en la vida cotidiana.
+          La Integración Sensorial ayuda a comprender cómo una persona recibe,
+          organiza y utiliza la información de sus sentidos para participar en
+          la vida cotidiana.
         </p>
-        <p>
+        <p class="mt-0 text-lg leading-8">
           Algunas diferencias pueden observarse en el juego, la alimentación, el
           movimiento, el cuidado personal, el aprendizaje o la participación
           social. Una lista de señales no reemplaza una evaluación profesional
@@ -48,212 +102,215 @@ import heroImage from "../assets/hero-terapia.jpg";
 
   <section class="section-space">
     <div class="site-container">
-      <h2
-        class="mt-4 max-w-3xl font-aisa-heading text-aisa-section-title font-bold"
-      >
-        Una orientación que conecta a quienes acompañan
-      </h2>
-      <div class="mt-10 grid gap-6 lg:grid-cols-3">
-        <JourneyCard
-          title="Para familias: nadie conoce a tu niño tan bien como vos."
-          body="Si tu intuición te dice que hay algo que no está bien, confiá en tu percepción y ¡consultá! La detección precoz y tratamiento temprano son de gran importancia."
-          href="#proximos-pasos"
-          linkText="Ver próximos pasos"
-          tone="leaf"
-        />
-        <JourneyCard
-          title="Para docentes y escuelas, la mirada del aula es fundamental."
-          body="Algunos comportamientos en el aula pueden ser señales de dificultades en el procesamiento sensorial. Si observás varios de estos signos, consultar con un profesional puede ayudar a acompañar su aprendizaje."
-          href="#proximos-pasos"
-          linkText="Preparar una conversación"
-          tone="sand"
-        />
-        <JourneyCard
-          title="Los equipos de salud pueden ordenar información clave."
-          body="Compartí antecedentes relevantes y coordiná la derivación con criterios funcionales."
-          href="#proximos-pasos"
-          linkText="Ordenar el siguiente paso"
-          tone="sky"
-        />
+      <div class="max-w-3xl">
+        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+          Elegí la orientación que necesitás
+        </h2>
+        <p class="mt-5 text-lg leading-8">
+          La conversación se enriquece cuando cada persona comparte lo que
+          observa desde su contexto: la casa, el aula o el equipo de salud.
+        </p>
       </div>
+      <CardGrid>
+        {audiences.map((audience) => <JourneyCard {...audience} />)}
+      </CardGrid>
     </div>
   </section>
 
-  <section class="section-space bg-aisa-sand">
+  <section id="senales" class="section-space scroll-mt-28 bg-aisa-sand">
     <div class="site-container">
       <div class="max-w-3xl">
         <h2 class="font-aisa-heading text-aisa-section-title font-bold">
-          Señales orientativas: ¿cuándo conviene consultar?
+          Señales orientativas
         </h2>
         <p class="mt-5 text-lg leading-8">
-          Si tu hijo/a presenta algunas de estas características junto con
-          dificultades de conducta, atención, aprendizaje o coordinación motora,
-          compartí lo que observás con su pediatra o médico de cabecera y
-          consultá con un Terapista Ocupacional formado en Integración Sensorial.
-          Estas señales son orientativas y no reemplazan una evaluación.
+          Si una persona presenta alguna de las siguientes características y
+          manifiesta dificultades de conducta, atención, aprendizaje o en la
+          coordinación motora, es beneficioso que se asesoren con un Terapista
+          Ocupacional formado en Integración Sensorial, para una eventual
+          evaluación específica.
         </p>
       </div>
 
-      <div class="mt-10 grid gap-5 md:grid-cols-2">
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Regulación y descanso</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Se irrita fácilmente o llora sin un motivo claro.</li>
-            <li>Le cuesta calmarse y conciliar el sueño, aun cuando está cansado/a.</li>
-          </ul>
-        </article>
+      <CardGrid>
+        {
+          signals.map((signal) => (
+            <InfoCard title={signal.title} body={signal.body} tone="white" />
+          ))
+        }
+      </CardGrid>
+    </div>
+  </section>
 
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Cuidado personal y tacto</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Se angustia durante la higiene, el corte de pelo, el cepillado de dientes o el corte de uñas.</li>
-            <li>Rechaza ciertas prendas, zapatos, medias, gorros o cambios de estación.</li>
-            <li>Evita tocar arena, masas, plasticola u otros materiales, o tiende a evitar el contacto físico.</li>
-            <li>Reacciona exageradamente si lo tocan desde atrás o evita dar y recibir besos.</li>
-          </ul>
-        </article>
-
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Alimentación</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Tiene preferencias muy marcadas o rechaza alimentos por su textura, temperatura, sabor u olor.</li>
-            <li>Cuenta con un repertorio de alimentos especialmente limitado.</li>
-          </ul>
-        </article>
-
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Movimiento y coordinación</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Busca intensamente girar, hamacarse o usar juegos de plazas, sin parecer marearse.</li>
-            <li>Evita movimientos bruscos, cambios inesperados, subir y bajar escaleras o despegar los pies del piso.</li>
-            <li>Se cansa rápido en actividades físicas, se apoya sobre las manos o parece débil.</li>
-            <li>Tiene dificultades para andar en bicicleta o triciclo, o es más torpe que otros niños/as de su edad.</li>
-          </ul>
-        </article>
-
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Comunicación y vínculos</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Se retrasa en adquirir logros del habla y el lenguaje.</li>
-            <li>Tiene baja autoestima o pocas amistades.</li>
-          </ul>
-        </article>
-
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Sonidos y luz</h3>
-          <ul class="mt-4 grid list-disc gap-3 pl-5 leading-7">
-            <li>Es más sensible que otros a sonidos fuertes o inesperados y se abruma en ambientes ruidosos.</li>
-            <li>Le cuesta adaptarse a la luz del sol o se molesta, o presenta miedo excesivo a la oscuridad.</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="mt-8 grid gap-5 lg:grid-cols-2">
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Qué hacer si reconocés varias señales</h3>
-          <ol class="mt-4 grid list-decimal gap-3 pl-5 leading-7">
-            <li>Hablá con tu pediatra o médico de cabecera sobre lo que observás.</li>
-            <li>Si el examen clínico no explica esas conductas, solicitá una entrevista con un T.O. entrenado en I.S. para saber si hace falta una evaluación específica.</li>
-            <li>Si recibe un diagnóstico de desorden de procesamiento sensorial, pedí una copia de los resultados de la evaluación.</li>
-          </ol>
-        </article>
-
-        <article class="surface-card p-6 sm:p-8">
-          <h3 class="font-aisa-heading text-xl font-bold">Si comienza un tratamiento</h3>
-          <p class="mt-4 leading-7">
-            Asegurate de que el Terapista Ocupacional pueda acreditar su formación
-            en Integración Sensorial y su capacitación continua mediante grupos de
-            estudio, supervisiones clínicas, cursos o congresos de actualización.
-          </p>
-          <p class="mt-4 leading-7">
-            También es importante que la sala reúna condiciones adecuadas:
-          </p>
-          <ul class="mt-3 grid list-disc gap-3 pl-5 leading-7">
-            <li>Un tamaño no menor a 4 por 4 metros.</li>
-            <li>Al menos dos puntos de suspensión.</li>
-            <li>Más de un modelo de equipamiento colgante para ofrecer diversidad de movimiento.</li>
-            <li>Material terapéutico que ofrezca información de distintas modalidades sensoriales.</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="mt-8 rounded-[var(--radius-card)] bg-white p-6 sm:p-8">
-        <p class="font-aisa-heading text-xl font-bold text-aisa-ink">
-          Nadie conoce a tu niño/a tan bien como vos.
+  <section id="familias" class="section-space scroll-mt-28 bg-white">
+    <div
+      class="site-container grid gap-10 lg:grid-cols-[.78fr_1.22fr] lg:gap-16"
+    >
+      <div>
+        <h2 class="font-aisa-heading text-aisa-section-title font-bold">
+          Para familias
+        </h2>
+        <p class="mt-5 text-lg leading-8">
+          Nadie conoce a tu niño tan bien como vos. Si tu intuición te dice que
+          hay algo que no está bien, confiá en tu percepción y consultá.
         </p>
-        <p class="mt-3 leading-7">
-          Si tu intuición te dice que algo no está bien, confiá en tu percepción y
-          consultá. La detección precoz y el tratamiento temprano son importantes.
+      </div>
+      <div class="rich-copy">
+        <p class="mt-0">
+          Si pensás que tu niño/a puede presentar dificultades de procesamiento
+          sensorial, te sugerimos:
         </p>
-        <p class="mt-4 text-sm leading-6 text-aisa-muted">
-          Contenido traducido y adaptado de <cite>Sensational Kids</cite>, de Lucy
-          Jane Miller, Ph.D., ORT.
+        <ol class="grid list-decimal gap-3 pl-5 leading-7">
+          <li>
+            Hablar con tu pediatra o médico de cabecera sobre lo que observás.
+          </li>
+          <li>
+            Si el examen clínico no explica esas conductas, solicitar una
+            entrevista con un Terapista Ocupacional entrenado en Integración
+            Sensorial para saber si hace falta una evaluación específica.
+          </li>
+          <li>
+            Si recibe un diagnóstico de desorden de procesamiento sensorial,
+            pedir una copia de los resultados de la evaluación.
+          </li>
+          <li>
+            Verificar que el Terapista Ocupacional pueda acreditar su formación
+            en Integración Sensorial y su capacitación continua.
+          </li>
+        </ol>
+        <h3>Al comenzar un tratamiento</h3>
+        <p>
+          También es importante que la sala reúna condiciones adecuadas: un
+          tamaño no menor a 4 por 4 metros, al menos dos puntos de suspensión,
+          más de un modelo de equipamiento colgante y material terapéutico que
+          ofrezca información de distintas modalidades sensoriales.
         </p>
       </div>
     </div>
   </section>
 
-  <section class="section-space bg-white">
-    <div class="site-container grid gap-12 lg:grid-cols-[.8fr_1.2fr]">
+  <section id="docentes" class="section-space scroll-mt-28 bg-aisa-sand">
+    <div
+      class="site-container grid gap-10 lg:grid-cols-[.78fr_1.22fr] lg:gap-16"
+    >
       <div>
         <h2 class="font-aisa-heading text-aisa-section-title font-bold">
-          Qué esperar de una atención centrada en la participación
+          Para docentes y educadores
         </h2>
+        <p class="mt-5 text-lg leading-8">
+          La mirada del aula es fundamental para comprender cómo una persona
+          participa y aprende en su entorno cotidiano.
+        </p>
       </div>
-      <ol class="grid gap-4">
-        <li class="surface-card grid gap-4 p-6 sm:grid-cols-[3rem_1fr]">
-          <span
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-aisa-sky-wash font-bold text-aisa-sky-strong"
-            >1</span
-          >
-          <div>
-            <h3 class="font-aisa-heading text-xl font-bold">
-              Comprender el motivo de consulta
-            </h3><p class="mt-2">
-              La conversación inicial reúne preocupaciones, fortalezas, rutinas
-              y prioridades.
+      <div class="rich-copy">
+        <p class="mt-0">
+          Seguro tenés alumnos/as a los que les cuesta sostener la participación
+          en clase o mantener la atención en lo relevante: pueden distraerse si
+          un compañero/a habla, se mueve o se le acerca, o parecer abrumados por
+          los sonidos y movimientos del aula.
+        </p>
+        <p>
+          Estos signos pueden ser indicadores de dificultades en el
+          procesamiento sensorial. Si reconocés tres o más, puede ser
+          beneficioso conversar con la familia y sugerir una consulta con un
+          Terapista Ocupacional formado en Integración Sensorial.
+        </p>
+        <ul class="grid list-disc gap-3 pl-5 leading-7">
+          <li>Es demasiado activo, incapaz de frenarse o controlarse.</li>
+          <li>Se mueve o hamaca en la silla y no puede permanecer quieto/a.</li>
+          <li>Habla constantemente o interrumpe la clase.</li>
+          <li>Nunca termina su tarea aun cuando puede hacer el trabajo.</li>
+          <li>
+            Tiene atención corta para su edad o dificultad para cambiar de tarea
+            y seguir instrucciones.
+          </li>
+          <li>
+            Parece débil, cansado/a o suele recostarse sobre el escritorio.
+          </li>
+          <li>
+            Se cansa demasiado rápido al escribir o escribe con mucha presión.
+          </li>
+          <li>Parece más torpe y se lleva objetos o mobiliario por delante.</li>
+          <li>Reacciona de manera inadecuada cuando un compañero/a lo toca.</li>
+          <li>Sobre-reacciona a sonidos, luces, olores o gustos.</li>
+          <li>
+            Tiene un comportamiento explosivo o baja tolerancia a la
+            frustración.
+          </li>
+          <li>No juega con otros niños/as o prefiere jugar en soledad.</li>
+        </ul>
+        <p>
+          Comprender a los niños/as con dificultades en Integración Sensorial y
+          mostrarte sensible y compasivo con ellos es un gran paso para
+          ayudarles a aprender desde su propio estilo.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="salud" class="section-space scroll-mt-28 bg-aisa-sky-wash">
+    <div
+      class="site-container grid gap-10 lg:grid-cols-[.78fr_1.22fr] lg:gap-16"
+    >
+      <div>
+        <h2 class="font-aisa-heading text-aisa-section-title font-bold">
+          Para profesionales de la salud
+        </h2>
+        <p class="mt-5 text-lg leading-8">
+          Una mirada compartida puede ayudar a ordenar la información funcional
+          y definir cuándo conviene una consulta o una evaluación específica.
+        </p>
+      </div>
+      <div class="rich-copy">
+        <p class="mt-0">
+          Las dificultades en el procesamiento sensorial pueden presentarse de
+          forma aislada o junto con otras situaciones del desarrollo y la salud,
+          como trastornos del espectro autista, déficit de atención, trastornos
+          del aprendizaje, dispraxia, trastornos del lenguaje, síndromes
+          genéticos, prematuridad o trastornos neuromotores.
+        </p>
+        <h3>¿En qué consiste la intervención?</h3>
+        <div class="grid gap-5 sm:grid-cols-3">
+          <article class="surface-card bg-white p-6">
+            <h4 class="font-aisa-heading text-xl font-bold">
+              Educación familiar
+            </h4>
+            <p class="mt-3 leading-7">
+              Ayudar a la familia a entender el perfil sensorial y reconocer
+              señales de advertencia favorece una mejor comunicación y
+              participación.
             </p>
-          </div>
-        </li>
-        <li class="surface-card grid gap-4 p-6 sm:grid-cols-[3rem_1fr]">
-          <span
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-aisa-sky-wash font-bold text-aisa-sky-strong"
-            >2</span
-          >
-          <div>
-            <h3 class="font-aisa-heading text-xl font-bold">
-              Evaluar en contexto
-            </h3><p class="mt-2">
-              Se combinan entrevistas, observaciones y herramientas pertinentes
-              a cada situación.
+          </article>
+          <article class="surface-card bg-white p-6">
+            <h4 class="font-aisa-heading text-xl font-bold">
+              Adaptación del ambiente
+            </h4>
+            <p class="mt-3 leading-7">
+              Graduar la cantidad e intensidad de estímulos y crear espacios de
+              calma puede favorecer la regulación en los contextos cotidianos.
             </p>
-          </div>
-        </li>
-        <li class="surface-card grid gap-4 p-6 sm:grid-cols-[3rem_1fr]">
-          <span
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-aisa-sky-wash font-bold text-aisa-sky-strong"
-            >3</span
-          >
-          <div>
-            <h3 class="font-aisa-heading text-xl font-bold">
-              Acordar objetivos y apoyos
-            </h3><p class="mt-2">
-              La devolución explica hallazgos, prioridades y estrategias con
-              lenguaje claro.
+          </article>
+          <article class="surface-card bg-white p-6">
+            <h4 class="font-aisa-heading text-xl font-bold">
+              Intervención directa
+            </h4>
+            <p class="mt-3 leading-7">
+              La persona participa activamente en experiencias que acompañan la
+              exploración, el juego y la resolución de problemas funcionales.
             </p>
-          </div>
-        </li>
-      </ol>
+          </article>
+        </div>
+      </div>
     </div>
   </section>
 
   <section id="proximos-pasos" class="section-space scroll-mt-28">
     <div class="site-container">
       <Callout
-        title="Tres próximos pasos: conversá, conocé la evaluación y buscá acompañamiento"
-        body="Compartí lo que observás con el equipo educativo o de salud, prepará ejemplos de situaciones cotidianas y elegí un profesional con formación en Integración Sensorial."
-        href="/buscar-profesional/"
-        linkText="Ir al buscador"
+        title="¿Querés dar el próximo paso?"
+        body="Si reconocés algunas de estas señales, conversá con tu equipo de salud y encontrá un Terapista Ocupacional formado en Integración Sensorial para saber si hace falta una evaluación específica."
+        href="/buscar-profesional/#mapa"
+        linkText="Encontrá un profesional"
         tone="leaf"
       />
     </div>

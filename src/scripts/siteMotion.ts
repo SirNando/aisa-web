@@ -53,6 +53,15 @@ const activeProfessionalSection = (url: URL) => {
   return null;
 };
 
+const scrollToHashTarget = (behavior: ScrollBehavior = "auto") => {
+  if (!window.location.hash) return;
+
+  const id = decodeURIComponent(window.location.hash.slice(1));
+  requestAnimationFrame(() => {
+    document.getElementById(id)?.scrollIntoView({ behavior, block: "start" });
+  });
+};
+
 const navPillTarget = (key: string) => {
   if (key === "professionals") {
     return document.querySelector<HTMLElement>("[data-nav-professionals] [data-nav-pill-target]");
@@ -429,6 +438,190 @@ const setupTiltCards = () => {
 const clampMotion = (value: number, minimum: number, maximum: number) =>
   Math.min(Math.max(value, minimum), maximum);
 
+const sectionShapeModifiers = ["one", "two", "three", "four", "five"] as const;
+const sectionShapeDepths = [-0.28, 0.2, -0.16, 0.24, -0.12] as const;
+
+const shuffledOrganicLayouts = () => {
+  const layouts = [1, 2, 3, 4, 5];
+  for (let index = layouts.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [layouts[index], layouts[swapIndex]] = [layouts[swapIndex], layouts[index]];
+  }
+  return layouts;
+};
+
+const setupSectionShapes = () => {
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>("main section.section-space"),
+  );
+  let layoutPool: number[] = [];
+  let previousLayout: number | null = null;
+
+  sections.forEach((section) => {
+    const existingShapes = section.querySelector<HTMLElement>(":scope > [data-section-shapes]");
+    if (existingShapes) {
+      previousLayout = Number(section.dataset.sectionShapeLayout ?? previousLayout);
+      return;
+    }
+
+    if (layoutPool.length === 0) {
+      layoutPool = shuffledOrganicLayouts();
+      if (layoutPool[0] === previousLayout) {
+        const differentIndex = layoutPool.findIndex((layout) => layout !== previousLayout);
+        if (differentIndex > 0) {
+          [layoutPool[0], layoutPool[differentIndex]] = [
+            layoutPool[differentIndex],
+            layoutPool[0],
+          ];
+        }
+      }
+    }
+
+    const layout = layoutPool.shift() ?? 1;
+    previousLayout = layout;
+    section.dataset.sectionShapeLayout = String(layout);
+
+    const decoration = document.createElement("div");
+    decoration.className = "section-shapes";
+    decoration.dataset.sectionShapes = "";
+    decoration.setAttribute("aria-hidden", "true");
+
+    sectionShapeModifiers.forEach((modifier, index) => {
+      const shape = document.createElement("span");
+      const parallaxLayer = document.createElement("span");
+      const idleLayer = document.createElement("span");
+      const artwork = document.createElement("span");
+
+      shape.className = `section-shape section-shape--${modifier}`;
+      parallaxLayer.className = "section-shape__parallax";
+      parallaxLayer.dataset.sectionShapeParallax = "";
+      parallaxLayer.dataset.depth = String(sectionShapeDepths[index]);
+      idleLayer.className = "section-shape__idle";
+      idleLayer.dataset.sectionShapeIdle = "";
+      artwork.className = "section-shape__art";
+
+      idleLayer.append(artwork);
+      parallaxLayer.append(idleLayer);
+      shape.append(parallaxLayer);
+      decoration.append(shape);
+    });
+
+    section.prepend(decoration);
+  });
+};
+
+const repeatedOrganicPatternSelector = [
+  ".journey-card",
+  ".info-card",
+  ".surface-card",
+  ".resource-card",
+  ".directory-card",
+  ".organic-panel",
+].join(", ");
+
+const setupRepeatedOrganicPatterns = () => {
+  const main = document.querySelector<HTMLElement>("main");
+  if (!main) return;
+
+  const groups = new Map<HTMLElement, HTMLElement[]>();
+
+  main
+    .querySelectorAll<HTMLElement>(repeatedOrganicPatternSelector)
+    .forEach((element) => {
+      const parent = element.parentElement;
+      if (!parent) return;
+
+      const siblings = groups.get(parent) ?? [];
+      siblings.push(element);
+      groups.set(parent, siblings);
+    });
+
+  groups.forEach((elements) => {
+    let layoutPool: number[] = [];
+    let previousLayout: number | null = null;
+
+    elements.forEach((element) => {
+      const existingLayout = Number(element.dataset.organicPatternLayout);
+      if (existingLayout >= 1 && existingLayout <= 5) {
+        previousLayout = existingLayout;
+        layoutPool = [];
+        return;
+      }
+
+      if (layoutPool.length === 0) {
+        layoutPool = shuffledOrganicLayouts();
+        if (layoutPool[0] === previousLayout) {
+          const differentIndex = layoutPool.findIndex(
+            (layout) => layout !== previousLayout,
+          );
+          if (differentIndex > 0) {
+            [layoutPool[0], layoutPool[differentIndex]] = [
+              layoutPool[differentIndex],
+              layoutPool[0],
+            ];
+          }
+        }
+      }
+
+      const layout = layoutPool.shift() ?? 1;
+      previousLayout = layout;
+      element.dataset.organicPatternLayout = String(layout);
+    });
+  });
+};
+
+const setupSectionShapeMotion = () => {
+  document.querySelectorAll<HTMLElement>("[data-section-shapes]").forEach(
+    (decoration, sectionIndex) => {
+      const section = decoration.closest<HTMLElement>("section");
+      if (!section) return;
+
+      decoration
+        .querySelectorAll<HTMLElement>("[data-section-shape-parallax]")
+        .forEach((layer) => {
+          const depth = Number(layer.dataset.depth ?? 0.15);
+          gsap.fromTo(
+            layer,
+            { yPercent: depth * -42 },
+            {
+              yPercent: depth * 42,
+              ease: "none",
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 0.9,
+              },
+            },
+          );
+        });
+
+      decoration
+        .querySelectorAll<HTMLElement>("[data-section-shape-idle]")
+        .forEach((layer, shapeIndex) => {
+          const direction = (sectionIndex + shapeIndex) % 2 === 0 ? 1 : -1;
+          const travel = desktop.matches ? 5 + shapeIndex * 1.2 : 3 + shapeIndex * 0.7;
+          gsap.to(layer, {
+            x: direction * travel,
+            y: direction * travel * 0.7,
+            rotation: direction * (1.4 + shapeIndex * 0.35),
+            duration: 6.8 + shapeIndex * 0.85 + (sectionIndex % 3) * 0.4,
+            delay: shapeIndex * 0.12,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 110%",
+              end: "bottom -10%",
+              toggleActions: "play pause resume pause",
+            },
+          });
+        });
+    },
+  );
+};
+
 const setupHeroMotion = (hero: HTMLElement, heroContent: HTMLElement) => {
   const revealLayers = Array.from(
     hero.querySelectorAll<HTMLElement>("[data-hero-reveal]"),
@@ -553,6 +746,8 @@ const setupHeroMotion = (hero: HTMLElement, heroContent: HTMLElement) => {
 
 const initialize = () => {
   cleanup();
+  setupSectionShapes();
+  setupRepeatedOrganicPatterns();
   setupMenu();
   setupDesktopNavigation();
   setupNavigationState();
@@ -565,7 +760,7 @@ const initialize = () => {
     const heroContent = hero?.querySelector<HTMLElement>("[data-hero-content]");
 
     if (reducedMotion.matches) {
-      gsap.set("[data-reveal], [data-reveal-item], main .surface-card, main section h2, [data-hero-reveal], [data-hero-idle], [data-hero-drift]", {
+      gsap.set("[data-reveal], [data-reveal-item], main .surface-card, main section h2, [data-hero-reveal], [data-hero-idle], [data-hero-drift], [data-section-shape-parallax], [data-section-shape-idle]", {
         clearProps: "all",
         autoAlpha: 1,
       });
@@ -575,6 +770,8 @@ const initialize = () => {
     if (hero && heroContent) {
       setupHeroMotion(hero, heroContent);
     }
+
+    setupSectionShapeMotion();
 
     const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(
       "[data-reveal], main .surface-card, main section h2:not(.page-hero__title)",
@@ -737,12 +934,18 @@ const handleBeforeSwap = (event: TransitionBeforeSwapEvent) => {
 };
 
 document.addEventListener("astro:before-swap", handleBeforeSwap as EventListener);
-document.addEventListener("astro:page-load", initialize);
+document.addEventListener("astro:page-load", () => {
+  initialize();
+  scrollToHashTarget();
+});
 document.addEventListener(
   "astro:before-preparation",
   handleBeforePreparation as EventListener,
 );
-window.addEventListener("hashchange", () => syncNavigation(true));
+window.addEventListener("hashchange", () => {
+  syncNavigation(true);
+  scrollToHashTarget("smooth");
+});
 reducedMotion.addEventListener("change", initialize);
 desktop.addEventListener("change", initialize);
 finePointer.addEventListener("change", initialize);

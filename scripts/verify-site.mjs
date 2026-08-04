@@ -21,6 +21,7 @@ const expectedRoutes = [
 
 const failures = [];
 const pages = new Map();
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 for (const route of expectedRoutes) {
   try {
@@ -65,7 +66,6 @@ for (const [route, html] of pages) {
   const hrefs = [...html.matchAll(/<a\b[^>]*\bhref="([^"]+)"/gi)].map((match) => match[1]);
   for (const href of hrefs) {
     if (
-      href.startsWith("#") ||
       href.startsWith("mailto:") ||
       href.startsWith("https://") ||
       href.startsWith("http://") ||
@@ -73,9 +73,16 @@ for (const [route, html] of pages) {
     ) {
       continue;
     }
+    const [hrefPath, hash] = href.split("#", 2);
+    const targetRoute = hrefPath ? routeToFile(hrefPath) : route;
+    if (hash) {
+      const targetHtml = pages.get(targetRoute);
+      if (targetHtml && !new RegExp(`\\bid="${escapeRegExp(hash)}"`).test(targetHtml)) {
+        failures.push(`${route} apunta a un ancla inexistente: ${href}`);
+      }
+    }
     if (href.startsWith("/")) {
-      const file = routeToFile(href);
-      if (!expectedRoutes.includes(file)) failures.push(`${route} enlaza a una ruta inexistente: ${href}`);
+      if (!expectedRoutes.includes(targetRoute)) failures.push(`${route} enlaza a una ruta inexistente: ${href}`);
     }
   }
 }

@@ -1,5 +1,6 @@
 ---
 import ArrowLink from "./ArrowLink.astro";
+import OrganicShapes from "./OrganicShapes.astro";
 import SectionHeading from "./SectionHeading.astro";
 
 interface StackItem {
@@ -31,6 +32,11 @@ const { title, body, items } = Astro.props;
             style={`--stack-index: ${index}`}
             data-stack-card
           >
+            <OrganicShapes
+              variant={index % 2 === 0 ? "orbit" : "trail"}
+              tone={index === 1 ? "sky" : index === 2 ? "sand" : "leaf"}
+              className="stack-card__shapes"
+            />
             <div>
               <span class="stack-card__number">{String(index + 1).padStart(2, "0")}</span>
               <h3>{item.title}</h3>

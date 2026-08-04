@@ -2,37 +2,68 @@
 import LocationMap from "./design-system/LocationMap.astro";
 import { professionals } from "../data/professionals";
 
-const provinces = [...new Set(professionals.map((person) => person.province))].sort(
-  (a, b) => a.localeCompare(b, "es-AR"),
+const offices = professionals.flatMap((professional) => professional.offices);
+const provinces = [...new Set(offices.map((office) => office.province))].sort(
+  (first, second) => first.localeCompare(second, "es-AR"),
 );
-const localities = [...professionals]
-  .sort((a, b) => a.locality.localeCompare(b.locality, "es-AR"))
-  .map((person) => ({ locality: person.locality, province: person.province }));
+const localities = [
+  ...new Map(
+    offices
+      .sort((first, second) =>
+        first.locality.localeCompare(second.locality, "es-AR"),
+      )
+      .map((office) => [
+        `${office.province}:${office.locality}`,
+        { locality: office.locality, province: office.province },
+      ]),
+  ).values(),
+];
+
+const certificationLabel = (status: "complete" | "in-progress") =>
+  status === "complete" ? "Certificación completa" : "Certificación en curso";
+
+const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
+  if (modes.length === 2) return "Presencial y virtual";
+  return modes[0] === "virtual" ? "Atención virtual" : "Atención presencial";
+};
 ---
 
-<section class="directory-explorer" data-directory-root aria-labelledby="directory-title">
+<section
+  id="mapa"
+  class="directory-explorer scroll-mt-28"
+  data-directory-root
+  aria-labelledby="directory-title"
+>
   <div class="directory-explorer__heading">
     <div>
       <h2 id="directory-title">Encontrá profesionales cerca tuyo</h2>
-      <p>Explorá el mapa o combiná los filtros para acotar los resultados.</p>
+      <p>
+        Explorá los consultorios en el mapa, combiná los filtros o usá tu
+        ubicación para ordenar las opciones por cercanía.
+      </p>
     </div>
     <p class="directory-explorer__count" aria-live="polite">
       <span data-directory-count>{professionals.length}</span>
-      <span data-directory-count-label> resultados</span>
+      <span data-directory-count-label> profesionales</span>
     </p>
   </div>
 
-  <LocationMap professionals={professionals}>
+  <aside class="directory-demo-note" aria-label="Información sobre esta vista">
+    <strong>Vista interactiva de prueba.</strong>{" "}
+    Los perfiles, ubicaciones y datos de contacto son ilustrativos.
+  </aside>
+
+  <LocationMap>
     <form class="directory-filters" data-directory-form slot="filters">
       <h3>Filtrar el mapa</h3>
 
       <label for="directory-query">
-        <span>Nombre o ubicación</span>
+        <span>Nombre, especialidad o ubicación</span>
         <input
           id="directory-query"
           name="query"
           type="search"
-          placeholder="Ej.: Córdoba"
+          placeholder="Ej.: Córdoba o infancias"
           autocomplete="off"
         />
       </label>
@@ -42,7 +73,11 @@ const localities = [...professionals]
           <span>Provincia</span>
           <select id="directory-province" name="province">
             <option value="">Todas</option>
-            {provinces.map((province) => <option value={province}>{province}</option>)}
+            {
+              provinces.map((province) => (
+                <option value={province}>{province}</option>
+              ))
+            }
           </select>
         </label>
 
@@ -52,27 +87,72 @@ const localities = [...professionals]
             <option value="">Todas</option>
             {
               localities.map(({ locality, province }) => (
-                <option value={locality} data-province={province}>{locality}</option>
+                <option value={locality} data-province={province}>
+                  {locality}
+                </option>
               ))
             }
           </select>
         </label>
       </div>
 
-      <label for="directory-status">
-        <span>Certificación</span>
-        <select id="directory-status" name="certificationStatus">
-          <option value="">Todos los estados</option>
-          <option value="complete">Certificación completa</option>
-          <option value="in-progress">Certificación en curso</option>
+      <div class="directory-filters__pair">
+        <label for="directory-status">
+          <span>Certificación</span>
+          <select id="directory-status" name="certificationStatus">
+            <option value="">Todas</option>
+            <option value="complete">Completa</option>
+            <option value="in-progress">En curso</option>
+          </select>
+        </label>
+
+        <label for="directory-care-mode">
+          <span>Modalidad</span>
+          <select id="directory-care-mode" name="careMode">
+            <option value="">Todas</option>
+            <option value="in-person">Presencial</option>
+            <option value="virtual">Virtual</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="directory-filters__checkbox">
+        <input type="checkbox" name="equipped" />
+        <span>Mostrar sólo consultorios equipados</span>
+      </label>
+
+      <label for="directory-sort">
+        <span>Ordenar resultados</span>
+        <select id="directory-sort" name="sort" data-directory-sort>
+          <option value="name">Nombre A–Z</option>
+          <option value="distance" data-distance-option disabled>
+            Más cercanos
+          </option>
         </select>
       </label>
 
       <div class="directory-filters__actions">
         <button type="button" class="button-primary" data-directory-geolocate>
-          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
-            <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6" />
-            <path d="M10 2v2m0 12v2M2 10h2m12 0h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          <svg
+            viewBox="0 0 20 20"
+            width="18"
+            height="18"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle
+              cx="10"
+              cy="10"
+              r="3"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <path
+              d="M10 2v2m0 12v2M2 10h2m12 0h2"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            />
           </svg>
           <span data-geolocate-label>Usar mi ubicación</span>
         </button>
@@ -81,44 +161,81 @@ const localities = [...professionals]
         </button>
       </div>
 
-      <p class="directory-filters__status" data-geolocation-status aria-live="polite"></p>
+      <p
+        class="directory-filters__status"
+        data-geolocation-status
+        aria-live="polite"
+      ></p>
     </form>
   </LocationMap>
 
   <div class="directory-results" data-directory-results>
     {
-      professionals.map((person) => (
-        <article
-          class="directory-card"
-          data-directory-card
-          data-professional-id={person.id}
-          data-name={person.name}
-          data-province={person.province}
-          data-locality={person.locality}
-          data-status={person.certificationStatus}
-          data-latitude={person.latitude}
-          data-longitude={person.longitude}
-        >
-          <div>
-            <p class="directory-card__location">{person.locality}, {person.province}</p>
-            <h3>{person.name}</h3>
-          </div>
-          <p class:list={["directory-card__status", person.certificationStatus === "complete" && "is-complete"]}>
-            {person.certificationStatus === "complete"
-              ? "Certificación completa"
-              : "Certificación en curso"}
-          </p>
-          <button class="button-quiet" type="button" data-card-locate data-professional-id={person.id}>
-            Ver en el mapa
-          </button>
-        </article>
-      ))
+      professionals.map((person, index) => {
+        const firstOffice = person.offices[0];
+        return (
+          <article
+            class="directory-card"
+            data-directory-card
+            data-professional-id={person.id}
+            data-original-index={index}
+          >
+            <div class="directory-card__main">
+              <p class="directory-card__location" data-card-location>
+                {firstOffice.locality}, {firstOffice.province}
+              </p>
+              <h3>{person.name}</h3>
+              <p class="directory-card__profession">{person.profession}</p>
+              <ul class="directory-card__details" aria-label="Modalidad y población">
+                <li>{careModeLabel(person.careModes)}</li>
+                <li>{person.populations.join(" · ")}</li>
+                {person.offices.length > 1 && <li>{person.offices.length} consultorios</li>}
+              </ul>
+              <dl class="directory-card__contact">
+                <div>
+                  <dt>Teléfono</dt>
+                  <dd>{person.phone}</dd>
+                </div>
+                <div>
+                  <dt>Email</dt>
+                  <dd>{person.email}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <p
+              class:list={[
+                "directory-card__status",
+                person.certificationStatus === "complete" && "is-complete",
+              ]}
+            >
+              {certificationLabel(person.certificationStatus)}
+            </p>
+
+            <div class="directory-card__actions">
+              <p class="directory-card__distance" data-card-distance hidden></p>
+              <button
+                class="button-quiet"
+                type="button"
+                data-card-locate
+                data-professional-id={person.id}
+                data-office-id={firstOffice.id}
+              >
+                Ver en el mapa
+              </button>
+            </div>
+          </article>
+        );
+      })
     }
   </div>
 
   <div class="directory-empty" hidden data-directory-empty>
     <h3>No encontramos coincidencias</h3>
-    <p>Probá con otra ubicación o limpiá los filtros para volver a ver todos los perfiles.</p>
+    <p>
+      Probá con otra ubicación o limpiá los filtros para volver a ver todos los
+      perfiles.
+    </p>
   </div>
 
   <noscript>
@@ -129,192 +246,592 @@ const localities = [...professionals]
 </section>
 
 <script>
-  import { findNearestProfessional, matchesProfessional } from "../lib/directoryFilters";
+  import maplibregl, {
+    type Map as MapLibreMap,
+    type Marker as MapLibreMarker,
+  } from "maplibre-gl";
   import { professionals } from "../data/professionals";
+  import type {
+    Professional,
+    ProfessionalOffice,
+  } from "../data/professionals";
+  import {
+    distanceInKilometres,
+    filterProfessionals,
+    matchesOfficeFilters,
+  } from "../lib/directoryFilters";
+  import type {
+    Coordinates,
+    DirectoryFilters,
+  } from "../lib/directoryFilters";
+
+  interface MarkerRecord {
+    professional: Professional;
+    office: ProfessionalOffice;
+    marker: MapLibreMarker;
+    element: HTMLButtonElement;
+  }
+
+  const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+  const ARGENTINA_CENTER: [number, number] = [-63.6167, -38.4161];
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
+  let cleanupDirectory: (() => void) | undefined;
 
   const initializeDirectory = () => {
+    cleanupDirectory?.();
+
     const root = document.querySelector<HTMLElement>("[data-directory-root]");
-    if (!root || root.dataset.directoryInitialized === "true") return;
-    root.dataset.directoryInitialized = "true";
+    if (!root) return;
 
     const form = root.querySelector<HTMLFormElement>("[data-directory-form]");
-    const map = root.querySelector<HTMLElement>("[data-directory-map]");
-    const resetButton = root.querySelector<HTMLButtonElement>("[data-directory-reset]");
-    const geolocateButton = root.querySelector<HTMLButtonElement>("[data-directory-geolocate]");
-    const geolocateLabel = root.querySelector<HTMLElement>("[data-geolocate-label]");
-    const geolocationStatus = root.querySelector<HTMLElement>("[data-geolocation-status]");
-    const provinceSelect = root.querySelector<HTMLSelectElement>("#directory-province");
-    const localitySelect = root.querySelector<HTMLSelectElement>("#directory-locality");
-    const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-directory-card]"));
-    const markers = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-map-marker]"));
+    const mapShell = root.querySelector<HTMLElement>("[data-directory-map]");
+    const mapCanvas = root.querySelector<HTMLElement>("[data-directory-map-canvas]");
+    const mapLoading = root.querySelector<HTMLElement>("[data-map-loading]");
+    const resetButton = root.querySelector<HTMLButtonElement>(
+      "[data-directory-reset]",
+    );
+    const geolocateButton = root.querySelector<HTMLButtonElement>(
+      "[data-directory-geolocate]",
+    );
+    const geolocateLabel = root.querySelector<HTMLElement>(
+      "[data-geolocate-label]",
+    );
+    const geolocationStatus = root.querySelector<HTMLElement>(
+      "[data-geolocation-status]",
+    );
+    const provinceSelect = root.querySelector<HTMLSelectElement>(
+      "#directory-province",
+    );
+    const localitySelect = root.querySelector<HTMLSelectElement>(
+      "#directory-locality",
+    );
+    const sortSelect = root.querySelector<HTMLSelectElement>(
+      "[data-directory-sort]",
+    );
+    const distanceOption = root.querySelector<HTMLOptionElement>(
+      "[data-distance-option]",
+    );
+    const results = root.querySelector<HTMLElement>("[data-directory-results]");
+    const cards = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-directory-card]"),
+    );
     const count = root.querySelector<HTMLElement>("[data-directory-count]");
-    const countLabel = root.querySelector<HTMLElement>("[data-directory-count-label]");
+    const countLabel = root.querySelector<HTMLElement>(
+      "[data-directory-count-label]",
+    );
     const empty = root.querySelector<HTMLElement>("[data-directory-empty]");
     const popup = root.querySelector<HTMLElement>("[data-map-popup]");
     const popupName = root.querySelector<HTMLElement>("[data-map-popup-name]");
-    const popupLocation = root.querySelector<HTMLElement>("[data-map-popup-location]");
-    const popupStatus = root.querySelector<HTMLElement>("[data-map-popup-status]");
-    const popupClose = root.querySelector<HTMLButtonElement>("[data-map-popup-close]");
-    if (!form) return;
+    const popupLocation = root.querySelector<HTMLElement>(
+      "[data-map-popup-location]",
+    );
+    const popupProfession = root.querySelector<HTMLElement>(
+      "[data-map-popup-profession]",
+    );
+    const popupStatus = root.querySelector<HTMLElement>(
+      "[data-map-popup-status]",
+    );
+    const popupPhone = root.querySelector<HTMLElement>("[data-map-popup-phone]");
+    const popupEmail = root.querySelector<HTMLElement>("[data-map-popup-email]");
+    const popupClose = root.querySelector<HTMLButtonElement>(
+      "[data-map-popup-close]",
+    );
 
-    let activeId = "";
+    if (!form || !mapCanvas || !results || !count || !countLabel || !empty) return;
 
-    const closePopup = () => {
-      activeId = "";
-      if (popup) popup.hidden = true;
-      markers.forEach((marker) => {
-        marker.classList.remove("is-active");
-        marker.setAttribute("aria-pressed", "false");
-      });
-      cards.forEach((card) => card.classList.remove("is-active"));
+    const listenerCleanups: (() => void)[] = [];
+    const markerRecords: MarkerRecord[] = [];
+    const cardsByProfessionalId = new Map(
+      cards.map((card) => [card.dataset.professionalId ?? "", card]),
+    );
+    let directoryMap: MapLibreMap | null = null;
+    let userLocationMarker: MapLibreMarker | null = null;
+    let userOrigin: Coordinates | null = null;
+    let activeOfficeId = "";
+    let mapReady = false;
+
+    const listen = (
+      target: EventTarget,
+      type: string,
+      handler: EventListenerOrEventListenerObject,
+    ) => {
+      target.addEventListener(type, handler);
+      listenerCleanups.push(() => target.removeEventListener(type, handler));
     };
 
-    const setActive = (id: string, scrollToMap = false) => {
-      const professional = professionals.find((record) => record.id === id);
-      const marker = markers.find((item) => item.dataset.professionalId === id);
-      const card = cards.find((item) => item.dataset.professionalId === id);
-      if (!professional || !marker || marker.hidden) return;
-
-      activeId = id;
-      markers.forEach((item) => {
-        const active = item === marker;
-        item.classList.toggle("is-active", active);
-        item.setAttribute("aria-pressed", String(active));
-      });
-      cards.forEach((item) => item.classList.toggle("is-active", item === card));
-
-      if (popup && popupName && popupLocation && popupStatus) {
-        popupName.textContent = professional.name;
-        popupLocation.textContent = `${professional.locality}, ${professional.province}`;
-        popupStatus.textContent =
-          professional.certificationStatus === "complete"
-            ? "Certificación completa"
-            : "Certificación en curso";
-        popup.hidden = false;
-      }
-
-      if (scrollToMap) {
-        map?.scrollIntoView({ behavior: "smooth", block: "center" });
-        window.setTimeout(() => marker.focus({ preventScroll: true }), 450);
-      }
+    const getFilters = (): DirectoryFilters => {
+      const fields = new FormData(form);
+      return {
+        query: String(fields.get("query") ?? ""),
+        province: String(fields.get("province") ?? ""),
+        locality: String(fields.get("locality") ?? ""),
+        certificationStatus: String(fields.get("certificationStatus") ?? ""),
+        careMode: String(fields.get("careMode") ?? ""),
+        equipped: fields.get("equipped") !== null,
+      };
     };
+
+    const getMatchingOffices = (
+      professional: Professional,
+      filters: DirectoryFilters,
+    ) =>
+      professional.offices.filter((office) =>
+        matchesOfficeFilters(office, filters),
+      );
+
+    const getPreferredOffice = (
+      professional: Professional,
+      filters: DirectoryFilters,
+    ) => {
+      const matchingOffices = getMatchingOffices(professional, filters);
+      if (!matchingOffices.length) return professional.offices[0];
+      if (!userOrigin) return matchingOffices[0];
+      return (
+        matchingOffices.reduce<ProfessionalOffice | null>((nearest, office) => {
+          if (!nearest) return office;
+          return distanceInKilometres(userOrigin as Coordinates, office) <
+            distanceInKilometres(userOrigin as Coordinates, nearest)
+            ? office
+            : nearest;
+        }, null) ?? matchingOffices[0]
+      );
+    };
+
+    const formatDistance = (distance: number) =>
+      distance < 10
+        ? `${distance.toLocaleString("es-AR", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          })} km`
+        : `${Math.round(distance).toLocaleString("es-AR")} km`;
 
     const updateLocalityOptions = () => {
       if (!provinceSelect || !localitySelect) return;
       const selectedProvince = provinceSelect.value;
       Array.from(localitySelect.options).forEach((option) => {
         if (!option.value) return;
-        const available = !selectedProvince || option.dataset.province === selectedProvince;
+        const available =
+          !selectedProvince || option.dataset.province === selectedProvince;
         option.hidden = !available;
         option.disabled = !available;
       });
-      const selectedOption = localitySelect.selectedOptions[0];
-      if (selectedOption?.disabled) localitySelect.value = "";
+      if (localitySelect.selectedOptions[0]?.disabled) localitySelect.value = "";
     };
 
-    const applyFilters = () => {
-      if (!count || !countLabel || !empty) return;
-      const fields = new FormData(form);
-      const filters = {
-        query: String(fields.get("query") ?? ""),
-        province: String(fields.get("province") ?? ""),
-        locality: String(fields.get("locality") ?? ""),
-        certificationStatus: String(fields.get("certificationStatus") ?? ""),
-      };
-      const visibleIds = new Set(
-        professionals.filter((professional) => matchesProfessional(professional, filters)).map(
-          (professional) => professional.id,
+    const closePopup = () => {
+      activeOfficeId = "";
+      if (popup) popup.hidden = true;
+      markerRecords.forEach(({ element }) => {
+        element.classList.remove("is-active");
+        element.setAttribute("aria-pressed", "false");
+      });
+      cards.forEach((card) => card.classList.remove("is-active"));
+    };
+
+    const fitMapToOffices = (visibleOffices: ProfessionalOffice[]) => {
+      if (!directoryMap || !mapReady || visibleOffices.length === 0) return;
+
+      if (visibleOffices.length === 1) {
+        const office = visibleOffices[0];
+        directoryMap.easeTo({
+          center: [office.longitude, office.latitude],
+          zoom: 12,
+          duration: prefersReducedMotion.matches ? 0 : 650,
+        });
+        return;
+      }
+
+      const bounds = new maplibregl.LngLatBounds();
+      visibleOffices.forEach((office) =>
+        bounds.extend([office.longitude, office.latitude]),
+      );
+      const desktop = window.matchMedia("(min-width: 48rem)").matches;
+      directoryMap.fitBounds(bounds, {
+        padding: {
+          top: 55,
+          right: 55,
+          bottom: 55,
+          left: desktop ? 410 : 55,
+        },
+        maxZoom: 12,
+        duration: prefersReducedMotion.matches ? 0 : 650,
+      });
+    };
+
+    const setActive = (
+      professionalId: string,
+      officeId: string,
+      scrollToMap = false,
+    ) => {
+      const record = markerRecords.find(
+        ({ office }) => office.id === officeId,
+      );
+      const card = cardsByProfessionalId.get(professionalId);
+      if (!record || record.element.hidden || !card) return;
+
+      activeOfficeId = officeId;
+      markerRecords.forEach(({ element, office }) => {
+        const active = office.id === officeId;
+        element.classList.toggle("is-active", active);
+        element.setAttribute("aria-pressed", String(active));
+      });
+      cards.forEach((item) =>
+        item.classList.toggle("is-active", item === card),
+      );
+
+      if (
+        popup &&
+        popupName &&
+        popupLocation &&
+        popupProfession &&
+        popupStatus &&
+        popupPhone &&
+        popupEmail
+      ) {
+        popupName.textContent = record.professional.name;
+        popupLocation.textContent = `${record.office.address} · ${record.office.locality}, ${record.office.province}`;
+        popupProfession.textContent = record.professional.profession;
+        popupStatus.textContent =
+          record.professional.certificationStatus === "complete"
+            ? "Certificación completa"
+            : "Certificación en curso";
+        popupPhone.textContent = record.professional.phone;
+        popupEmail.textContent = record.professional.email;
+        popup.hidden = false;
+      }
+
+      directoryMap?.flyTo({
+        center: [record.office.longitude, record.office.latitude],
+        zoom: Math.max(directoryMap.getZoom(), 12),
+        duration: prefersReducedMotion.matches ? 0 : 700,
+        essential: false,
+      });
+
+      if (scrollToMap) {
+        mapShell?.scrollIntoView({
+          behavior: prefersReducedMotion.matches ? "auto" : "smooth",
+          block: "start",
+        });
+        window.setTimeout(
+          () => record.element.focus({ preventScroll: true }),
+          prefersReducedMotion.matches ? 0 : 720,
+        );
+      }
+    };
+
+    const sortCards = (
+      visibleProfessionals: Professional[],
+      filters: DirectoryFilters,
+    ) => {
+      const sortMode = sortSelect?.value ?? "name";
+      const ordered = [...visibleProfessionals].sort((first, second) => {
+        if (sortMode === "distance" && userOrigin) {
+          const firstOffice = getPreferredOffice(first, filters);
+          const secondOffice = getPreferredOffice(second, filters);
+          return (
+            distanceInKilometres(userOrigin, firstOffice) -
+            distanceInKilometres(userOrigin, secondOffice)
+          );
+        }
+        return first.name.localeCompare(second.name, "es-AR");
+      });
+
+      ordered.forEach((professional) => {
+        const card = cardsByProfessionalId.get(professional.id);
+        if (card) results.append(card);
+      });
+    };
+
+    const applyFilters = (fitMap = false) => {
+      const filters = getFilters();
+      const visibleProfessionals = filterProfessionals(professionals, filters);
+      const visibleProfessionalIds = new Set(
+        visibleProfessionals.map((professional) => professional.id),
+      );
+      const visibleOfficeIds = new Set(
+        visibleProfessionals.flatMap((professional) =>
+          getMatchingOffices(professional, filters).map((office) => office.id),
         ),
       );
 
       cards.forEach((card) => {
-        card.hidden = !visibleIds.has(card.dataset.professionalId ?? "");
-      });
-      markers.forEach((marker) => {
-        marker.hidden = !visibleIds.has(marker.dataset.professionalId ?? "");
+        const professionalId = card.dataset.professionalId ?? "";
+        const professional = professionals.find(
+          (record) => record.id === professionalId,
+        );
+        const visible = visibleProfessionalIds.has(professionalId);
+        card.hidden = !visible;
+        if (!visible || !professional) return;
+
+        const preferredOffice = getPreferredOffice(professional, filters);
+        const location = card.querySelector<HTMLElement>("[data-card-location]");
+        const locateButton = card.querySelector<HTMLButtonElement>(
+          "[data-card-locate]",
+        );
+        const distance = card.querySelector<HTMLElement>("[data-card-distance]");
+        if (location) {
+          location.textContent = `${preferredOffice.locality}, ${preferredOffice.province}`;
+        }
+        if (locateButton) locateButton.dataset.officeId = preferredOffice.id;
+        if (distance) {
+          if (userOrigin) {
+            distance.textContent = `A ${formatDistance(
+              distanceInKilometres(userOrigin, preferredOffice),
+            )}`;
+            distance.hidden = false;
+          } else {
+            distance.hidden = true;
+            distance.textContent = "";
+          }
+        }
       });
 
-      const visibleCount = visibleIds.size;
-      count.textContent = String(visibleCount);
-      countLabel.textContent = visibleCount === 1 ? " resultado" : " resultados";
-      empty.hidden = visibleCount !== 0;
-      if (activeId && !visibleIds.has(activeId)) closePopup();
+      markerRecords.forEach(({ office, element }) => {
+        element.hidden = !visibleOfficeIds.has(office.id);
+      });
+
+      sortCards(visibleProfessionals, filters);
+      count.textContent = String(visibleProfessionals.length);
+      countLabel.textContent =
+        visibleProfessionals.length === 1
+          ? " profesional"
+          : " profesionales";
+      empty.hidden = visibleProfessionals.length !== 0;
+
+      if (activeOfficeId && !visibleOfficeIds.has(activeOfficeId)) closePopup();
+      if (fitMap) {
+        fitMapToOffices(
+          markerRecords
+            .filter(({ office }) => visibleOfficeIds.has(office.id))
+            .map(({ office }) => office),
+        );
+      }
     };
 
-    form.addEventListener("input", applyFilters);
-    form.addEventListener("change", (event) => {
-      if (event.target === provinceSelect) updateLocalityOptions();
-      applyFilters();
-    });
-    form.addEventListener("submit", (event) => event.preventDefault());
-    resetButton?.addEventListener("click", () => {
-      form.reset();
-      updateLocalityOptions();
-      applyFilters();
-      closePopup();
-      if (geolocationStatus) geolocationStatus.textContent = "";
-      form.querySelector<HTMLInputElement>("#directory-query")?.focus();
-    });
-
-    markers.forEach((marker) => {
-      marker.addEventListener("click", () => setActive(marker.dataset.professionalId ?? ""));
-    });
-    root.querySelectorAll<HTMLButtonElement>("[data-card-locate]").forEach((button) => {
-      button.addEventListener("click", () =>
-        setActive(button.dataset.professionalId ?? "", true),
+    try {
+      directoryMap = new maplibregl.Map({
+        container: mapCanvas,
+        style: MAP_STYLE_URL,
+        center: ARGENTINA_CENTER,
+        zoom: 3.1,
+        minZoom: 2.3,
+        maxZoom: 17,
+        cooperativeGestures: true,
+        attributionControl: {},
+      });
+      directoryMap.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "top-right",
       );
-    });
-    popupClose?.addEventListener("click", closePopup);
-    root.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && activeId) closePopup();
-    });
+      directoryMap.on("styleimagemissing", ({ id }) => {
+        if (directoryMap?.hasImage(id)) return;
+        directoryMap?.addImage(id, {
+          width: 1,
+          height: 1,
+          data: new Uint8Array([0, 0, 0, 0]),
+        });
+      });
 
-    geolocateButton?.addEventListener("click", () => {
-      if (!geolocationStatus || !geolocateLabel) return;
-      if (!("geolocation" in navigator)) {
-        geolocationStatus.textContent = "Tu navegador no ofrece acceso a la ubicación.";
-        return;
+      professionals.forEach((professional) => {
+        professional.offices.forEach((office) => {
+          const element = document.createElement("button");
+          element.type = "button";
+          element.className = "directory-map-marker";
+          element.dataset.professionalId = professional.id;
+          element.dataset.officeId = office.id;
+          element.setAttribute(
+            "aria-label",
+            `Ver ${professional.name} en ${office.locality}, ${office.province}`,
+          );
+          element.setAttribute("aria-pressed", "false");
+          const markerArtwork = document.createElement("span");
+          markerArtwork.setAttribute("aria-hidden", "true");
+          element.append(markerArtwork);
+
+          const marker = new maplibregl.Marker({
+            element,
+            anchor: "bottom",
+          })
+            .setLngLat([office.longitude, office.latitude])
+            .addTo(directoryMap as MapLibreMap);
+
+          const markerRecord = { professional, office, marker, element };
+          markerRecords.push(markerRecord);
+          listen(element, "click", () =>
+            setActive(professional.id, office.id),
+          );
+        });
+      });
+
+      directoryMap.once("load", () => {
+        mapReady = true;
+        if (mapLoading) mapLoading.hidden = true;
+        applyFilters(true);
+      });
+      directoryMap.on("error", () => {
+        if (!mapReady && mapLoading) {
+          mapLoading.textContent =
+            "No pudimos cargar el mapa. Podés seguir usando el listado y los filtros.";
+          mapLoading.classList.add("is-error");
+        }
+      });
+    } catch {
+      if (mapLoading) {
+        mapLoading.textContent =
+          "No pudimos cargar el mapa. Podés seguir usando el listado y los filtros.";
+        mapLoading.classList.add("is-error");
       }
+    }
 
-      geolocateButton.disabled = true;
-      geolocateLabel.textContent = "Buscando ubicación…";
-      geolocationStatus.textContent = "Esperando permiso del navegador.";
-
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          const nearest = findNearestProfessional(professionals, {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-          });
-          if (nearest && provinceSelect && localitySelect) {
-            provinceSelect.value = nearest.province;
-            updateLocalityOptions();
-            localitySelect.value = nearest.locality;
-            applyFilters();
-            setActive(nearest.id);
-            geolocationStatus.textContent = `La opción más cercana está en ${nearest.locality}, ${nearest.province}.`;
-          }
-          geolocateButton.disabled = false;
-          geolocateLabel.textContent = "Usar mi ubicación";
-        },
-        (error) => {
-          const messages: Record<number, string> = {
-            1: "No pudimos acceder a tu ubicación. Podés elegir una provincia manualmente.",
-            2: "Tu ubicación no está disponible en este momento.",
-            3: "La búsqueda de ubicación tardó demasiado. Intentá nuevamente.",
-          };
-          geolocationStatus.textContent = messages[error.code] ?? "No pudimos obtener tu ubicación.";
-          geolocateButton.disabled = false;
-          geolocateLabel.textContent = "Usar mi ubicación";
-        },
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
-      );
+    let searchTimer = 0;
+    listen(form, "input", (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.name !== "query") return;
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => applyFilters(true), 180);
     });
+    listen(form, "change", (event) => {
+      if (event.target === provinceSelect) updateLocalityOptions();
+      applyFilters(true);
+    });
+    listen(form, "submit", (event) => event.preventDefault());
+
+    if (resetButton) {
+      listen(resetButton, "click", () => {
+        form.reset();
+        userOrigin = null;
+        userLocationMarker?.remove();
+        userLocationMarker = null;
+        if (distanceOption) distanceOption.disabled = true;
+        updateLocalityOptions();
+        closePopup();
+        if (geolocationStatus) geolocationStatus.textContent = "";
+        applyFilters(true);
+        form.querySelector<HTMLInputElement>("#directory-query")?.focus();
+      });
+    }
+
+    root.querySelectorAll<HTMLButtonElement>("[data-card-locate]").forEach(
+      (button) => {
+        listen(button, "click", () =>
+          setActive(
+            button.dataset.professionalId ?? "",
+            button.dataset.officeId ?? "",
+            true,
+          ),
+        );
+      },
+    );
+    if (popupClose) listen(popupClose, "click", closePopup);
+    listen(root, "keydown", (event) => {
+      if ((event as KeyboardEvent).key === "Escape" && activeOfficeId) {
+        closePopup();
+      }
+    });
+
+    if (geolocateButton) {
+      listen(geolocateButton, "click", () => {
+        if (!geolocationStatus || !geolocateLabel) return;
+        if (!("geolocation" in navigator)) {
+          geolocationStatus.textContent =
+            "Tu navegador no ofrece acceso a la ubicación.";
+          return;
+        }
+
+        geolocateButton.disabled = true;
+        geolocateLabel.textContent = "Buscando ubicación…";
+        geolocationStatus.textContent = "Esperando permiso del navegador.";
+
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => {
+            userOrigin = {
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            };
+
+            userLocationMarker?.remove();
+            if (directoryMap) {
+              const userMarkerElement = document.createElement("div");
+              userMarkerElement.className = "directory-user-location";
+              userMarkerElement.setAttribute("aria-label", "Tu ubicación aproximada");
+              userLocationMarker = new maplibregl.Marker({
+                element: userMarkerElement,
+                anchor: "center",
+              })
+                .setLngLat([coords.longitude, coords.latitude])
+                .addTo(directoryMap);
+            }
+
+            if (distanceOption) distanceOption.disabled = false;
+            if (sortSelect) sortSelect.value = "distance";
+            applyFilters(false);
+
+            const filters = getFilters();
+            const visibleProfessionals = filterProfessionals(
+              professionals,
+              filters,
+            );
+            const nearest = [...visibleProfessionals]
+              .map((professional) => {
+                const office = getPreferredOffice(professional, filters);
+                return {
+                  professional,
+                  office,
+                  distance: distanceInKilometres(userOrigin as Coordinates, office),
+                };
+              })
+              .sort((first, second) => first.distance - second.distance)[0];
+
+            if (nearest) {
+              setActive(nearest.professional.id, nearest.office.id);
+              if (directoryMap) {
+                const bounds = new maplibregl.LngLatBounds();
+                bounds.extend([coords.longitude, coords.latitude]);
+                bounds.extend([nearest.office.longitude, nearest.office.latitude]);
+                directoryMap.fitBounds(bounds, {
+                  padding: 80,
+                  maxZoom: 13,
+                  duration: prefersReducedMotion.matches ? 0 : 700,
+                });
+              }
+              geolocationStatus.textContent = `Ordenamos los resultados por cercanía. La primera opción está a ${formatDistance(nearest.distance)}.`;
+            }
+
+            geolocateButton.disabled = false;
+            geolocateLabel.textContent = "Actualizar mi ubicación";
+          },
+          (error) => {
+            const messages: Record<number, string> = {
+              1: "No pudimos acceder a tu ubicación. Podés elegir una localidad manualmente.",
+              2: "Tu ubicación no está disponible en este momento.",
+              3: "La búsqueda de ubicación tardó demasiado. Intentá nuevamente.",
+            };
+            geolocationStatus.textContent =
+              messages[error.code] ?? "No pudimos obtener tu ubicación.";
+            geolocateButton.disabled = false;
+            geolocateLabel.textContent = "Usar mi ubicación";
+          },
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+        );
+      });
+    }
 
     updateLocalityOptions();
-    applyFilters();
+    applyFilters(false);
+
+    cleanupDirectory = () => {
+      window.clearTimeout(searchTimer);
+      listenerCleanups.forEach((cleanup) => cleanup());
+      markerRecords.forEach(({ marker }) => marker.remove());
+      userLocationMarker?.remove();
+      directoryMap?.remove();
+      cleanupDirectory = undefined;
+    };
   };
 
   initializeDirectory();
   document.addEventListener("astro:page-load", initializeDirectory);
+  document.addEventListener("astro:before-swap", () => cleanupDirectory?.());
 </script>

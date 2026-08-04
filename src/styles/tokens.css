@@ -4,7 +4,7 @@
   --color-aisa-green: #4CA751;
   --color-aisa-green-strong: #2e6d42;
   --color-aisa-green-dark: #276d32;
-  --color-aisa-on-primary: #102c18;
+  --color-aisa-on-primary: #ffffff;
   --color-aisa-footer: #dff0df;
   --color-aisa-sky: #028bb3;
   --color-aisa-sky-strong: #086b88;
@@ -41,6 +41,8 @@
   --radius-aisa-card: 2rem;
   --radius-aisa-control: 1rem;
   --radius-aisa-pill: 999px;
+  --radius-aisa-organic-a: 38% 62% 48% 52% / 55% 42% 58% 45%;
+  --radius-aisa-organic-b: 58% 42% 55% 45% / 44% 58% 42% 56%;
   --shadow-aisa-card: 0 18px 60px rgb(24 50 58 / 0.08);
   --shadow-aisa-raised: 0 30px 80px rgb(24 50 58 / 0.14);
   --shadow-aisa-button: 0 12px 30px rgb(76 167 81 / 0.22);
@@ -50,7 +52,7 @@
   --color-aisa-green: #4CA751;
   --color-aisa-green-strong: #2e6d42;
   --color-aisa-green-dark: #276d32;
-  --color-on-primary: #102c18;
+  --color-on-primary: #ffffff;
   --color-footer: #dff0df;
   --color-aisa-sky: #028bb3;
   --color-aisa-sky-strong: #086b88;
@@ -100,6 +102,8 @@
   --radius-card: 2rem;
   --radius-control: 1rem;
   --radius-pill: 999px;
+  --radius-organic-a: 38% 62% 48% 52% / 55% 42% 58% 45%;
+  --radius-organic-b: 58% 42% 55% 45% / 44% 58% 42% 56%;
   --shadow-card: 0 18px 60px rgb(24 50 58 / 0.08);
   --shadow-raised: 0 30px 80px rgb(24 50 58 / 0.14);
   --shadow-button: 0 12px 30px rgb(76 167 81 / 0.22);

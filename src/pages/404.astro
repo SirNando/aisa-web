@@ -1,5 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import heroImage from "../assets/hero-terapia.jpg";
+import spaceImage from "../assets/espacio-terapeutico.jpg";
 ---
 
 <BaseLayout
@@ -7,18 +10,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   description="La página solicitada no existe o cambió de ubicación."
   noindex={true}
 >
-  <section class="section-space min-h-[65vh]">
-    <div class="site-container max-w-3xl text-center">
-      <h1 class="font-aisa-heading text-5xl font-semibold text-aisa-ink sm:text-6xl">
-        Error 404: no encontramos esa página.
-      </h1>
-      <p class="mx-auto mt-6 max-w-xl text-lg leading-8">
-        Puede haber cambiado de lugar. Volvé al inicio o elegí una de las tareas principales.
-      </p>
-      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <a class="button-primary" href="/">Volver al inicio</a>
-        <a class="button-secondary" href="/contacto/">Contactar a AISA</a>
-      </div>
-    </div>
-  </section>
+  <PageHero
+    title="Error 404: no encontramos esa página."
+    lead="Puede haber cambiado de lugar. Volvé al inicio o elegí una de las tareas principales."
+    primaryHref="/"
+    primaryLabel="Volver al inicio"
+    secondaryHref="/contacto/"
+    secondaryLabel="Contactar a AISA"
+    fullHeight={true}
+    orbitImages={[heroImage, spaceImage]}
+    nextTone="mist"
+  />
 </BaseLayout>

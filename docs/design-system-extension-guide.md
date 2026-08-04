@@ -57,6 +57,7 @@ The main layout classes live near the top of `src/styles/global.css`:
 - `.reading-container`: constrained long-form measure.
 - `.section-space`: shared vertical section padding.
 - `.surface-card`: neutral elevated surface.
+- `.organic-panel`: organic decoration for page-owned panels that are not elevated cards.
 - `.button-primary`, `.button-secondary`, `.button-quiet`: canonical controls.
 - `.arrow-link`: canonical inline arrow action.
 
@@ -99,11 +100,21 @@ Import hero media through `astro:assets`. The first orbit image can carry meanin
 
 Do not add eyebrow text to `SectionHeading`, `PageHero`, cards, or callouts.
 
+### Organic shapes
+
+| Component or class | Use it for | Important contract |
+| --- | --- | --- |
+| `design-system/OrganicShapes.astro` | Multi-shape decorative clusters inside composed components | Variants: `cluster`, `orbit`, `trail`; tones: `leaf`, `sky`, `sand`, `inverse`. Always remains `aria-hidden`. |
+| `.organic-panel` | Page-owned informational panels that need the shared shape language without card elevation | Keeps decoration behind content and clips it to the panel surface. |
+
+Every `main section.section-space` receives five decorative shapes at runtime. Layouts `1` through `5` are shuffled in cycles so adjacent sections do not repeat the same arrangement, and a new order is selected on each direct load or Astro navigation. The shapes use separate parallax and idle wrappers so shared GSAP motion never competes for one transform. Repeated card-like components also receive one of five `data-organic-pattern-layout` arrangements, shuffled independently within each parent group; a complete set is used before a layout repeats, and adjacent cards never share the same arrangement. `SectionHeading`, shared card surfaces, `InfoCard`, rail cards, directory cards, callouts, stacked cards, the directory map, the membership form, and the footer also inherit or compose the same system. Reuse these treatments instead of adding page-local circles or blobs. Keep shapes decorative, pointer-transparent, behind readable content, and clipped by the nearest safe paint boundary.
+
 ### Cards
 
 | Component | Use it for | Important contract |
 | --- | --- | --- |
 | `design-system/CardGrid.astro` | Responsive grid container | One column, then two, then three at shared breakpoints. |
+| `design-system/InfoCard.astro` | Non-linked information card | Tones: `white`, `sky`, `leaf`, `sand`, `dark`; organic decoration is built in. |
 | `src/components/JourneyCard.astro` | Linked navigation/information card | Tones: `white`, `sky`, `leaf`, `sand`, `dark`; `featured` enables the idle attention treatment. |
 | `design-system/CardRail.astro` | Horizontal resource carousel | Receives an item array and wires shared previous/next controls. Cards are fully clickable. |
 | `design-system/StackedCards.astro` | Multi-step narrative revealed as a sticky stack | CSS creates sticky overlap; desktop GSAP only scales outgoing cards. The current homepage uses three items. |
@@ -199,6 +210,7 @@ All shared motion lives in `src/scripts/siteMotion.ts`. Current public hooks inc
 - `data-card-rail`, `data-rail-viewport`, `data-rail-prev`, `data-rail-next`.
 - `data-card-stack` with `data-stack-card`.
 - `data-page-hero`, required `data-hero-content`, `data-hero-reveal`, `data-hero-idle`, and `data-hero-drift` with numeric `data-depth`.
+- `data-section-shapes`, with generated `data-section-shape-parallax`, `data-section-shape-idle`, and numeric `data-depth` layers.
 
 Treat these hooks as an API shared by markup and TypeScript. Renaming one requires updating both sides.
 

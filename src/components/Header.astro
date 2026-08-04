@@ -5,15 +5,32 @@ import logo from "../assets/aisa-logo.png";
 const pathname = Astro.url.pathname;
 const navItems = [
   { label: "Inicio", href: "/", key: "home" },
-  { label: "Familias y Escuelas", href: "/familias-y-escuelas/", key: "families" },
+  {
+    label: "Familias y Escuelas",
+    href: "/familias-y-escuelas/",
+    key: "families",
+  },
   { label: "Profesionales", href: "/profesionales/", key: "professionals" },
   { label: "Acerca de", href: "/acerca-de/", key: "aisa" },
 ];
 
 const professionalLinks = [
-  { label: "Cursos", href: "/profesionales/formacion-y-cursos/", section: "courses" },
-  { label: "Certificación", href: "/profesionales/certificacion/", section: "certification" },
-  { label: "Asociate", href: "/profesionales/#solicitud", section: "membership", featured: true },
+  {
+    label: "Cursos",
+    href: "/profesionales/formacion-y-cursos/",
+    section: "courses",
+  },
+  {
+    label: "Certificación",
+    href: "/profesionales/certificacion/",
+    section: "certification",
+  },
+  {
+    label: "Asociate",
+    href: "/profesionales/#solicitud",
+    section: "membership",
+    featured: true,
+  },
 ];
 
 const isActive = (href: string) => {
@@ -23,7 +40,9 @@ const isActive = (href: string) => {
 };
 
 const professionalsActive = pathname.startsWith("/profesionales");
-const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-y-cursos")
+const activeProfessionalSection = pathname.startsWith(
+  "/profesionales/formacion-y-cursos",
+)
   ? "courses"
   : pathname.startsWith("/profesionales/certificacion")
     ? "certification"
@@ -33,19 +52,29 @@ const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-
 <header class="site-header" data-site-header transition:persist="site-header">
   <div class="site-header__shell">
     <a class="site-header__brand" href="/" aria-label="AISA Argentina, inicio">
-      <Image src={logo} alt="AISA Argentina" width={176} height={60} loading="eager" />
+      <Image
+        src={logo}
+        alt="AISA Argentina"
+        width={176}
+        height={60}
+        loading="eager"
+      />
     </a>
 
     <nav class="site-nav" aria-label="Navegación principal" data-desktop-nav>
-      <span class="site-nav__active-pill" aria-hidden="true" data-nav-pill></span>
+      <span class="site-nav__active-pill" aria-hidden="true" data-nav-pill
+      ></span>
       {
         navItems.map((item) =>
           item.key === "professionals" ? (
             <div
-              class:list={["site-nav__group", professionalsActive && "is-active"]}
+              class:list={[
+                "site-nav__group",
+                professionalsActive && "is-active",
+              ]}
               data-nav-professionals
             >
-              <span class="site-nav__group-hover-pill" aria-hidden="true"></span>
+              <span class="site-nav__group-hover-pill" aria-hidden="true" />
               <div class="site-nav__group-primary" data-nav-pill-target>
                 <a
                   class="site-nav__toggle"
@@ -57,27 +86,53 @@ const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-
                   data-nav-key={item.key}
                 >
                   <span>{item.label}</span>
-                  <svg class="site-nav__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-                    <path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                  <svg
+                    class="site-nav__chevron"
+                    viewBox="0 0 16 16"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m4 6 4 4 4-4"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </a>
               </div>
               <div class="site-nav__dropdown">
-                <span class="site-nav__section-pill" aria-hidden="true" data-professionals-section-pill></span>
-                <span class="site-nav__section-hover-pill" aria-hidden="true" data-professionals-section-hover-pill></span>
-                {
-                  professionalLinks.map((link) => (
-                    <a
-                      href={link.href}
-                      aria-current={activeProfessionalSection === link.section ? "page" : undefined}
-                      data-professionals-menu-link
-                      data-professional-section={link.section}
-                      class:list={["site-nav__dropdown-option", link.featured && "is-featured"]}
-                    >
-                      <span>{link.label}</span>
-                    </a>
-                  ))
-                }
+                <span
+                  class="site-nav__section-pill"
+                  aria-hidden="true"
+                  data-professionals-section-pill
+                />
+                <span
+                  class="site-nav__section-hover-pill"
+                  aria-hidden="true"
+                  data-professionals-section-hover-pill
+                />
+                {professionalLinks.map((link) => (
+                  <a
+                    href={link.href}
+                    aria-current={
+                      activeProfessionalSection === link.section
+                        ? "page"
+                        : undefined
+                    }
+                    data-professionals-menu-link
+                    data-professional-section={link.section}
+                    class:list={[
+                      "site-nav__dropdown-option",
+                      link.featured && "is-featured",
+                    ]}
+                  >
+                    <span>{link.label}</span>
+                  </a>
+                ))}
               </div>
             </div>
           ) : (
@@ -89,7 +144,7 @@ const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-
               data-nav-key={item.key}
               data-nav-pill-target
             >
-              <span class="site-nav__hover-pill" aria-hidden="true"></span>
+              <span class="site-nav__hover-pill" aria-hidden="true" />
               <span class="site-nav__link-label">{item.label}</span>
             </a>
           ),
@@ -99,17 +154,17 @@ const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-
 
     <div class="site-header__actions">
       <a
-        class="button-secondary"
-        href="/contacto/"
-        aria-current={pathname.startsWith("/contacto") ? "page" : undefined}
-        data-nav-action="contact"
-      >Contacto</a>
+        class="button-secondary button-secondary--sky"
+        href="">Iniciar Sesión</a
+      >
       <a
         class="button-primary"
         href="/buscar-profesional/"
-        aria-current={pathname.startsWith("/buscar-profesional") ? "page" : undefined}
-        data-nav-action="search"
-      >Buscar profesional</a>
+        aria-current={pathname.startsWith("/buscar-profesional")
+          ? "page"
+          : undefined}
+        data-nav-action="search">Encontrá un profesional</a
+      >
     </div>
 
     <button
@@ -121,37 +176,90 @@ const activeProfessionalSection = pathname.startsWith("/profesionales/formacion-
       data-menu-toggle
     >
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" data-menu-icon>
-        <path d="M5 7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-menu-line="top" />
-        <path d="M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-menu-line="middle" />
-        <path d="M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-menu-line="bottom" />
+        <path
+          d="M5 7h14"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          data-menu-line="top"></path>
+        <path
+          d="M5 12h14"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          data-menu-line="middle"></path>
+        <path
+          d="M5 17h14"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          data-menu-line="bottom"></path>
       </svg>
     </button>
 
     <div class="mobile-nav" id="mobile-menu" data-mobile-menu hidden>
       <div class="mobile-nav__actions">
-        <a class="button-primary" href="/buscar-profesional/" data-nav-action="search">Buscar profesional</a>
-        <a class="button-secondary" href="/profesionales/#solicitud">Asociate</a>
+        <a
+          class="button-primary"
+          href="/buscar-profesional/"
+          data-nav-action="search">Buscar profesional</a
+        >
+        <a class="button-secondary" href="/profesionales/#solicitud">Asociate</a
+        >
       </div>
       <nav aria-label="Navegación móvil">
         {
           navItems.slice(0, 2).map((item) => (
-            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined} data-nav-link data-nav-key={item.key}>{item.label}</a>
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              data-nav-link
+              data-nav-key={item.key}
+            >
+              {item.label}
+            </a>
           ))
         }
-        <a href="/profesionales/" aria-current={professionalsActive ? "page" : undefined} data-nav-link data-nav-key="professionals">Profesionales</a>
+        <a
+          href="/profesionales/"
+          aria-current={professionalsActive ? "page" : undefined}
+          data-nav-link
+          data-nav-key="professionals">Profesionales</a
+        >
         <div class="mobile-nav__subnav">
           {
             professionalLinks.map((link) => (
               <a
                 href={link.href}
-                aria-current={activeProfessionalSection === link.section ? "page" : undefined}
+                aria-current={
+                  activeProfessionalSection === link.section
+                    ? "page"
+                    : undefined
+                }
                 data-professional-section={link.section}
-              >{link.label}</a>
+              >
+                {link.label}
+              </a>
             ))
           }
         </div>
-        {navItems.slice(3).map((item) => <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined} data-nav-link data-nav-key={item.key}>{item.label}</a>)}
-        <a href="/contacto/" aria-current={pathname.startsWith("/contacto") ? "page" : undefined} data-nav-action="contact">Contacto</a>
+        {
+          navItems.slice(3).map((item) => (
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              data-nav-link
+              data-nav-key={item.key}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+        <a
+          href="/contacto/"
+          aria-current={pathname.startsWith("/contacto") ? "page" : undefined}
+          data-nav-action="contact">Contacto</a
+        >
       </nav>
     </div>
   </div>

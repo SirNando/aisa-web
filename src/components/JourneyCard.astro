@@ -7,9 +7,10 @@ interface Props {
   href: string;
   linkText: string;
   tone?: "white" | "sky" | "leaf" | "sand" | "dark";
-  number?: string;
+  eyebrow?: string;
   alignLinkBottom?: boolean;
   featured?: boolean;
+  compact?: boolean;
 }
 
 const {
@@ -18,20 +19,21 @@ const {
   href,
   linkText,
   tone = "white",
-  number,
+  eyebrow,
   alignLinkBottom = true,
   featured = false,
+  compact = false,
 } = Astro.props;
 ---
 
 <article
-  class:list={["journey-card", `journey-card--${tone}`, featured && "journey-card--featured"]}
+  class:list={["journey-card", `journey-card--${tone}`, featured && "journey-card--featured", compact && "journey-card--compact"]}
   data-reveal-item
   data-tilt-card
   data-featured-card={featured ? "true" : undefined}
 >
   <div class="journey-card__tilt" data-tilt-surface>
-    {number && <span class="journey-card__number">{number}</span>}
+    {eyebrow && <span class="journey-card__number">{eyebrow}</span>}
     <h3 class="journey-card__title">{title}</h3>
     <p class="journey-card__body">{body}</p>
   </div>

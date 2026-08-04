@@ -3,9 +3,11 @@ import { professionals } from "../src/data/professionals";
 import {
   distanceInKilometres,
   filterProfessionals,
+  findNearestOffice,
   findNearestProfessional,
   matchesProfessional,
   normalizeFilterText,
+  sortProfessionalsByDistance,
 } from "../src/lib/directoryFilters";
 
 const emptyFilters = {
@@ -13,6 +15,8 @@ const emptyFilters = {
   province: "",
   locality: "",
   certificationStatus: "",
+  careMode: "",
+  equipped: false,
 };
 
 describe("normalizeFilterText", () => {
@@ -37,7 +41,7 @@ describe("matchesProfessional", () => {
       ...emptyFilters,
       certificationStatus: "complete",
     });
-    expect(matches).toHaveLength(3);
+    expect(matches).toHaveLength(6);
   });
 
   it("matches an individual province", () => {
@@ -64,18 +68,31 @@ describe("matchesProfessional", () => {
     expect(matches.map((person) => person.id)).toEqual(["professional-06"]);
   });
 
-  it("combines province, locality, and status", () => {
+  it("combines office location, status, and care mode", () => {
     const matches = filterProfessionals(professionals, {
       ...emptyFilters,
-      province: "Santa Fe",
-      locality: "Rosario",
-      certificationStatus: "in-progress",
+      province: "CABA",
+      locality: "Palermo",
+      certificationStatus: "complete",
+      careMode: "virtual",
     });
-    expect(matches.map((person) => person.id)).toEqual(["professional-04"]);
+    expect(matches.map((person) => person.id)).toEqual(["professional-01"]);
+  });
+
+  it("filters by equipped offices", () => {
+    const matches = filterProfessionals(professionals, {
+      ...emptyFilters,
+      province: "Buenos Aires",
+      equipped: true,
+    });
+    expect(matches.map((person) => person.id)).toEqual([
+      "professional-02",
+      "professional-07",
+    ]);
   });
 
   it("returns every record after reset", () => {
-    expect(filterProfessionals(professionals, emptyFilters)).toHaveLength(6);
+    expect(filterProfessionals(professionals, emptyFilters)).toHaveLength(10);
   });
 
   it("returns no results for an unmatched query", () => {
@@ -104,5 +121,22 @@ describe("location helpers", () => {
       longitude: -64.19,
     });
     expect(nearest?.id).toBe("professional-03");
+  });
+
+  it("selects the closest office for a professional with several locations", () => {
+    const nearestOffice = findNearestOffice(professionals[0], {
+      latitude: -34.59,
+      longitude: -58.4,
+    });
+    expect(nearestOffice?.id).toBe("office-01-recoleta");
+  });
+
+  it("sorts every professional from closest to farthest", () => {
+    const sorted = sortProfessionalsByDistance(professionals, {
+      latitude: -34.62,
+      longitude: -58.44,
+    });
+    expect(sorted[0].id).toBe("professional-10");
+    expect(sorted).toHaveLength(professionals.length);
   });
 });
