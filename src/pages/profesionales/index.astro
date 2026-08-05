@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHero from "../../components/PageHero.astro";
 import JourneyCard from "../../components/JourneyCard.astro";
 import Callout from "../../components/Callout.astro";
+import DirectoryMapPreview from "../../components/DirectoryMapPreview.astro";
 import MembershipForm from "../../components/MembershipForm.astro";
 import InfoCard from "../../components/design-system/InfoCard.astro";
 import SectionHeading from "../../components/design-system/SectionHeading.astro";
@@ -181,7 +182,9 @@ const interestLinkGroups = [
         href="/buscar-profesional/"
         linkText="Explorar el directorio"
         tone="sky"
-      />
+      >
+        <DirectoryMapPreview slot="visual" />
+      </Callout>
     </div>
   </section>
 

@@ -13,17 +13,33 @@ interface Props {
 
 const { title, body, href, linkText, tone = "leaf", motionKey } = Astro.props;
 const shapeTone = tone === "green" || tone === "dark" ? "inverse" : tone;
+const hasVisual = Astro.slots.has("visual");
 ---
 
 <aside
-  class:list={["callout-card", `callout-card--${tone}`]}
+  class:list={[
+    "callout-card",
+    `callout-card--${tone}`,
+    hasVisual && "callout-card--with-visual",
+  ]}
   data-reveal
   data-motion={motionKey}
 >
-  <OrganicShapes variant="cluster" tone={shapeTone} className="callout-card__shapes" />
-  <div>
+  {
+    !hasVisual && (
+      <OrganicShapes variant="cluster" tone={shapeTone} className="callout-card__shapes" />
+    )
+  }
+  <div class="callout-card__copy">
     <h2>{title}</h2>
     <p>{body}</p>
   </div>
   <ArrowLink href={href} label={linkText} className="callout-card__action" />
+  {
+    hasVisual && (
+      <div class="callout-card__visual">
+        <slot name="visual" />
+      </div>
+    )
+  }
 </aside>
