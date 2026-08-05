@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import PlayfulObject from "./design-system/PlayfulObject.astro";
 import type { PlayfulDecoration } from "../lib/playfulArtwork";
+import { sectionTransitionPaths } from "../lib/sectionTransitions";
 
 interface Props {
   title: string;
@@ -180,5 +181,22 @@ const visuals = [
       )
     }
   </div>
-  <div class="page-hero__curve" aria-hidden="true"></div>
+  <div
+    class="page-hero__curve section-transition"
+    data-section-transition
+    data-transition-layout="1"
+    aria-hidden="true"
+  >
+    <svg
+      class="section-transition__surface"
+      viewBox="0 0 1440 180"
+      preserveAspectRatio="none"
+      focusable="false"
+    >
+      <path d={sectionTransitionPaths[0]}></path>
+    </svg>
+    <span class="section-transition__motif section-transition__motif--arc"></span>
+    <span class="section-transition__motif section-transition__motif--seed"></span>
+    <span class="section-transition__motif section-transition__motif--dot"></span>
+  </div>
 </section>

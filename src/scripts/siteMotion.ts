@@ -5,6 +5,7 @@ import type {
   TransitionBeforePreparationEvent,
   TransitionBeforeSwapEvent,
 } from "astro:transitions/client";
+import { sectionTransitionPaths } from "../lib/sectionTransitions";
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -438,6 +439,62 @@ const setupTiltCards = () => {
 const clampMotion = (value: number, minimum: number, maximum: number) =>
   Math.min(Math.max(value, minimum), maximum);
 
+const isTransparentColor = (color: string) => {
+  const normalized = color.replaceAll(" ", "").toLowerCase();
+  return normalized === "transparent" || normalized === "rgba(0,0,0,0)";
+};
+
+const resolvedSurfaceColor = (element: HTMLElement) => {
+  let current: HTMLElement | null = element;
+
+  while (current) {
+    const color = window.getComputedStyle(current).backgroundColor;
+    if (!isTransparentColor(color)) return color;
+    current = current.parentElement;
+  }
+
+  return window.getComputedStyle(document.documentElement).backgroundColor;
+};
+
+const setupSectionTransitions = () => {
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>("main > section:not([data-page-hero])"),
+  );
+
+  sections.forEach((section, index) => {
+    const previous = section.previousElementSibling;
+    if (!(previous instanceof HTMLElement) || previous.matches("[data-page-hero]")) return;
+    if (previous.querySelector(":scope > [data-section-transition]")) return;
+
+    const transition = document.createElement("div");
+    const surface = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const arc = document.createElement("span");
+    const seed = document.createElement("span");
+    const dot = document.createElement("span");
+
+    transition.className = "section-transition";
+    transition.dataset.sectionTransition = "";
+    transition.dataset.transitionLayout = String((index % sectionTransitionPaths.length) + 1);
+    transition.setAttribute("aria-hidden", "true");
+    transition.style.setProperty("--section-transition-surface", resolvedSurfaceColor(section));
+    previous.classList.add("section-transition-host");
+
+    surface.classList.add("section-transition__surface");
+    surface.setAttribute("viewBox", "0 0 1440 180");
+    surface.setAttribute("preserveAspectRatio", "none");
+    surface.setAttribute("focusable", "false");
+    path.setAttribute("d", sectionTransitionPaths[index % sectionTransitionPaths.length]);
+    surface.append(path);
+
+    arc.className = "section-transition__motif section-transition__motif--arc";
+    seed.className = "section-transition__motif section-transition__motif--seed";
+    dot.className = "section-transition__motif section-transition__motif--dot";
+    transition.append(surface, arc, seed, dot);
+    previous.append(transition);
+  });
+};
+
 const sectionShapeModifiers = ["one", "two", "three", "four", "five"] as const;
 const sectionShapeDepths = [-0.28, 0.2, -0.16, 0.24, -0.12] as const;
 
@@ -622,6 +679,30 @@ const setupSectionShapeMotion = () => {
   );
 };
 
+const setupSectionTransitionMotion = () => {
+  document.querySelectorAll<HTMLElement>("[data-section-transition]").forEach(
+    (transition) => {
+      const surface = transition.querySelector<SVGElement>(".section-transition__surface");
+      if (!surface) return;
+
+      gsap.fromTo(
+        surface,
+        { yPercent: 12 },
+        {
+          yPercent: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: transition,
+            start: "top bottom",
+            end: "bottom 42%",
+            scrub: 0.85,
+          },
+        },
+      );
+    },
+  );
+};
+
 const setupHeroMotion = (hero: HTMLElement, heroContent: HTMLElement) => {
   const revealLayers = Array.from(
     hero.querySelectorAll<HTMLElement>("[data-hero-reveal]"),
@@ -746,6 +827,7 @@ const setupHeroMotion = (hero: HTMLElement, heroContent: HTMLElement) => {
 
 const initialize = () => {
   cleanup();
+  setupSectionTransitions();
   setupSectionShapes();
   setupRepeatedOrganicPatterns();
   setupMenu();
@@ -760,7 +842,7 @@ const initialize = () => {
     const heroContent = hero?.querySelector<HTMLElement>("[data-hero-content]");
 
     if (reducedMotion.matches) {
-      gsap.set("[data-reveal], [data-reveal-item], main .surface-card, main section h2, [data-hero-reveal], [data-hero-idle], [data-hero-drift], [data-section-shape-parallax], [data-section-shape-idle]", {
+      gsap.set("[data-reveal], [data-reveal-item], main .surface-card, main section h2, [data-hero-reveal], [data-hero-idle], [data-hero-drift], [data-section-transition], [data-section-transition] .section-transition__surface, [data-section-shape-parallax], [data-section-shape-idle]", {
         clearProps: "all",
         autoAlpha: 1,
       });
@@ -772,6 +854,7 @@ const initialize = () => {
     }
 
     setupSectionShapeMotion();
+    setupSectionTransitionMotion();
 
     const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(
       "[data-reveal], main .surface-card, main section h2:not(.page-hero__title)",
