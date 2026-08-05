@@ -44,6 +44,7 @@ Core visual contract:
 - Heading font: Newsreader via `--font-heading`.
 - Body font: DM Sans via `--font-body`.
 - Primary light surfaces: mist, sand, leaf wash, sky wash, and white.
+- Decorative play accents: play blue, coral, sun, and sun wash. These colors support illustrations and narrative surfaces; they do not replace AISA green for primary actions.
 - Shared corner and elevation: `--radius-card`, `--shadow-card`, and `--shadow-raised`.
 - Shared vertical rhythm: `--section-space` and `.section-space`.
 
@@ -85,6 +86,7 @@ Add responsive behavior beside the existing centralized media-query blocks unles
 - Required: `title`, `lead`.
 - Optional paired CTAs: `primaryHref`/`primaryLabel` and `secondaryHref`/`secondaryLabel`.
 - Media: `orbitImages`, `imageAlt`.
+- Playful media: `illustrations`, an optional array of up to three typed object decorations. The first two occupy mobile-visible hero slots; the third is a desktop accent.
 - Modes: `compact`, `fullHeight`, `landing`. `fullHeight` and `landing` currently share the same full-height visual class; `landing` additionally emits the reserved `data-landing-hero` hook.
 - Boundary: `nextTone="white|mist|sand|leaf|sky"`.
 
@@ -100,14 +102,24 @@ Import hero media through `astro:assets`. The first orbit image can carry meanin
 
 Do not add eyebrow text to `SectionHeading`, `PageHero`, cards, or callouts.
 
+The global cursor layer in `src/styles/global.css` uses the supplied cursor
+assets only for fine-pointer hover devices: the default cursor is global, the
+pointer cursor covers links, buttons, and clickable cards, and the grab cursor
+covers the horizontally scrollable resource rail and the draggable directory
+map; active drag states use `cursor-grabbing-70.svg`. Keep touch and
+coarse-pointer behavior native, and extend the shared selector rather than
+adding page-local cursors.
+
 ### Organic shapes
 
 | Component or class | Use it for | Important contract |
 | --- | --- | --- |
 | `design-system/OrganicShapes.astro` | Multi-shape decorative clusters inside composed components | Variants: `cluster`, `orbit`, `trail`; tones: `leaf`, `sky`, `sand`, `inverse`. Always remains `aria-hidden`. |
+| `design-system/PlayfulObject.astro` | Original inline-SVG objects that extend the shape language into recognizable scenes | Kinds: `kite`, `tree`, `blocks`, `train`, `cloud`, `book-pencil`, `elephant-tree`, `balloon-plane`, and `puzzle`; tones and motion are narrow typed unions. The outer layer may own shared parallax while the inner artwork owns ambient CSS motion. Always remains `aria-hidden`. |
+| `design-system/ToyPhotoFrame.astro` | Astro-optimized editorial photography presented as two overlapping toy-like panels | Requires meaningful `alt` plus a distinct `secondarySrc`; supports portrait, landscape, and square compositions, shared tones, focal-position presets, and the existing scroll-parallax hooks. |
 | `.organic-panel` | Page-owned informational panels that need the shared shape language without card elevation | Keeps decoration behind content and clips it to the panel surface. |
 
-Every `main section.section-space` receives five decorative shapes at runtime. Layouts `1` through `5` are shuffled in cycles so adjacent sections do not repeat the same arrangement, and a new order is selected on each direct load or Astro navigation. The shapes use separate parallax and idle wrappers so shared GSAP motion never competes for one transform. Repeated card-like components also receive one of five `data-organic-pattern-layout` arrangements, shuffled independently within each parent group; a complete set is used before a layout repeats, and adjacent cards never share the same arrangement. `SectionHeading`, shared card surfaces, `InfoCard`, rail cards, directory cards, callouts, stacked cards, the directory map, the membership form, and the footer also inherit or compose the same system. Reuse these treatments instead of adding page-local circles or blobs. Keep shapes decorative, pointer-transparent, behind readable content, and clipped by the nearest safe paint boundary.
+Every normal `main section.section-space` receives five decorative shapes at runtime. Layouts `1` through `5` are shuffled in cycles so adjacent sections do not repeat the same arrangement, and a new order is selected on each direct load or Astro navigation. A section may provide its own direct `data-section-shapes` layer when a semantic decorative field such as the stacked story's clouds should replace those generated shapes. The shapes use separate parallax and idle wrappers so shared GSAP motion never competes for one transform. Repeated card-like components also receive one of five `data-organic-pattern-layout` arrangements, shuffled independently within each parent group; a complete set is used before a layout repeats, and adjacent cards never share the same arrangement. `SectionHeading`, shared card surfaces, `InfoCard`, rail cards, directory cards, callouts, the directory map, the membership form, and the footer also inherit or compose the same system. Reuse these treatments instead of adding page-local circles or blobs. Keep shapes decorative, pointer-transparent, behind readable content, and clipped by the nearest safe paint boundary.
 
 ### Cards
 
@@ -117,7 +129,7 @@ Every `main section.section-space` receives five decorative shapes at runtime. L
 | `design-system/InfoCard.astro` | Non-linked information card | Tones: `white`, `sky`, `leaf`, `sand`, `dark`; organic decoration is built in. |
 | `src/components/JourneyCard.astro` | Linked navigation/information card | Tones: `white`, `sky`, `leaf`, `sand`, `dark`; `featured` enables the idle attention treatment. |
 | `design-system/CardRail.astro` | Horizontal resource carousel | Receives an item array and wires shared previous/next controls. Cards are fully clickable. |
-| `design-system/StackedCards.astro` | Multi-step narrative revealed as a sticky stack | CSS creates sticky overlap; desktop GSAP only scales outgoing cards. The current homepage uses three items. |
+| `design-system/StackedCards.astro` | Multi-step narrative revealed as a playful sticky deck | CSS creates sticky overlap and slight whole-card rotation; desktop GSAP shifts and scales outgoing motion wrappers without changing opacity. A dedicated cloud field rises behind the deck. The current homepage uses three items. |
 
 `JourneyCard` and rail cards use one real `ArrowLink` plus `.stretched-card-link` to cover the card. Preserve that semantic pattern:
 
@@ -192,7 +204,8 @@ The stacked story has three separate responsibilities:
 
 1. `.stack-card { position: sticky; }` creates the physical overlap.
 2. Each `--stack-index` offsets the visible top edge.
-3. `siteMotion.ts` scales outgoing desktop cards without changing their opacity, filter, or color.
+3. `.stack-card__surface` owns the small static paper-like angle.
+4. `siteMotion.ts` shifts and scales `.stack-card__motion` on outgoing desktop cards without changing their opacity, filter, or color.
 
 On desktop, the trailing hold space is generated by `.stacked-story__cards::after`. It must remain a real grid row, not container padding. Sticky positioning excludes the container's padding from the usable holding boundary; converting that tail to padding makes the completed stack scroll away before the next section arrives.
 
@@ -209,8 +222,10 @@ All shared motion lives in `src/scripts/siteMotion.ts`. Current public hooks inc
 - `data-parallax-media`.
 - `data-card-rail`, `data-rail-viewport`, `data-rail-prev`, `data-rail-next`.
 - `data-card-stack` with `data-stack-card`.
+- `data-stack-card-motion`, the transform layer inside each sticky stack card.
 - `data-page-hero`, required `data-hero-content`, `data-hero-reveal`, `data-hero-idle`, and `data-hero-drift` with numeric `data-depth`.
 - `data-section-shapes`, with generated `data-section-shape-parallax`, `data-section-shape-idle`, and numeric `data-depth` layers.
+- `data-parallax-media`, used by `ToyPhotoFrame` viewports so image drift stays separate from panel rotation.
 
 Treat these hooks as an API shared by markup and TypeScript. Renaming one requires updating both sides.
 

@@ -2,8 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import ProfessionalDirectory from "../components/ProfessionalDirectory.astro";
-import heroImage from "../assets/hero-terapia.jpg";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../data/siteMedia";
 ---
 
 <BaseLayout
@@ -13,7 +12,13 @@ import spaceImage from "../assets/espacio-terapeutico.jpg";
   <PageHero
     title="Encontrá profesionales desde el mapa."
     lead="Buscá por provincia, localidad o estado de certificación y usá tu ubicación para encontrar la opción más cercana."
-    orbitImages={[spaceImage, heroImage]}
+    orbitImages={heroMedia.search}
+    illustrations={[
+      { kind: "balloon-plane", tone: "sky" },
+      { kind: "tree", tone: "leaf" },
+      { kind: "kite", tone: "sand" },
+    ]}
+    imageAlt="Sala preparada para actividades de movimiento y participación."
     fullHeight={true}
     nextTone="mist"
   />

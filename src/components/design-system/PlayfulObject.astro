@@ -1,0 +1,272 @@
+---
+import type {
+  PlayfulMotion,
+  PlayfulObjectKind,
+  PlayfulTone,
+} from "../../lib/playfulArtwork";
+
+interface Props {
+  kind: PlayfulObjectKind;
+  tone?: PlayfulTone;
+  motion?: PlayfulMotion;
+  parallax?: number;
+  className?: string;
+}
+
+const {
+  kind,
+  tone = "leaf",
+  motion,
+  parallax,
+  className,
+} = Astro.props;
+
+const resolvedMotion = motion ?? (
+  kind === "tree"
+    ? "sway"
+    : kind === "blocks" || kind === "train" || kind === "book-pencil" || kind === "elephant-tree" || kind === "puzzle"
+      ? "bob"
+      : "float"
+);
+---
+
+<span
+  class:list={[
+    "playful-object",
+    `playful-object--${kind}`,
+    `playful-object--${tone}`,
+    className,
+  ]}
+  data-playful-object
+  data-playful-kind={kind}
+  data-playful-motion={resolvedMotion}
+  data-parallax={typeof parallax === "number" ? parallax : undefined}
+  aria-hidden="true"
+>
+  <span class="playful-object__art">
+    {
+      kind === "kite" && (
+        <svg viewBox="0 0 180 230" focusable="false">
+          <g class="playful-object__kite-body" data-playful-part>
+            <path d="M88 12 156 78 88 144 20 78Z" fill="var(--playful-primary)" />
+            <path d="M88 12v66H20Z" fill="var(--playful-sun)" />
+            <path d="m88 12 68 66H88Z" fill="var(--playful-blue)" />
+            <path d="m20 78 68 66V78Z" fill="var(--playful-coral)" />
+          </g>
+          <path
+            class="playful-object__kite-string"
+            d="M88 144c-5 27 30 28 14 49-10 13-30 7-28 29"
+            fill="none"
+            stroke="var(--playful-ink)"
+            stroke-linecap="round"
+            stroke-width="4"
+          />
+          <g class="playful-object__kite-tail" data-playful-part>
+            <path d="m89 166 13-7 6 12-13 7Z" fill="var(--playful-blue)" />
+            <path d="m89 195 13-7 7 12-14 7Z" fill="var(--playful-sun)" />
+            <path d="m68 217 12-7 7 12-13 7Z" fill="var(--playful-coral)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "tree" && (
+        <svg viewBox="0 0 190 225" focusable="false">
+          <path
+            d="M84 79h25v116H84z"
+            fill="var(--playful-coral)"
+          />
+          <path
+            d="M96 113c-10 16-22 27-37 34"
+            fill="none"
+            stroke="var(--playful-coral)"
+            stroke-linecap="round"
+            stroke-width="17"
+          />
+          <path
+            d="M98 105c12 13 25 22 39 27"
+            fill="none"
+            stroke="var(--playful-coral)"
+            stroke-linecap="round"
+            stroke-width="15"
+          />
+          <g class="playful-object__tree-canopy" data-playful-part>
+            <ellipse cx="96" cy="55" rx="58" ry="48" fill="var(--playful-primary)" />
+            <ellipse cx="50" cy="83" rx="42" ry="37" fill="var(--playful-primary-strong)" />
+            <ellipse cx="140" cy="83" rx="43" ry="37" fill="var(--playful-primary)" />
+          </g>
+          <path d="M44 195h104" stroke="var(--playful-blue)" stroke-linecap="round" stroke-width="13" />
+          <circle cx="142" cy="45" r="13" fill="var(--playful-sun)" />
+        </svg>
+      )
+    }
+
+    {
+      kind === "blocks" && (
+        <svg viewBox="0 0 220 185" focusable="false">
+          <g class="playful-object__block playful-object__block--one" data-playful-part>
+            <rect x="12" y="60" width="78" height="78" rx="15" fill="var(--playful-blue)" />
+            <circle cx="51" cy="99" r="18" fill="var(--playful-sun)" />
+          </g>
+          <g class="playful-object__block playful-object__block--two" data-playful-part>
+            <rect x="76" y="21" width="85" height="85" rx="16" fill="var(--playful-primary)" />
+            <path d="m119 42 22 39H97Z" fill="var(--playful-sand)" />
+          </g>
+          <g class="playful-object__block playful-object__block--three" data-playful-part>
+            <rect x="133" y="83" width="75" height="75" rx="15" fill="var(--playful-coral)" />
+            <path d="M151 140v-39h39v39h-12v-19h-15v19Z" fill="var(--playful-sun)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "train" && (
+        <svg viewBox="0 0 245 165" focusable="false">
+          <path d="M9 112 66 78v54H9Z" fill="var(--playful-sun)" opacity=".8" />
+          <g class="playful-object__train-body" data-playful-part>
+            <path d="M68 56h89v70H68z" fill="var(--playful-blue)" />
+            <path d="M143 78h62l24 22v26h-86z" fill="var(--playful-blue)" />
+            <path d="M91 20h47v50H91z" fill="var(--playful-blue)" />
+            <path d="M101 30h25v22h-25z" fill="var(--playful-primary)" />
+            <path d="M74 30h18v35H74z" fill="var(--playful-coral)" />
+            <circle cx="101" cy="129" r="23" fill="var(--playful-ink)" />
+            <circle cx="101" cy="129" r="11" fill="var(--playful-sand)" />
+            <circle cx="190" cy="129" r="23" fill="var(--playful-ink)" />
+            <circle cx="190" cy="129" r="11" fill="var(--playful-sand)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "cloud" && (
+        <svg viewBox="0 0 220 120" focusable="false">
+          <g class="playful-object__cloud-body" data-playful-part>
+            <circle cx="55" cy="71" r="34" fill="var(--playful-cloud)" />
+            <circle cx="102" cy="55" r="49" fill="var(--playful-cloud)" />
+            <circle cx="157" cy="69" r="37" fill="var(--playful-cloud)" />
+            <rect x="52" y="69" width="109" height="36" fill="var(--playful-cloud)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "book-pencil" && (
+        <svg viewBox="0 0 220 200" focusable="false">
+          <g class="playful-object__book-pages" data-playful-part>
+            <path
+              d="M12 67c35-8 67 0 98 23v91c-30-24-63-32-98-23Z"
+              fill="var(--playful-primary)"
+            />
+            <path
+              d="M208 67c-35-8-67 0-98 23v91c30-24 63-32 98-23Z"
+              fill="var(--playful-blue)"
+            />
+            <path
+              d="M30 53c29-3 56 5 80 25v91c-25-20-52-27-80-23Z"
+              fill="var(--playful-sand)"
+              opacity=".96"
+            />
+            <path
+              d="M190 53c-29-3-56 5-80 25v91c25-20 52-27 80-23Z"
+              fill="var(--playful-cloud)"
+              opacity=".97"
+            />
+            <path d="M110 78v91" stroke="var(--playful-coral)" stroke-linecap="round" stroke-width="5" />
+            <path d="M48 86h39M48 104h48M132 89h39M126 108h47" stroke="var(--playful-primary-strong)" stroke-linecap="round" stroke-width="7" opacity=".55" />
+          </g>
+          <g class="playful-object__pencil" data-playful-part>
+            <path d="m127 16 19-10 61 109-19 11Z" fill="var(--playful-cloud)" />
+            <path d="m132 18 14-8 58 104-14 8Z" fill="var(--playful-sun)" />
+            <path d="m132 18 14-8 11 20-14 8Z" fill="var(--playful-coral)" />
+            <path d="m190 122 17-7 2 29Z" fill="var(--playful-sand)" />
+            <path d="m204 134 5 10-10-2Z" fill="var(--playful-ink)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "elephant-tree" && (
+        <svg viewBox="0 0 240 205" focusable="false">
+          <path d="M38 74h23v111H38z" fill="var(--playful-coral)" />
+          <g class="playful-object__elephant-tree-canopy" data-playful-part>
+            <ellipse cx="50" cy="39" rx="39" ry="28" fill="var(--playful-primary)" />
+            <ellipse cx="29" cy="70" rx="25" ry="25" fill="var(--playful-primary-strong)" />
+            <ellipse cx="70" cy="71" rx="31" ry="27" fill="var(--playful-primary)" />
+          </g>
+          <path d="M17 186h77" stroke="var(--playful-blue)" stroke-linecap="round" stroke-width="10" />
+          <g class="playful-object__elephant-body">
+            <rect x="78" y="70" width="121" height="89" rx="42" fill="var(--playful-primary)" />
+            <circle cx="190" cy="101" r="41" fill="var(--playful-primary)" />
+            <rect x="91" y="126" width="28" height="55" rx="8" fill="var(--playful-primary)" />
+            <rect x="139" y="128" width="28" height="53" rx="8" fill="var(--playful-primary)" />
+            <rect x="174" y="126" width="25" height="55" rx="8" fill="var(--playful-primary)" />
+            <path d="M83 100 65 90" stroke="var(--playful-primary-strong)" stroke-linecap="round" stroke-width="10" />
+          </g>
+          <ellipse class="playful-object__elephant-ear" data-playful-part cx="173" cy="100" rx="31" ry="40" fill="var(--playful-blue)" />
+          <path
+            class="playful-object__elephant-trunk"
+            data-playful-part
+            d="M218 101c19 7 20 28 7 38-13 11-30 3-27-11"
+            fill="none"
+            stroke="var(--playful-primary)"
+            stroke-linecap="round"
+            stroke-width="20"
+          />
+          <circle cx="209" cy="89" r="5" fill="var(--playful-ink)" />
+        </svg>
+      )
+    }
+
+    {
+      kind === "balloon-plane" && (
+        <svg viewBox="0 0 220 210" focusable="false">
+          <g class="playful-object__balloon" data-playful-part>
+            <path
+              d="M18 60C18 29 43 9 73 9s55 20 55 51c0 30-22 48-39 64H57C40 108 18 90 18 60Z"
+              fill="var(--playful-coral)"
+              stroke="var(--playful-cloud)"
+              stroke-width="7"
+            />
+            <path d="M48 20c-8 24-7 65 12 97M98 20c8 24 7 65-12 97" fill="none" stroke="var(--playful-sun)" stroke-linecap="round" stroke-width="16" />
+            <path d="m57 124 11 38M89 124l-11 38" stroke="var(--playful-blue)" stroke-width="6" />
+            <path class="playful-object__balloon-basket" data-playful-part d="M57 157h42l-8 36H65Z" fill="var(--playful-primary)" />
+          </g>
+          <g class="playful-object__paper-plane" data-playful-part>
+            <path d="m91 168 119-53-36 81-30-31-24 27-3-39Z" fill="var(--playful-cloud)" />
+            <path d="m100 165 101-43-58 35-18 28-2-40Z" fill="var(--playful-coral)" />
+            <path d="m143 157 58-35-30 65Z" fill="var(--playful-sun)" />
+            <path d="m125 185 18-28 28 30-35-13Z" fill="var(--playful-blue)" />
+          </g>
+        </svg>
+      )
+    }
+
+    {
+      kind === "puzzle" && (
+        <svg viewBox="0 0 220 190" focusable="false">
+          <g transform="translate(8 27) rotate(-7 77 76)">
+            <g class="playful-object__puzzle-piece playful-object__puzzle-piece--one" data-playful-part>
+              <path
+                d="M8 28h47c-3 5-5 10-4 16 1 12 11 21 23 21s22-9 23-21c1-6-1-11-4-16h45v42h10c13 0 24 10 24 23s-11 23-24 23h-10v43H94c3-5 5-10 4-16-1-12-11-21-23-21s-22 9-23 21c-1 6 1 11 4 16H8v-43h11c13 0 23-10 23-23S32 70 19 70H8Z"
+                fill="var(--playful-blue)"
+              />
+            </g>
+          </g>
+          <g transform="translate(88 1) rotate(9 66 69)">
+            <g class="playful-object__puzzle-piece playful-object__puzzle-piece--two" data-playful-part>
+              <path
+                d="M8 28h42c-3 5-5 10-4 16 1 12 11 21 23 21s22-9 23-21c1-6-1-11-4-16h42v42h10c13 0 23 10 23 23s-10 23-23 23h-10v42H88c3-5 5-10 4-16-1-12-11-21-23-21s-22 9-23 21c-1 6 1 11 4 16H8v-42h10c13 0 23-10 23-23S31 70 18 70H8Z"
+                fill="var(--playful-sun)"
+              />
+            </g>
+          </g>
+        </svg>
+      )
+    }
+  </span>
+</span>

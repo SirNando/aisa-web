@@ -1,8 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
-import heroImage from "../assets/hero-terapia.jpg";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../data/siteMedia";
 ---
 
 <BaseLayout
@@ -18,7 +17,13 @@ import spaceImage from "../assets/espacio-terapeutico.jpg";
     secondaryHref="/contacto/"
     secondaryLabel="Contactar a AISA"
     fullHeight={true}
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.notFound}
+    illustrations={[
+      { kind: "balloon-plane", tone: "sky" },
+      { kind: "cloud", tone: "inverse" },
+      { kind: "puzzle", tone: "sand" },
+    ]}
+    imageAlt="Niño explorando bloques de colores durante el juego."
     nextTone="mist"
   />
 </BaseLayout>

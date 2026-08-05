@@ -52,6 +52,7 @@ for (const [route, html] of pages) {
   if (h1Count !== 1) failures.push(`${route} tiene ${h1Count} elementos h1.`);
 
   const imageTags = html.match(/<img\b[^>]*>/gi) ?? [];
+  const imageSources = new Map();
   for (const tag of imageTags) {
     // HTML permits an empty attribute to serialize as bare `alt`; Astro uses
     // that valid form for decorative images passed as alt="".
@@ -60,6 +61,16 @@ for (const [route, html] of pages) {
     }
     if (!/\bwidth="\d+"/i.test(tag) || !/\bheight="\d+"/i.test(tag)) {
       failures.push(`${route} contiene una imagen sin dimensiones.`);
+    }
+
+    const source = tag.match(/\bsrc="([^"]+)"/i)?.[1];
+    if (source) {
+      imageSources.set(source, (imageSources.get(source) ?? 0) + 1);
+    }
+  }
+  for (const [source, count] of imageSources) {
+    if (count > 1) {
+      failures.push(`${route} repite una imagen ${count} veces: ${source}`);
     }
   }
 
@@ -99,6 +110,14 @@ for (const forbidden of ["d1_databases", "kv_namespaces", "r2_buckets", "\"main\
 
 await stat(join(rootPath, "public", "robots.txt"));
 await stat(join(rootPath, "public", "og.png"));
+for (const cursorAsset of [
+  "cursor-default.svg",
+  "cursor-pointer.svg",
+  "cursor-grab.svg",
+  "cursor-grabbing-70.svg",
+]) {
+  await stat(join(rootPath, "public", "cursors", cursorAsset));
+}
 
 if (failures.length > 0) {
   console.error(failures.join("\n"));

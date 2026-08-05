@@ -6,8 +6,8 @@ import Callout from "../components/Callout.astro";
 import CardGrid from "../components/design-system/CardGrid.astro";
 import SectionHeading from "../components/design-system/SectionHeading.astro";
 import StackedCards from "../components/design-system/StackedCards.astro";
-import heroImage from "../assets/hero-terapia.jpg";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
+import ToyPhotoFrame from "../components/design-system/ToyPhotoFrame.astro";
+import { featureMedia, heroMedia } from "../data/siteMedia";
 
 const pathways = [
   {
@@ -15,18 +15,21 @@ const pathways = [
     body: "Te acercamos orientación general para reconocer cuándo una dificultad sensorial está afectando la vida cotidiana y cómo conversar con el equipo de salud o educativo.",
     href: "/familias-y-escuelas/",
     linkText: "Leé la guía",
+    illustration: "puzzle" as const,
   },
   {
     title: "Crecé con formación de calidad",
     body: "Reunimos cursos, certificaciones y altos estándares de educación para acompañar el desarrollo de Terapistas Ocupacionales.",
     href: "/profesionales/formacion-y-cursos/",
     linkText: "Explorá los cursos",
+    illustration: "book-pencil" as const,
   },
   {
     title: "Conectá con la comunidad AISA",
     body: "Construimos una red de profesionales especializados y preparamos un directorio público para facilitar el contacto con pacientes.",
     href: "/profesionales/#solicitud",
     linkText: "Hacete socio",
+    illustration: "elephant-tree" as const,
   },
 ];
 
@@ -69,7 +72,13 @@ const pathways = [
     primaryLabel="Encontrá un profesional"
     secondaryHref="/acerca-de/"
     secondaryLabel="Conocé AISA"
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.home}
+    illustrations={[
+      { kind: "elephant-tree", tone: "leaf" },
+      { kind: "kite", tone: "leaf" },
+      { kind: "balloon-plane", tone: "sky" },
+    ]}
+    imageAlt="Niño participando de una actividad de movimiento en un espacio terapéutico."
     fullHeight={true}
     landing={true}
     nextTone="sand"
@@ -77,7 +86,18 @@ const pathways = [
 
   <section class="section-space bg-aisa-sand">
     <div class="site-container">
-      <SectionHeading title="¿Cómo podemos ayudarte?" body="" />
+      <div class="playful-media-grid">
+        <SectionHeading title="¿Cómo podemos ayudarte?" body="" />
+        <ToyPhotoFrame
+          src={featureMedia.toyBlocks}
+          secondarySrc={featureMedia.sensoryRice}
+          alt="Niño explorando bloques de colores durante el juego."
+          aspect="landscape"
+          tone="sand"
+          objectPosition="center"
+          className="playful-media-grid__media"
+        />
+      </div>
       <CardGrid>
         <JourneyCard
           eyebrow="Información"
@@ -86,6 +106,7 @@ const pathways = [
           href="/familias-y-escuelas/"
           linkText="Buscá orientación"
           tone="sky"
+          illustration="elephant-tree"
         />
         <JourneyCard
           eyebrow="Cursos"
@@ -94,6 +115,7 @@ const pathways = [
           href="/profesionales/"
           linkText="Conocé los cursos"
           tone="white"
+          illustration="book-pencil"
         />
         <JourneyCard
           eyebrow="Certificaciones"
@@ -103,6 +125,7 @@ const pathways = [
           linkText="Asociate con AISA"
           tone="leaf"
           featured={true}
+          illustration="puzzle"
         />
       </CardGrid>
     </div>

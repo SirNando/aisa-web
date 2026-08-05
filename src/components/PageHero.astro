@@ -1,6 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import PlayfulObject from "./design-system/PlayfulObject.astro";
+import type { PlayfulDecoration } from "../lib/playfulArtwork";
 
 interface Props {
   title: string;
@@ -10,6 +12,7 @@ interface Props {
   secondaryHref?: string;
   secondaryLabel?: string;
   orbitImages?: ImageMetadata[];
+  illustrations?: PlayfulDecoration[];
   imageAlt?: string;
   compact?: boolean;
   fullHeight?: boolean;
@@ -25,6 +28,7 @@ const {
   secondaryHref,
   secondaryLabel,
   orbitImages = [],
+  illustrations = [],
   imageAlt = "",
   compact = false,
   fullHeight = false,
@@ -33,9 +37,12 @@ const {
 } = Astro.props;
 
 const firstImage = orbitImages[0];
-const secondImage = orbitImages[1] ?? orbitImages[0];
-const thirdImage = orbitImages[2] ?? secondImage;
-const fourthImage = orbitImages[3] ?? firstImage;
+const secondImage = orbitImages[1];
+const thirdImage = orbitImages[2];
+const fourthImage = orbitImages[3];
+const firstIllustration = illustrations[0];
+const secondIllustration = illustrations[1];
+const thirdIllustration = illustrations[2];
 
 const visuals = [
   {
@@ -58,8 +65,20 @@ const visuals = [
     parallax: -0.12,
     depth: 0.88,
   },
-  { kind: "shape" as const, modifier: "three", parallax: 0.17, depth: 0.46 },
-  { kind: "shape" as const, modifier: "four", parallax: -0.08, depth: 0.55 },
+  {
+    kind: firstIllustration ? "illustration" as const : "shape" as const,
+    modifier: "three",
+    illustration: firstIllustration,
+    parallax: 0.17,
+    depth: 0.46,
+  },
+  {
+    kind: secondIllustration ? "illustration" as const : "shape" as const,
+    modifier: "four",
+    illustration: secondIllustration,
+    parallax: -0.08,
+    depth: 0.55,
+  },
   {
     kind: "image" as const,
     modifier: "five",
@@ -81,7 +100,13 @@ const visuals = [
     depth: 0.95,
   },
   { kind: "shape" as const, modifier: "seven", parallax: 0.05, depth: 1.08 },
-  { kind: "shape" as const, modifier: "eight", parallax: -0.05, depth: 0.64 },
+  {
+    kind: thirdIllustration ? "illustration" as const : "shape" as const,
+    modifier: "eight",
+    illustration: thirdIllustration,
+    parallax: -0.05,
+    depth: 0.64,
+  },
 ];
 ---
 
@@ -99,7 +124,11 @@ const visuals = [
     {
       visuals.map((visual) => (
         <div
-          class:list={["page-hero__shape", `page-hero__shape--${visual.modifier}`]}
+          class:list={[
+            "page-hero__shape",
+            `page-hero__shape--${visual.modifier}`,
+            `page-hero__shape--${visual.kind}`,
+          ]}
           data-parallax={visual.parallax}
         >
           <div class="page-hero__shape-reveal" data-hero-reveal>
@@ -114,6 +143,15 @@ const visuals = [
                         widths={visual.widths}
                         sizes={visual.sizes}
                         loading={visual.loading}
+                      />
+                    )
+                  }
+                  {
+                    visual.kind === "illustration" && visual.illustration && (
+                      <PlayfulObject
+                        kind={visual.illustration.kind}
+                        tone={visual.illustration.tone}
+                        motion={visual.illustration.motion}
                       />
                     )
                   }

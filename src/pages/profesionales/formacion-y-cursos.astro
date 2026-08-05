@@ -2,11 +2,27 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHero from "../../components/PageHero.astro";
 import JourneyCard from "../../components/JourneyCard.astro";
+import PlayfulObject from "../../components/design-system/PlayfulObject.astro";
 import { Image } from "astro:assets";
-import heroImage from "../../assets/hero-terapia.jpg";
-import spaceImage from "../../assets/espacio-terapeutico.jpg";
+import type { ImageMetadata } from "astro";
+import type { PlayfulObjectKind, PlayfulTone } from "../../lib/playfulArtwork";
+import { courseMedia, heroMedia } from "../../data/siteMedia";
 
-const courseLevels = [
+interface Course {
+  provider: string;
+  title: string;
+  href: string;
+  image?: ImageMetadata;
+  illustration?: PlayfulObjectKind;
+  tone?: PlayfulTone;
+}
+
+interface CourseLevel {
+  level: string;
+  courses: Course[];
+}
+
+const courseLevels: CourseLevel[] = [
   {
     level: "Nivel 1",
     courses: [
@@ -14,27 +30,27 @@ const courseLevels = [
         provider: "Actualizaciones Terapéuticas",
         title: "Introducción a la Teoría de Integración Sensorial",
         href: "http://www.actualizacionesterapeuticas.com/",
-        image: heroImage,
+        image: courseMedia.therapy,
       },
       {
         provider: "Ideas Argentinas A.I.",
         title:
           "Fundamentos teóricos de Integración Sensorial: de la teoría a la integración",
         href: "mailto:cursosideasargentinas@gmail.com",
-        image: spaceImage,
+        image: courseMedia.space,
       },
       {
         provider: "Equipo en Vuelo",
         title:
           "Módulo 1 – CLASI · Curso 1 de IS: Principios teóricos y fundamentos neurocientíficos de la práctica clínica",
         href: "mailto:formacion@equipoenvuelo.com",
-        image: heroImage,
+        image: courseMedia.ballPit,
       },
       {
         provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
         title: "Teoría de Integración Sensorial",
         href: "mailto:info.isuba@gmail.com",
-        image: spaceImage,
+        image: courseMedia.climbingPlay,
       },
     ],
   },
@@ -46,26 +62,26 @@ const courseLevels = [
         title:
           "Evaluación y tratamiento de los Desórdenes de Modulación y Motores de base sensorial (DMS + DMBS)",
         href: "http://www.actualizacionesterapeuticas.com/",
-        image: spaceImage,
+        image: courseMedia.familyBallPit,
       },
       {
         provider: "Ideas Argentinas",
         title:
           "Evaluación y razonamiento clínico de Integración Sensorial · USC",
         href: "mailto:cursosideasargentinas@gmail.com",
-        image: heroImage,
+        image: courseMedia.sharedPlay,
       },
       {
         provider: "Equipo en Vuelo",
         title: "Módulos 2 y 3 – CLASI",
         href: "mailto:formacion@equipoenvuelo.com",
-        image: spaceImage,
+        image: courseMedia.conversation,
       },
       {
         provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
         title: "Evaluación en Integración Sensorial",
         href: "mailto:info.isuba@gmail.com",
-        image: heroImage,
+        image: courseMedia.room,
       },
     ],
   },
@@ -77,25 +93,27 @@ const courseLevels = [
         title:
           "Evaluación y tratamiento de los Desórdenes de Modulación y Motores de base sensorial (DMS + DMBS)",
         href: "http://www.actualizacionesterapeuticas.com/",
-        image: heroImage,
+        image: courseMedia.tunnel,
       },
       {
         provider: "Ideas Argentinas",
         title: "Tratamiento en Integración Sensorial · USC",
         href: "mailto:cursosideasargentinas@gmail.com",
-        image: spaceImage,
+        image: courseMedia.blocks,
       },
       {
         provider: "Equipo en Vuelo",
         title: "Módulos 4 y 5 – CLASI",
         href: "mailto:formacion@equipoenvuelo.com",
-        image: heroImage,
+        illustration: "tree",
+        tone: "leaf",
       },
       {
         provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
         title: "Tratamiento en Integración Sensorial",
         href: "mailto:info.isuba@gmail.com",
-        image: spaceImage,
+        illustration: "cloud",
+        tone: "sky",
       },
     ],
   },
@@ -107,26 +125,30 @@ const courseLevels = [
         title:
           "Entrenamiento clínico intensivo de Integración Sensorial (ECIS)",
         href: "http://www.actualizacionesterapeuticas.com/",
-        image: spaceImage,
+        illustration: "book-pencil",
+        tone: "sand",
       },
       {
         provider: "Ideas Argentinas",
         title:
           "Excelencia en la evaluación e intervención en Integración Sensorial",
         href: "mailto:cursosideasargentinas@gmail.com",
-        image: heroImage,
+        illustration: "blocks",
+        tone: "leaf",
       },
       {
         provider: "Equipo en Vuelo",
         title: "Módulos 3 y 6 – CLASI",
         href: "mailto:formacion@equipoenvuelo.com",
-        image: spaceImage,
+        illustration: "elephant-tree",
+        tone: "sky",
       },
       {
         provider: "ISUBA – UBA, Posgrado Facultad de Psicología",
         title: "Práctica clínica intensiva en Integración Sensorial",
         href: "mailto:info.isuba@gmail.com",
-        image: heroImage,
+        illustration: "kite",
+        tone: "sand",
       },
     ],
   },
@@ -144,7 +166,13 @@ const courseLevels = [
     primaryLabel="Ver cursos"
     secondaryHref="/profesionales/certificacion/#requisitos"
     secondaryLabel="Ver requisitos"
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.courses}
+    illustrations={[
+      { kind: "book-pencil", tone: "sky" },
+      { kind: "blocks", tone: "leaf" },
+      { kind: "balloon-plane", tone: "sand" },
+    ]}
+    imageAlt="Profesional acompañando una actividad de movimiento en un espacio terapéutico."
     fullHeight={true}
     nextTone="mist"
   />
@@ -224,15 +252,23 @@ const courseLevels = [
                           : "Enviar mail"}
                       </a>
                     </div>
-                    <div class="min-h-full bg-aisa-sky-wash">
-                      <Image
-                        src={course.image}
-                        alt="Actividad de Integración Sensorial"
-                        widths={[180, 280, 360]}
-                        sizes="(min-width: 768px) 9rem, 7rem"
-                        class="h-full w-full object-cover"
-                        loading="lazy"
-                      />
+                    <div class="course-card__visual min-h-full bg-aisa-sky-wash">
+                      {course.image ? (
+                        <Image
+                          src={course.image}
+                          alt="Actividad de Integración Sensorial"
+                          widths={[180, 280, 360]}
+                          sizes="(min-width: 768px) 9rem, 7rem"
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <PlayfulObject
+                          kind={course.illustration ?? "blocks"}
+                          tone={course.tone ?? "sky"}
+                          className="course-card__illustration"
+                        />
+                      )}
                     </div>
                   </article>
                 ))}
@@ -260,6 +296,7 @@ const courseLevels = [
           linkText="Ver requisitos"
           tone="sky"
           alignLinkBottom={true}
+          illustration="puzzle"
         />
         <JourneyCard
           title="¿Ya tenés formación previa? Conocé cómo certificarla"
@@ -268,6 +305,7 @@ const courseLevels = [
           linkText="Ver el proceso"
           tone="leaf"
           alignLinkBottom={true}
+          illustration="balloon-plane"
         />
       </div>
     </div>

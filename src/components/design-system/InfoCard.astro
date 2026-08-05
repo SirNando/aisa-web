@@ -1,5 +1,7 @@
 ---
 import ArrowLink from "./ArrowLink.astro";
+import PlayfulObject from "./PlayfulObject.astro";
+import type { PlayfulObjectKind, PlayfulTone } from "../../lib/playfulArtwork";
 
 interface Props {
   title: string;
@@ -8,6 +10,7 @@ interface Props {
   linkText?: string;
   external?: boolean;
   tone?: "white" | "sky" | "leaf" | "sand" | "dark";
+  illustration?: PlayfulObjectKind;
 }
 
 const {
@@ -17,10 +20,28 @@ const {
   linkText = "Visitar sitio",
   external = true,
   tone = "white",
+  illustration,
 } = Astro.props;
+
+const illustrationTone: PlayfulTone = tone === "dark"
+  ? "inverse"
+  : tone === "sky"
+    ? "sky"
+    : tone === "sand"
+      ? "sand"
+      : "leaf";
 ---
 
 <article class:list={["info-card", `info-card--${tone}`]} data-reveal-item>
+  {
+    illustration && (
+      <PlayfulObject
+        kind={illustration}
+        tone={illustrationTone}
+        className="info-card__illustration"
+      />
+    )
+  }
   <h3 class="info-card__title">{title}</h3>
   <p class="info-card__body">{body}</p>
   {href && (

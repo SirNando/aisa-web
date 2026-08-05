@@ -6,8 +6,7 @@ import Callout from "../../components/Callout.astro";
 import MembershipForm from "../../components/MembershipForm.astro";
 import InfoCard from "../../components/design-system/InfoCard.astro";
 import SectionHeading from "../../components/design-system/SectionHeading.astro";
-import heroImage from "../../assets/hero-terapia.jpg";
-import spaceImage from "../../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../../data/siteMedia";
 
 const benefits = [
   {
@@ -126,7 +125,13 @@ const interestLinkGroups = [
     primaryLabel="Asociate a AISA"
     secondaryHref="/profesionales/formacion-y-cursos/"
     secondaryLabel="Ver formación y cursos"
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.professionals}
+    illustrations={[
+      { kind: "balloon-plane", tone: "leaf" },
+      { kind: "book-pencil", tone: "sky" },
+      { kind: "elephant-tree", tone: "sand" },
+    ]}
+    imageAlt="Profesional acompañando una actividad de movimiento en un espacio terapéutico."
     fullHeight={true}
     nextTone="white"
   />
@@ -145,6 +150,7 @@ const interestLinkGroups = [
           href="/profesionales/formacion-y-cursos/"
           linkText="Explorá los cursos"
           tone="sky"
+          illustration="book-pencil"
         />
         <JourneyCard
           title="Ya hice los cursos y busco el aval institucional"
@@ -152,6 +158,7 @@ const interestLinkGroups = [
           href="/profesionales/certificacion/"
           linkText="Conocé los requisitos"
           tone="white"
+          illustration="puzzle"
         />
         <JourneyCard
           title="Quiero formar parte como socio AISA"
@@ -160,6 +167,7 @@ const interestLinkGroups = [
           linkText="Quiero asociarme"
           tone="leaf"
           featured={true}
+          illustration="elephant-tree"
         />
       </div>
     </div>

@@ -5,8 +5,8 @@ import JourneyCard from "../components/JourneyCard.astro";
 import Callout from "../components/Callout.astro";
 import CardGrid from "../components/design-system/CardGrid.astro";
 import InfoCard from "../components/design-system/InfoCard.astro";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
-import heroImage from "../assets/hero-terapia.jpg";
+import ToyPhotoFrame from "../components/design-system/ToyPhotoFrame.astro";
+import { featureMedia, heroMedia } from "../data/siteMedia";
 
 const audiences = [
   {
@@ -15,6 +15,7 @@ const audiences = [
     href: "#familias",
     linkText: "Orientación para familias",
     tone: "leaf" as const,
+    illustration: "elephant-tree" as const,
   },
   {
     title: "Docentes y educadores",
@@ -22,6 +23,7 @@ const audiences = [
     href: "#docentes",
     linkText: "Orientación para docentes",
     tone: "sand" as const,
+    illustration: "book-pencil" as const,
   },
   {
     title: "Profesionales de la salud",
@@ -29,6 +31,7 @@ const audiences = [
     href: "#salud",
     linkText: "Orientación para salud",
     tone: "sky" as const,
+    illustration: "puzzle" as const,
   },
 ];
 
@@ -36,26 +39,32 @@ const signals = [
   {
     title: "Regulación y descanso",
     body: "Se irrita fácilmente, llora sin un motivo claro o le cuesta llegar a la calma y conciliar el sueño aun cuando está cansado/a.",
+    illustration: "cloud" as const,
   },
   {
     title: "Cuidado personal y tacto",
     body: "Se angustia durante la higiene, rechaza ciertas prendas o materiales, o evita el contacto físico y algunas texturas.",
+    illustration: "elephant-tree" as const,
   },
   {
     title: "Alimentación",
     body: "Tiene preferencias muy marcadas, rechaza alimentos por su textura, temperatura, sabor u olor, o cuenta con un repertorio especialmente limitado.",
+    illustration: "blocks" as const,
   },
   {
     title: "Movimiento y coordinación",
     body: "Busca intensamente girar o hamacarse, evita ciertos movimientos, se cansa rápido en actividades físicas o parece más torpe que otros niños/as de su edad.",
+    illustration: "balloon-plane" as const,
   },
   {
     title: "Comunicación y vínculos",
     body: "Se retrasa en algunos logros del habla y el lenguaje, tiene pocas amistades o le cuesta participar en juegos y actividades compartidas.",
+    illustration: "book-pencil" as const,
   },
   {
     title: "Sonidos y luz",
     body: "Se abruma en ambientes ruidosos, reacciona ante sonidos inesperados o tiene dificultades para adaptarse a la luz del sol y a la oscuridad.",
+    illustration: "kite" as const,
   },
 ];
 ---
@@ -72,31 +81,45 @@ const signals = [
     secondaryHref="#que-es"
     secondaryLabel="Leé nuestra guía"
     fullHeight={true}
-    orbitImages={[spaceImage, heroImage]}
-    imageAlt="Espacio terapéutico equipado para actividades de movimiento y participación."
+    orbitImages={heroMedia.families}
+    illustrations={[
+      { kind: "elephant-tree", tone: "sky" },
+      { kind: "blocks", tone: "leaf" },
+      { kind: "puzzle", tone: "sand" },
+    ]}
+    imageAlt="Niña participando de una actividad de movimiento en un espacio terapéutico."
     nextTone="white"
   />
 
   <section id="que-es" class="section-space scroll-mt-28 bg-white">
-    <div class="site-container grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
-      <div>
+    <div class="site-container playful-media-grid">
+      <div class="reading-container">
         <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
           ¿Qué es la Integración Sensorial?
         </h2>
+        <div class="rich-copy">
+          <p class="text-lg leading-8">
+            La Integración Sensorial ayuda a comprender cómo una persona recibe,
+            organiza y utiliza la información de sus sentidos para participar en
+            la vida cotidiana.
+          </p>
+          <p class="text-lg leading-8">
+            Algunas diferencias pueden observarse en el juego, la alimentación, el
+            movimiento, el cuidado personal, el aprendizaje o la participación
+            social. Una lista de señales no reemplaza una evaluación profesional
+            ni determina por sí sola una condición.
+          </p>
+        </div>
       </div>
-      <div class="rich-copy reading-container">
-        <p class="mt-0 text-lg leading-8">
-          La Integración Sensorial ayuda a comprender cómo una persona recibe,
-          organiza y utiliza la información de sus sentidos para participar en
-          la vida cotidiana.
-        </p>
-        <p class="mt-0 text-lg leading-8">
-          Algunas diferencias pueden observarse en el juego, la alimentación, el
-          movimiento, el cuidado personal, el aprendizaje o la participación
-          social. Una lista de señales no reemplaza una evaluación profesional
-          ni determina por sí sola una condición.
-        </p>
-      </div>
+      <ToyPhotoFrame
+        src={featureMedia.sensoryRice}
+        secondarySrc={featureMedia.sharedPlay}
+        alt="Niña explorando texturas y objetos durante una actividad de juego sensorial."
+        aspect="landscape"
+        tone="sky"
+        objectPosition="right"
+        className="playful-media-grid__media"
+      />
     </div>
   </section>
 
@@ -135,7 +158,12 @@ const signals = [
       <CardGrid>
         {
           signals.map((signal) => (
-            <InfoCard title={signal.title} body={signal.body} tone="white" />
+            <InfoCard
+              title={signal.title}
+              body={signal.body}
+              tone="white"
+              illustration={signal.illustration}
+            />
           ))
         }
       </CardGrid>

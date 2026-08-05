@@ -1,5 +1,7 @@
 ---
 import ArrowLink from "./design-system/ArrowLink.astro";
+import PlayfulObject from "./design-system/PlayfulObject.astro";
+import type { PlayfulObjectKind, PlayfulTone } from "../lib/playfulArtwork";
 
 interface Props {
   title: string;
@@ -11,6 +13,7 @@ interface Props {
   alignLinkBottom?: boolean;
   featured?: boolean;
   compact?: boolean;
+  illustration?: PlayfulObjectKind;
 }
 
 const {
@@ -23,7 +26,16 @@ const {
   alignLinkBottom = true,
   featured = false,
   compact = false,
+  illustration,
 } = Astro.props;
+
+const illustrationTone: PlayfulTone = tone === "dark"
+  ? "inverse"
+  : tone === "sky"
+    ? "sky"
+    : tone === "sand"
+      ? "sand"
+      : "leaf";
 ---
 
 <article
@@ -32,6 +44,15 @@ const {
   data-tilt-card
   data-featured-card={featured ? "true" : undefined}
 >
+  {
+    illustration && (
+      <PlayfulObject
+        kind={illustration}
+        tone={illustrationTone}
+        className="journey-card__illustration"
+      />
+    )
+  }
   <div class="journey-card__tilt" data-tilt-surface>
     {eyebrow && <span class="journey-card__number">{eyebrow}</span>}
     <h3 class="journey-card__title">{title}</h3>

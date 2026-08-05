@@ -3,8 +3,7 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import Callout from "../components/Callout.astro";
-import heroImage from "../assets/hero-terapia.jpg";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../data/siteMedia";
 import sabrinaBlanco from "../assets/equipo/sabrina-blanco.jpg";
 import alejandraUberti from "../assets/equipo/alejandra-uberti.png";
 import patriciaRodriguez from "../assets/equipo/patricia-rodriguez.jpg";
@@ -74,7 +73,13 @@ const pillars = [
     primaryLabel="Conocé nuestra misión"
     secondaryHref="#equipo"
     secondaryLabel="Conocé al equipo"
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.about}
+    illustrations={[
+      { kind: "tree", tone: "leaf" },
+      { kind: "puzzle", tone: "sky" },
+      { kind: "balloon-plane", tone: "sand" },
+    ]}
+    imageAlt="Familia compartiendo un momento de juego en un espacio terapéutico."
     fullHeight={true}
     nextTone="white"
   />

@@ -1,8 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
-import heroImage from "../assets/hero-terapia.jpg";
-import spaceImage from "../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../data/siteMedia";
 
 const email = "integracion.sensorialargentina@gmail.com";
 const topics = [
@@ -46,7 +45,13 @@ const topics = [
   <PageHero
     title="Contanos qué necesitás para orientar mejor tu consulta."
     lead="Elegí un motivo y se abrirá un correo dirigido a AISA con el asunto preparado. Este sitio no almacena datos ni envía formularios."
-    orbitImages={[heroImage, spaceImage]}
+    orbitImages={heroMedia.contact}
+    illustrations={[
+      { kind: "book-pencil", tone: "sky" },
+      { kind: "cloud", tone: "inverse" },
+      { kind: "balloon-plane", tone: "sand" },
+    ]}
+    imageAlt="Profesional conversando con una niña en un espacio de atención."
     fullHeight={true}
     nextTone="mist"
   />

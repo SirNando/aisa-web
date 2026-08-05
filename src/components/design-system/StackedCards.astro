@@ -1,13 +1,15 @@
 ---
 import ArrowLink from "./ArrowLink.astro";
-import OrganicShapes from "./OrganicShapes.astro";
+import PlayfulObject from "./PlayfulObject.astro";
 import SectionHeading from "./SectionHeading.astro";
+import type { PlayfulObjectKind, PlayfulTone } from "../../lib/playfulArtwork";
 
 interface StackItem {
   title: string;
   body: string;
   href: string;
   linkText: string;
+  illustration?: PlayfulObjectKind;
 }
 
 interface Props {
@@ -17,9 +19,42 @@ interface Props {
 }
 
 const { title, body, items } = Astro.props;
+
+const fallbackIllustrations: PlayfulObjectKind[] = [
+  "puzzle",
+  "book-pencil",
+  "elephant-tree",
+  "balloon-plane",
+  "kite",
+  "blocks",
+  "train",
+  "tree",
+];
+const cardAngles = [-2.2, 1.8, -1.2, 2.1];
+const illustrationTones: PlayfulTone[] = ["inverse", "leaf", "sky", "leaf"];
+const clouds = [
+  { className: "stacked-story__cloud--one", parallax: -0.2 },
+  { className: "stacked-story__cloud--two", parallax: -0.34 },
+  { className: "stacked-story__cloud--three", parallax: -0.16 },
+  { className: "stacked-story__cloud--four", parallax: -0.42 },
+  { className: "stacked-story__cloud--five", parallax: -0.28 },
+];
 ---
 
 <section class="stacked-story section-space" data-stack-section>
+  <div class="section-shapes stacked-story__clouds" data-section-shapes aria-hidden="true">
+    {
+      clouds.map((cloud) => (
+        <PlayfulObject
+          kind="cloud"
+          tone="inverse"
+          motion="float"
+          parallax={cloud.parallax}
+          className={`stacked-story__cloud ${cloud.className}`}
+        />
+      ))
+    }
+  </div>
   <div class="site-container stacked-story__layout">
     <div class="stacked-story__intro">
       <SectionHeading title={title} body={body} />
@@ -29,20 +64,24 @@ const { title, body, items } = Astro.props;
         items.map((item, index) => (
           <article
             class="stack-card"
-            style={`--stack-index: ${index}`}
+            style={`--stack-index: ${index}; --stack-angle: ${cardAngles[index % cardAngles.length]}deg; --stack-mobile-angle: ${cardAngles[index % cardAngles.length] * 0.55}deg`}
             data-stack-card
           >
-            <OrganicShapes
-              variant={index % 2 === 0 ? "orbit" : "trail"}
-              tone={index === 1 ? "sky" : index === 2 ? "sand" : "leaf"}
-              className="stack-card__shapes"
-            />
-            <div>
-              <span class="stack-card__number">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
+            <div class="stack-card__motion" data-stack-card-motion>
+              <div class="stack-card__surface">
+                <PlayfulObject
+                  kind={item.illustration ?? fallbackIllustrations[index % fallbackIllustrations.length]}
+                  tone={illustrationTones[index % illustrationTones.length]}
+                  className="stack-card__illustration"
+                />
+                <div class="stack-card__copy">
+                  <span class="stack-card__number">{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </div>
+                <ArrowLink href={item.href} label={item.linkText} />
+              </div>
             </div>
-            <ArrowLink href={item.href} label={item.linkText} />
           </article>
         ))
       }

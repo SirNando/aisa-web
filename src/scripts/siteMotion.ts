@@ -849,8 +849,10 @@ const initialize = () => {
         const cards = Array.from(stack.querySelectorAll<HTMLElement>("[data-stack-card]"));
         cards.slice(0, -1).forEach((card, index) => {
           const nextCard = cards[index + 1];
-          gsap.to(card, {
+          const motionTarget = card.querySelector<HTMLElement>("[data-stack-card-motion]") ?? card;
+          gsap.to(motionTarget, {
             scale: 0.92 + index * 0.02,
+            yPercent: -12 + index * 2,
             ease: "none",
             scrollTrigger: {
               trigger: nextCard,

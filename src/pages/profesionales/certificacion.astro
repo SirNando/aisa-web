@@ -1,8 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHero from "../../components/PageHero.astro";
-import heroImage from "../../assets/hero-terapia.jpg";
-import spaceImage from "../../assets/espacio-terapeutico.jpg";
+import { heroMedia } from "../../data/siteMedia";
 
 const certificationLevels = [
   {
@@ -76,7 +75,13 @@ const certificationLevels = [
     primaryLabel="Conocé los requisitos"
     secondaryHref="#proceso"
     secondaryLabel="Certificá tu conocimiento"
-    orbitImages={[spaceImage, heroImage]}
+    orbitImages={heroMedia.certification}
+    illustrations={[
+      { kind: "puzzle", tone: "sky" },
+      { kind: "book-pencil", tone: "leaf" },
+      { kind: "blocks", tone: "sand" },
+    ]}
+    imageAlt="Profesional conversando con una niña durante una instancia de acompañamiento."
     fullHeight={true}
     nextTone="white"
   />
