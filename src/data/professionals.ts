@@ -1,4 +1,4 @@
-export type CertificationStatus = "complete" | "in-progress";
+export type CertificationStatus = "complete" | "in-progress" | "none";
 export type CareMode = "in-person" | "virtual";
 
 export interface ProfessionalOffice {
@@ -21,6 +21,7 @@ export interface Professional {
   populations: string[];
   phone: string;
   email: string;
+  photoUrl?: string | null;
   offices: ProfessionalOffice[];
 }
 

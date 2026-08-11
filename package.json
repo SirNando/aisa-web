@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "deploy": "npm run build && wrangler deploy",
+    "build": "node scripts/build.mjs",
+    "build:preview": "node scripts/build.mjs preview",
+    "deploy": "npm run build && wrangler deploy --env \"\"",
+    "deploy:preview": "npm run build:preview && wrangler deploy --env preview",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",

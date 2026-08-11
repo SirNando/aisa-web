@@ -1,9 +1,22 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "aisa-argentina-public-site",
+  "name": "aisa-web",
   "compatibility_date": "2026-07-19",
+  "vars": {
+    "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma.nandinc.workers.dev"
+  },
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
+  },
+  "env": {
+    "preview": {
+      "name": "aisa-web-preview",
+      "workers_dev": true,
+      "preview_urls": true,
+      "vars": {
+        "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma-preview.nandinc.workers.dev"
+      }
+    }
   }
 }

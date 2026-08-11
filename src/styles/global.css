@@ -2683,20 +2683,6 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   font-weight: 700;
 }
 
-.directory-demo-note {
-  margin-top: 1.5rem;
-  border: 1px solid rgb(2 139 179 / 0.18);
-  border-radius: var(--radius-card);
-  background: var(--color-sky-wash);
-  padding: 1rem 1.2rem;
-  color: var(--color-body);
-  line-height: 1.6;
-}
-
-.directory-demo-note strong {
-  color: var(--color-ink);
-}
-
 .directory-map {
   position: relative;
   height: min(50rem, calc(100vh - var(--header-height) - 2rem));
@@ -2934,6 +2920,16 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   line-height: 1.45;
 }
 
+.directory-map__popup-photo {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 0.85rem;
+  border-radius: 1.25rem;
+  object-fit: cover;
+  box-shadow: var(--shadow-card);
+}
+
 .directory-map__popup h3 {
   margin-top: 0.55rem;
   color: var(--color-ink);
@@ -3044,6 +3040,25 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   color: var(--color-aisa-sky-strong);
   font-size: 0.86rem;
   font-weight: 700;
+}
+
+.directory-card__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.directory-card__identity > div {
+  min-width: 0;
+}
+
+.directory-card__photo {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.25rem;
+  object-fit: cover;
+  box-shadow: var(--shadow-card);
 }
 
 .directory-card h3 {

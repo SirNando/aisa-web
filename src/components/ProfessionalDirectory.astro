@@ -1,31 +1,5 @@
 ---
 import LocationMap from "./design-system/LocationMap.astro";
-import { professionals } from "../data/professionals";
-
-const offices = professionals.flatMap((professional) => professional.offices);
-const provinces = [...new Set(offices.map((office) => office.province))].sort(
-  (first, second) => first.localeCompare(second, "es-AR"),
-);
-const localities = [
-  ...new Map(
-    offices
-      .sort((first, second) =>
-        first.locality.localeCompare(second.locality, "es-AR"),
-      )
-      .map((office) => [
-        `${office.province}:${office.locality}`,
-        { locality: office.locality, province: office.province },
-      ]),
-  ).values(),
-];
-
-const certificationLabel = (status: "complete" | "in-progress") =>
-  status === "complete" ? "Certificación completa" : "Certificación en curso";
-
-const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
-  if (modes.length === 2) return "Presencial y virtual";
-  return modes[0] === "virtual" ? "Atención virtual" : "Atención presencial";
-};
 ---
 
 <section
@@ -43,15 +17,10 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
       </p>
     </div>
     <p class="directory-explorer__count" aria-live="polite">
-      <span data-directory-count>{professionals.length}</span>
+      <span data-directory-count>0</span>
       <span data-directory-count-label> profesionales</span>
     </p>
   </div>
-
-  <aside class="directory-demo-note" aria-label="Información sobre esta vista">
-    <strong>Vista interactiva de prueba.</strong>{" "}
-    Los perfiles, ubicaciones y datos de contacto son ilustrativos.
-  </aside>
 
   <LocationMap>
     <form class="directory-filters" data-directory-form slot="filters">
@@ -73,11 +42,6 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
           <span>Provincia</span>
           <select id="directory-province" name="province">
             <option value="">Todas</option>
-            {
-              provinces.map((province) => (
-                <option value={province}>{province}</option>
-              ))
-            }
           </select>
         </label>
 
@@ -85,13 +49,6 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
           <span>Localidad</span>
           <select id="directory-locality" name="locality">
             <option value="">Todas</option>
-            {
-              localities.map(({ locality, province }) => (
-                <option value={locality} data-province={province}>
-                  {locality}
-                </option>
-              ))
-            }
           </select>
         </label>
       </div>
@@ -170,64 +127,9 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
   </LocationMap>
 
   <div class="directory-results" data-directory-results>
-    {
-      professionals.map((person, index) => {
-        const firstOffice = person.offices[0];
-        return (
-          <article
-            class="directory-card"
-            data-directory-card
-            data-professional-id={person.id}
-            data-original-index={index}
-          >
-            <div class="directory-card__main">
-              <p class="directory-card__location" data-card-location>
-                {firstOffice.locality}, {firstOffice.province}
-              </p>
-              <h3>{person.name}</h3>
-              <p class="directory-card__profession">{person.profession}</p>
-              <ul class="directory-card__details" aria-label="Modalidad y población">
-                <li>{careModeLabel(person.careModes)}</li>
-                <li>{person.populations.join(" · ")}</li>
-                {person.offices.length > 1 && <li>{person.offices.length} consultorios</li>}
-              </ul>
-              <dl class="directory-card__contact">
-                <div>
-                  <dt>Teléfono</dt>
-                  <dd>{person.phone}</dd>
-                </div>
-                <div>
-                  <dt>Email</dt>
-                  <dd>{person.email}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <p
-              class:list={[
-                "directory-card__status",
-                person.certificationStatus === "complete" && "is-complete",
-              ]}
-            >
-              {certificationLabel(person.certificationStatus)}
-            </p>
-
-            <div class="directory-card__actions">
-              <p class="directory-card__distance" data-card-distance hidden></p>
-              <button
-                class="button-quiet"
-                type="button"
-                data-card-locate
-                data-professional-id={person.id}
-                data-office-id={firstOffice.id}
-              >
-                Ver en el mapa
-              </button>
-            </div>
-          </article>
-        );
-      })
-    }
+    <p class="directory-empty" data-directory-loading role="status">
+      Cargando profesionales…
+    </p>
   </div>
 
   <div class="directory-empty" hidden data-directory-empty>
@@ -250,11 +152,11 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
     type Map as MapLibreMap,
     type Marker as MapLibreMarker,
   } from "maplibre-gl";
-  import { professionals } from "../data/professionals";
   import type {
     Professional,
     ProfessionalOffice,
   } from "../data/professionals";
+  import { normalizePublicDirectoryResponse } from "../lib/publicDirectory";
   import {
     distanceInKilometres,
     filterProfessionals,
@@ -274,12 +176,27 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
 
   const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
   const ARGENTINA_CENTER: [number, number] = [-63.6167, -38.4161];
+  const DIRECTORY_API_BASE_URL = import.meta.env.PUBLIC_DIRECTORY_API_URL;
+  const DIRECTORY_API_URL = `${DIRECTORY_API_BASE_URL.replace(/\/+$/, "")}/api/public/professionals`;
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   );
+  let professionals: Professional[] = [];
   let cleanupDirectory: (() => void) | undefined;
 
-  const initializeDirectory = () => {
+  const certificationLabel = (status: Professional["certificationStatus"]) => {
+    if (status === "complete") return "Certificación completa";
+    if (status === "in-progress") return "Certificación en curso";
+    return "Sin certificación publicada";
+  };
+
+  const careModeLabel = (modes: Professional["careModes"]) => {
+    if (modes.length === 2) return "Presencial y virtual";
+    if (modes[0] === "virtual") return "Atención virtual";
+    return "Atención presencial";
+  };
+
+  const initializeDirectory = async () => {
     cleanupDirectory?.();
 
     const root = document.querySelector<HTMLElement>("[data-directory-root]");
@@ -314,7 +231,8 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
       "[data-distance-option]",
     );
     const results = root.querySelector<HTMLElement>("[data-directory-results]");
-    const cards = Array.from(
+    const loading = root.querySelector<HTMLElement>("[data-directory-loading]");
+    let cards = Array.from(
       root.querySelectorAll<HTMLElement>("[data-directory-card]"),
     );
     const count = root.querySelector<HTMLElement>("[data-directory-count]");
@@ -333,17 +251,31 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
     const popupStatus = root.querySelector<HTMLElement>(
       "[data-map-popup-status]",
     );
+    const popupPhoto = root.querySelector<HTMLImageElement>(
+      "[data-map-popup-photo]",
+    );
     const popupPhone = root.querySelector<HTMLElement>("[data-map-popup-phone]");
     const popupEmail = root.querySelector<HTMLElement>("[data-map-popup-email]");
     const popupClose = root.querySelector<HTMLButtonElement>(
       "[data-map-popup-close]",
     );
 
-    if (!form || !mapCanvas || !results || !count || !countLabel || !empty) return;
+    if (
+      !form ||
+      !mapCanvas ||
+      !results ||
+      !count ||
+      !countLabel ||
+      !empty ||
+      !provinceSelect ||
+      !localitySelect
+    ) return;
 
+    const directoryRequest = new AbortController();
+    cleanupDirectory = () => directoryRequest.abort();
     const listenerCleanups: (() => void)[] = [];
     const markerRecords: MarkerRecord[] = [];
-    const cardsByProfessionalId = new Map(
+    let cardsByProfessionalId = new Map(
       cards.map((card) => [card.dataset.professionalId ?? "", card]),
     );
     let directoryMap: MapLibreMap | null = null;
@@ -371,6 +303,152 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
         careMode: String(fields.get("careMode") ?? ""),
         equipped: fields.get("equipped") !== null,
       };
+    };
+
+    const addText = (parent: HTMLElement, tag: string, text: string, className?: string) => {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      element.textContent = text;
+      parent.append(element);
+      return element;
+    };
+
+    const createCard = (professional: Professional, index: number) => {
+      const firstOffice = professional.offices[0];
+      const card = document.createElement("article");
+      card.className = "directory-card";
+      card.dataset.directoryCard = "true";
+      card.dataset.professionalId = professional.id;
+      card.dataset.originalIndex = String(index);
+
+      const main = document.createElement("div");
+      main.className = "directory-card__main";
+      const identity = document.createElement("div");
+      identity.className = "directory-card__identity";
+      const identityText = document.createElement("div");
+      identity.append(identityText);
+      if (professional.photoUrl) {
+        const photo = document.createElement("img");
+        photo.className = "directory-card__photo";
+        photo.src = professional.photoUrl;
+        photo.alt = `Foto de ${professional.name}`;
+        photo.width = 72;
+        photo.height = 72;
+        photo.loading = "lazy";
+        photo.decoding = "async";
+        identity.prepend(photo);
+      }
+      addText(
+        identityText,
+        "p",
+        [firstOffice.locality, firstOffice.province].filter(Boolean).join(", "),
+        "directory-card__location",
+      ).dataset.cardLocation = "true";
+      addText(identityText, "h3", professional.name);
+      addText(identityText, "p", professional.profession, "directory-card__profession");
+      main.append(identity);
+
+      const details = document.createElement("ul");
+      details.className = "directory-card__details";
+      details.setAttribute("aria-label", "Modalidad y población");
+      if (professional.careModes.length) {
+        addText(details, "li", careModeLabel(professional.careModes));
+      }
+      if (professional.populations.length) {
+        addText(details, "li", professional.populations.join(" · "));
+      }
+      if (professional.offices.length > 1) {
+        addText(details, "li", `${professional.offices.length} consultorios`);
+      }
+      if (details.children.length) main.append(details);
+
+      const contact = document.createElement("dl");
+      contact.className = "directory-card__contact";
+      if (professional.phone) {
+        const phone = document.createElement("div");
+        addText(phone, "dt", "Teléfono");
+        addText(phone, "dd", professional.phone);
+        contact.append(phone);
+      }
+      if (professional.email) {
+        const email = document.createElement("div");
+        addText(email, "dt", "Email");
+        addText(email, "dd", professional.email);
+        contact.append(email);
+      }
+      if (contact.children.length) main.append(contact);
+      card.append(main);
+
+      const status = addText(
+        card,
+        "p",
+        certificationLabel(professional.certificationStatus),
+        "directory-card__status",
+      );
+      if (professional.certificationStatus === "complete") {
+        status.classList.add("is-complete");
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "directory-card__actions";
+      const distance = addText(actions, "p", "", "directory-card__distance");
+      distance.dataset.cardDistance = "true";
+      distance.hidden = true;
+      const locate = addText(actions, "button", "Ver en el mapa", "button-quiet") as HTMLButtonElement;
+      locate.type = "button";
+      locate.dataset.cardLocate = "true";
+      locate.dataset.professionalId = professional.id;
+      locate.dataset.officeId = firstOffice.id;
+      actions.append(locate);
+      card.append(actions);
+      return card;
+    };
+
+    const populateDirectory = () => {
+      cards = professionals.map(createCard);
+      cardsByProfessionalId = new Map(
+        cards.map((card) => [card.dataset.professionalId ?? "", card]),
+      );
+      results.replaceChildren(...cards);
+
+      const offices = professionals.flatMap((professional) => professional.offices);
+      const provinces = [...new Set(offices.map((office) => office.province))]
+        .filter(Boolean)
+        .sort((first, second) => first.localeCompare(second, "es-AR"));
+      provinceSelect.replaceChildren(new Option("Todas", ""));
+      provinces.forEach((province) => provinceSelect.add(new Option(province, province)));
+
+      const localities = [
+        ...new Map(
+          offices
+            .filter((office) => office.locality)
+            .sort((first, second) => first.locality.localeCompare(second.locality, "es-AR"))
+            .map((office) => [
+              `${office.province}:${office.locality}`,
+              { locality: office.locality, province: office.province },
+            ]),
+        ).values(),
+      ];
+      localitySelect.replaceChildren(new Option("Todas", ""));
+      localities.forEach(({ locality, province }) => {
+        const option = new Option(locality, locality);
+        option.dataset.province = province;
+        localitySelect.add(option);
+      });
+    };
+
+    const bindCardLocateButtons = () => {
+      cards.forEach((card) => {
+        const button = card.querySelector<HTMLButtonElement>("[data-card-locate]");
+        if (!button) return;
+        listen(button, "click", () =>
+          setActive(
+            button.dataset.professionalId ?? "",
+            button.dataset.officeId ?? "",
+            true,
+          ),
+        );
+      });
     };
 
     const getMatchingOffices = (
@@ -423,6 +501,10 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
     const closePopup = () => {
       activeOfficeId = "";
       if (popup) popup.hidden = true;
+      if (popupPhoto) {
+        popupPhoto.hidden = true;
+        popupPhoto.removeAttribute("src");
+      }
       markerRecords.forEach(({ element }) => {
         element.classList.remove("is-active");
         element.setAttribute("aria-pressed", "false");
@@ -460,6 +542,43 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
       });
     };
 
+    const renderMarkers = () => {
+      if (!directoryMap) return;
+      markerRecords.forEach(({ marker }) => marker.remove());
+      markerRecords.length = 0;
+
+      professionals.forEach((professional) => {
+        professional.offices.forEach((office) => {
+          const element = document.createElement("button");
+          element.type = "button";
+          element.className = "directory-map-marker";
+          element.dataset.professionalId = professional.id;
+          element.dataset.officeId = office.id;
+          element.setAttribute(
+            "aria-label",
+            `Ver ${professional.name} en ${office.locality}, ${office.province}`,
+          );
+          element.setAttribute("aria-pressed", "false");
+          const markerArtwork = document.createElement("span");
+          markerArtwork.setAttribute("aria-hidden", "true");
+          element.append(markerArtwork);
+
+          const marker = new maplibregl.Marker({
+            element,
+            anchor: "bottom",
+          })
+            .setLngLat([office.longitude, office.latitude])
+            .addTo(directoryMap as MapLibreMap);
+
+          const markerRecord = { professional, office, marker, element };
+          markerRecords.push(markerRecord);
+          listen(element, "click", () =>
+            setActive(professional.id, office.id),
+          );
+        });
+      });
+    };
+
     const setActive = (
       professionalId: string,
       officeId: string,
@@ -491,14 +610,23 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
         popupEmail
       ) {
         popupName.textContent = record.professional.name;
-        popupLocation.textContent = `${record.office.address} · ${record.office.locality}, ${record.office.province}`;
+        popupLocation.textContent = [
+          record.office.address,
+          [record.office.locality, record.office.province].filter(Boolean).join(", "),
+        ]
+          .filter(Boolean)
+          .join(" · ");
         popupProfession.textContent = record.professional.profession;
-        popupStatus.textContent =
-          record.professional.certificationStatus === "complete"
-            ? "Certificación completa"
-            : "Certificación en curso";
+        popupStatus.textContent = certificationLabel(
+          record.professional.certificationStatus,
+        );
         popupPhone.textContent = record.professional.phone;
         popupEmail.textContent = record.professional.email;
+        if (popupPhoto && record.professional.photoUrl) {
+          popupPhoto.src = record.professional.photoUrl;
+          popupPhoto.alt = `Foto de ${record.professional.name}`;
+          popupPhoto.hidden = false;
+        }
         popup.hidden = false;
       }
 
@@ -634,40 +762,10 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
         });
       });
 
-      professionals.forEach((professional) => {
-        professional.offices.forEach((office) => {
-          const element = document.createElement("button");
-          element.type = "button";
-          element.className = "directory-map-marker";
-          element.dataset.professionalId = professional.id;
-          element.dataset.officeId = office.id;
-          element.setAttribute(
-            "aria-label",
-            `Ver ${professional.name} en ${office.locality}, ${office.province}`,
-          );
-          element.setAttribute("aria-pressed", "false");
-          const markerArtwork = document.createElement("span");
-          markerArtwork.setAttribute("aria-hidden", "true");
-          element.append(markerArtwork);
-
-          const marker = new maplibregl.Marker({
-            element,
-            anchor: "bottom",
-          })
-            .setLngLat([office.longitude, office.latitude])
-            .addTo(directoryMap as MapLibreMap);
-
-          const markerRecord = { professional, office, marker, element };
-          markerRecords.push(markerRecord);
-          listen(element, "click", () =>
-            setActive(professional.id, office.id),
-          );
-        });
-      });
-
       directoryMap.once("load", () => {
         mapReady = true;
         if (mapLoading) mapLoading.hidden = true;
+        renderMarkers();
         applyFilters(true);
       });
       directoryMap.on("error", () => {
@@ -713,17 +811,7 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
       });
     }
 
-    root.querySelectorAll<HTMLButtonElement>("[data-card-locate]").forEach(
-      (button) => {
-        listen(button, "click", () =>
-          setActive(
-            button.dataset.professionalId ?? "",
-            button.dataset.officeId ?? "",
-            true,
-          ),
-        );
-      },
-    );
+    bindCardLocateButtons();
     if (popupClose) listen(popupClose, "click", closePopup);
     listen(root, "keydown", (event) => {
       if ((event as KeyboardEvent).key === "Escape" && activeOfficeId) {
@@ -818,10 +906,41 @@ const careModeLabel = (modes: ("in-person" | "virtual")[]) => {
       });
     }
 
+    const loadDirectory = async () => {
+      try {
+        const response = await fetch(DIRECTORY_API_URL, {
+          headers: { Accept: "application/json" },
+          signal: directoryRequest.signal,
+        });
+        if (!response.ok) throw new Error("Directory request failed.");
+        professionals = normalizePublicDirectoryResponse(
+          await response.json(),
+          DIRECTORY_API_URL,
+        );
+        populateDirectory();
+        renderMarkers();
+        bindCardLocateButtons();
+        if (loading) loading.hidden = true;
+        updateLocalityOptions();
+        applyFilters(true);
+      } catch (error) {
+        if (directoryRequest.signal.aborted) return;
+        professionals = [];
+        if (loading) {
+          loading.textContent =
+            "No pudimos cargar el directorio. Intentá nuevamente más tarde.";
+          loading.classList.add("is-error");
+        }
+        applyFilters(false);
+      }
+    };
+
     updateLocalityOptions();
     applyFilters(false);
+    void loadDirectory();
 
     cleanupDirectory = () => {
+      directoryRequest.abort();
       window.clearTimeout(searchTimer);
       listenerCleanups.forEach((cleanup) => cleanup());
       markerRecords.forEach(({ marker }) => marker.remove());

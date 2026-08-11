@@ -9,7 +9,7 @@ await mkdir(outputDirectory, { recursive: true });
 
 const child = spawn(
   "wrangler",
-  ["deploy", "--dry-run", "--outdir", outputDirectory],
+  ["deploy", "--env", "", "--dry-run", "--outdir", outputDirectory],
   {
     stdio: "inherit",
     env: {
