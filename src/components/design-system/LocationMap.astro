@@ -36,24 +36,14 @@ import "maplibre-gl/dist/maplibre-gl.css";
     >
       <span aria-hidden="true">×</span>
     </button>
-    <img
-      data-map-popup-photo
-      class="directory-map__popup-photo"
-      alt=""
-      width="72"
-      height="72"
-      hidden
-    />
     <p data-map-popup-location></p>
     <h3 data-map-popup-name></h3>
-    <p class="directory-map__popup-profession" data-map-popup-profession></p>
-    <p class="directory-map__popup-status" data-map-popup-status></p>
     <dl class="directory-map__popup-contact">
-      <div>
+      <div data-map-popup-phone-row>
         <dt>Teléfono</dt>
         <dd data-map-popup-phone></dd>
       </div>
-      <div>
+      <div data-map-popup-email-row>
         <dt>Email</dt>
         <dd data-map-popup-email></dd>
       </div>

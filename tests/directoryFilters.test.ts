@@ -1,142 +1,76 @@
 import { describe, expect, it } from "vitest";
-import { professionals } from "../src/data/professionals";
 import {
   distanceInKilometres,
-  filterProfessionals,
-  findNearestOffice,
-  findNearestProfessional,
-  matchesProfessional,
+  findNearestListing,
+  matchesDirectoryListing,
   normalizeFilterText,
-  sortProfessionalsByDistance,
+  sortDirectoryListingsByDistance,
 } from "../src/lib/directoryFilters";
+import type { PublicDirectoryListing } from "../src/lib/publicDirectory";
 
-const emptyFilters = {
-  query: "",
-  province: "",
-  locality: "",
-  certificationStatus: "",
-  careMode: "",
-  equipped: false,
-};
-
-describe("normalizeFilterText", () => {
-  it("normalizes case and Spanish accents", () => {
-    expect(normalizeFilterText("  CÓRDOBA  ")).toBe("cordoba");
-    expect(normalizeFilterText("RÍO NEGRO")).toBe("rio negro");
-  });
+const listing = (
+  clientKey: string,
+  displayName: string,
+  locality: string,
+  province: string,
+  latitude: number,
+  longitude: number,
+): PublicDirectoryListing => ({
+  clientKey,
+  firstName: displayName.split(" ")[0] ?? displayName,
+  lastName: displayName.split(" ").slice(1).join(" "),
+  displayName,
+  email: "",
+  phone: "",
+  address: {
+    label: `Consultorio ${locality}`,
+    street: "",
+    locality,
+    city: locality,
+    province,
+    postalCode: "",
+    formatted: `${locality} · ${province}`,
+    latitude,
+    longitude,
+  },
 });
 
-describe("matchesProfessional", () => {
-  it("matches accented localities with an unaccented query", () => {
-    expect(
-      matchesProfessional(professionals[2], {
-        ...emptyFilters,
-        query: "cordoba",
-      }),
-    ).toBe(true);
+const records = [
+  listing("cordoba", "Ana Pérez", "Córdoba", "Córdoba", -31.417, -64.183),
+  listing("palermo", "Beatriz Gómez", "Palermo", "CABA", -34.58, -58.42),
+  listing("recoleta", "Carla Díaz", "Recoleta", "CABA", -34.59, -58.4),
+];
+
+const emptyFilters = { query: "", province: "", locality: "" };
+
+describe("directory filters", () => {
+  it("normalizes case and Spanish accents", () => {
+    expect(normalizeFilterText("  CÓRDOBA  ")).toBe("cordoba");
   });
 
-  it("matches an individual status", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      certificationStatus: "complete",
-    });
-    expect(matches).toHaveLength(6);
-  });
-
-  it("matches an individual province", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      province: "Río Negro",
-    });
-    expect(matches.map((person) => person.id)).toEqual(["professional-06"]);
-  });
-
-  it("matches a professional display name", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      query: "aisa e",
-    });
-    expect(matches.map((person) => person.id)).toEqual(["professional-05"]);
-  });
-
-  it("matches a province through the free-text query", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      query: "rio negro",
-    });
-    expect(matches.map((person) => person.id)).toEqual(["professional-06"]);
-  });
-
-  it("combines office location, status, and care mode", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      province: "CABA",
-      locality: "Palermo",
-      certificationStatus: "complete",
-      careMode: "virtual",
-    });
-    expect(matches.map((person) => person.id)).toEqual(["professional-01"]);
-  });
-
-  it("filters by equipped offices", () => {
-    const matches = filterProfessionals(professionals, {
-      ...emptyFilters,
-      province: "Buenos Aires",
-      equipped: true,
-    });
-    expect(matches.map((person) => person.id)).toEqual([
-      "professional-02",
-      "professional-07",
-    ]);
-  });
-
-  it("returns every record after reset", () => {
-    expect(filterProfessionals(professionals, emptyFilters)).toHaveLength(10);
-  });
-
-  it("returns no results for an unmatched query", () => {
-    expect(
-      filterProfessionals(professionals, {
-        ...emptyFilters,
-        query: "Ushuaia",
-      }),
-    ).toEqual([]);
+  it("matches names and address components", () => {
+    expect(matchesDirectoryListing(records[0], { ...emptyFilters, query: "cordoba" })).toBe(true);
+    expect(matchesDirectoryListing(records[1], { ...emptyFilters, query: "beatriz" })).toBe(true);
+    expect(matchesDirectoryListing(records[1], { ...emptyFilters, province: "Córdoba" })).toBe(false);
+    expect(matchesDirectoryListing(records[2], { ...emptyFilters, locality: "Recoleta" })).toBe(true);
   });
 });
 
 describe("location helpers", () => {
   it("returns zero kilometres for identical coordinates", () => {
-    expect(
-      distanceInKilometres(
-        { latitude: -31.417, longitude: -64.183 },
-        { latitude: -31.417, longitude: -64.183 },
-      ),
-    ).toBe(0);
+    expect(distanceInKilometres(
+      { latitude: -31.417, longitude: -64.183 },
+      { latitude: -31.417, longitude: -64.183 },
+    )).toBe(0);
   });
 
-  it("selects Córdoba for a nearby browser location", () => {
-    const nearest = findNearestProfessional(professionals, {
-      latitude: -31.42,
-      longitude: -64.19,
-    });
-    expect(nearest?.id).toBe("professional-03");
-  });
-
-  it("selects the closest office for a professional with several locations", () => {
-    const nearestOffice = findNearestOffice(professionals[0], {
-      latitude: -34.59,
-      longitude: -58.4,
-    });
-    expect(nearestOffice?.id).toBe("office-01-recoleta");
-  });
-
-  it("sorts every professional from closest to farthest", () => {
-    const sorted = sortProfessionalsByDistance(professionals, {
-      latitude: -34.62,
-      longitude: -58.44,
-    });
-    expect(sorted[0].id).toBe("professional-10");
-    expect(sorted).toHaveLength(professionals.length);
+  it("finds and sorts the nearest consultorio", () => {
+    const origin = { latitude: -34.588, longitude: -58.405 };
+    expect(findNearestListing(records, origin)?.clientKey).toBe("recoleta");
+    expect(sortDirectoryListingsByDistance(records, origin).map((item) => item.clientKey)).toEqual([
+      "recoleta",
+      "palermo",
+      "cordoba",
+    ]);
   });
 });

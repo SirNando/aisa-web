@@ -10,7 +10,7 @@ import LocationMap from "./design-system/LocationMap.astro";
 >
   <div class="directory-explorer__heading">
     <div>
-      <h2 id="directory-title">Encontrá profesionales cerca tuyo</h2>
+      <h2 id="directory-title">Encontrá consultorios cerca tuyo</h2>
       <p>
         Explorá los consultorios en el mapa, combiná los filtros o usá tu
         ubicación para ordenar las opciones por cercanía.
@@ -18,7 +18,7 @@ import LocationMap from "./design-system/LocationMap.astro";
     </div>
     <p class="directory-explorer__count" aria-live="polite">
       <span data-directory-count>0</span>
-      <span data-directory-count-label> profesionales</span>
+      <span data-directory-count-label> consultorios</span>
     </p>
   </div>
 
@@ -27,12 +27,12 @@ import LocationMap from "./design-system/LocationMap.astro";
       <h3>Filtrar el mapa</h3>
 
       <label for="directory-query">
-        <span>Nombre, especialidad o ubicación</span>
+        <span>Nombre o ubicación</span>
         <input
           id="directory-query"
           name="query"
           type="search"
-          placeholder="Ej.: Córdoba o infancias"
+          placeholder="Ej.: Córdoba o Lucía"
           autocomplete="off"
         />
       </label>
@@ -53,36 +53,10 @@ import LocationMap from "./design-system/LocationMap.astro";
         </label>
       </div>
 
-      <div class="directory-filters__pair">
-        <label for="directory-status">
-          <span>Certificación</span>
-          <select id="directory-status" name="certificationStatus">
-            <option value="">Todas</option>
-            <option value="complete">Completa</option>
-            <option value="in-progress">En curso</option>
-          </select>
-        </label>
-
-        <label for="directory-care-mode">
-          <span>Modalidad</span>
-          <select id="directory-care-mode" name="careMode">
-            <option value="">Todas</option>
-            <option value="in-person">Presencial</option>
-            <option value="virtual">Virtual</option>
-          </select>
-        </label>
-      </div>
-
-      <label class="directory-filters__checkbox">
-        <input type="checkbox" name="equipped" />
-        <span>Mostrar sólo consultorios equipados</span>
-      </label>
-
       <label for="directory-sort">
         <span>Ordenar resultados</span>
-        <select id="directory-sort" name="sort" data-directory-sort>
-          <option value="name">Nombre A–Z</option>
-          <option value="distance" data-distance-option disabled>
+        <select id="directory-sort" name="sort" data-directory-sort disabled>
+          <option value="distance" data-distance-option>
             Más cercanos
           </option>
         </select>
@@ -128,7 +102,7 @@ import LocationMap from "./design-system/LocationMap.astro";
 
   <div class="directory-results" data-directory-results>
     <p class="directory-empty" data-directory-loading role="status">
-      Cargando profesionales…
+      Cargando consultorios…
     </p>
   </div>
 
@@ -152,24 +126,19 @@ import LocationMap from "./design-system/LocationMap.astro";
     type Map as MapLibreMap,
     type Marker as MapLibreMarker,
   } from "maplibre-gl";
-  import type {
-    Professional,
-    ProfessionalOffice,
-  } from "../data/professionals";
-  import { normalizePublicDirectoryResponse } from "../lib/publicDirectory";
   import {
-    distanceInKilometres,
-    filterProfessionals,
-    matchesOfficeFilters,
-  } from "../lib/directoryFilters";
+    normalizePublicDirectoryResponse,
+    type PublicDirectoryAddress,
+    type PublicDirectoryListing,
+  } from "../lib/publicDirectory";
+  import { distanceInKilometres, matchesDirectoryListing } from "../lib/directoryFilters";
   import type {
     Coordinates,
     DirectoryFilters,
   } from "../lib/directoryFilters";
 
   interface MarkerRecord {
-    professional: Professional;
-    office: ProfessionalOffice;
+    listing: PublicDirectoryListing;
     marker: MapLibreMarker;
     element: HTMLButtonElement;
   }
@@ -181,20 +150,8 @@ import LocationMap from "./design-system/LocationMap.astro";
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   );
-  let professionals: Professional[] = [];
+  let listings: PublicDirectoryListing[] = [];
   let cleanupDirectory: (() => void) | undefined;
-
-  const certificationLabel = (status: Professional["certificationStatus"]) => {
-    if (status === "complete") return "Certificación completa";
-    if (status === "in-progress") return "Certificación en curso";
-    return "Sin certificación publicada";
-  };
-
-  const careModeLabel = (modes: Professional["careModes"]) => {
-    if (modes.length === 2) return "Presencial y virtual";
-    if (modes[0] === "virtual") return "Atención virtual";
-    return "Atención presencial";
-  };
 
   const initializeDirectory = async () => {
     cleanupDirectory?.();
@@ -227,9 +184,6 @@ import LocationMap from "./design-system/LocationMap.astro";
     const sortSelect = root.querySelector<HTMLSelectElement>(
       "[data-directory-sort]",
     );
-    const distanceOption = root.querySelector<HTMLOptionElement>(
-      "[data-distance-option]",
-    );
     const results = root.querySelector<HTMLElement>("[data-directory-results]");
     const loading = root.querySelector<HTMLElement>("[data-directory-loading]");
     let cards = Array.from(
@@ -245,17 +199,10 @@ import LocationMap from "./design-system/LocationMap.astro";
     const popupLocation = root.querySelector<HTMLElement>(
       "[data-map-popup-location]",
     );
-    const popupProfession = root.querySelector<HTMLElement>(
-      "[data-map-popup-profession]",
-    );
-    const popupStatus = root.querySelector<HTMLElement>(
-      "[data-map-popup-status]",
-    );
-    const popupPhoto = root.querySelector<HTMLImageElement>(
-      "[data-map-popup-photo]",
-    );
     const popupPhone = root.querySelector<HTMLElement>("[data-map-popup-phone]");
     const popupEmail = root.querySelector<HTMLElement>("[data-map-popup-email]");
+    const popupPhoneRow = root.querySelector<HTMLElement>("[data-map-popup-phone-row]");
+    const popupEmailRow = root.querySelector<HTMLElement>("[data-map-popup-email-row]");
     const popupClose = root.querySelector<HTMLButtonElement>(
       "[data-map-popup-close]",
     );
@@ -275,13 +222,13 @@ import LocationMap from "./design-system/LocationMap.astro";
     cleanupDirectory = () => directoryRequest.abort();
     const listenerCleanups: (() => void)[] = [];
     const markerRecords: MarkerRecord[] = [];
-    let cardsByProfessionalId = new Map(
-      cards.map((card) => [card.dataset.professionalId ?? "", card]),
+    let cardsByListingKey = new Map(
+      cards.map((card) => [card.dataset.listingKey ?? "", card]),
     );
     let directoryMap: MapLibreMap | null = null;
     let userLocationMarker: MapLibreMarker | null = null;
     let userOrigin: Coordinates | null = null;
-    let activeOfficeId = "";
+    let activeListingKey = "";
     let mapReady = false;
 
     const listen = (
@@ -299,9 +246,6 @@ import LocationMap from "./design-system/LocationMap.astro";
         query: String(fields.get("query") ?? ""),
         province: String(fields.get("province") ?? ""),
         locality: String(fields.get("locality") ?? ""),
-        certificationStatus: String(fields.get("certificationStatus") ?? ""),
-        careMode: String(fields.get("careMode") ?? ""),
-        equipped: fields.get("equipped") !== null,
       };
     };
 
@@ -313,12 +257,11 @@ import LocationMap from "./design-system/LocationMap.astro";
       return element;
     };
 
-    const createCard = (professional: Professional, index: number) => {
-      const firstOffice = professional.offices[0];
+    const createCard = (listing: PublicDirectoryListing, index: number) => {
       const card = document.createElement("article");
       card.className = "directory-card";
       card.dataset.directoryCard = "true";
-      card.dataset.professionalId = professional.id;
+      card.dataset.listingKey = listing.clientKey;
       card.dataset.originalIndex = String(index);
 
       const main = document.createElement("div");
@@ -327,67 +270,37 @@ import LocationMap from "./design-system/LocationMap.astro";
       identity.className = "directory-card__identity";
       const identityText = document.createElement("div");
       identity.append(identityText);
-      if (professional.photoUrl) {
-        const photo = document.createElement("img");
-        photo.className = "directory-card__photo";
-        photo.src = professional.photoUrl;
-        photo.alt = `Foto de ${professional.name}`;
-        photo.width = 72;
-        photo.height = 72;
-        photo.loading = "lazy";
-        photo.decoding = "async";
-        identity.prepend(photo);
-      }
       addText(
         identityText,
         "p",
-        [firstOffice.locality, firstOffice.province].filter(Boolean).join(", "),
+        listing.address.label,
+        "directory-card__office",
+      );
+      addText(identityText, "h3", listing.displayName);
+      addText(
+        identityText,
+        "p",
+        listing.address.formatted,
         "directory-card__location",
       ).dataset.cardLocation = "true";
-      addText(identityText, "h3", professional.name);
-      addText(identityText, "p", professional.profession, "directory-card__profession");
       main.append(identity);
-
-      const details = document.createElement("ul");
-      details.className = "directory-card__details";
-      details.setAttribute("aria-label", "Modalidad y población");
-      if (professional.careModes.length) {
-        addText(details, "li", careModeLabel(professional.careModes));
-      }
-      if (professional.populations.length) {
-        addText(details, "li", professional.populations.join(" · "));
-      }
-      if (professional.offices.length > 1) {
-        addText(details, "li", `${professional.offices.length} consultorios`);
-      }
-      if (details.children.length) main.append(details);
 
       const contact = document.createElement("dl");
       contact.className = "directory-card__contact";
-      if (professional.phone) {
+      if (listing.phone) {
         const phone = document.createElement("div");
         addText(phone, "dt", "Teléfono");
-        addText(phone, "dd", professional.phone);
+        addText(phone, "dd", listing.phone);
         contact.append(phone);
       }
-      if (professional.email) {
+      if (listing.email) {
         const email = document.createElement("div");
         addText(email, "dt", "Email");
-        addText(email, "dd", professional.email);
+        addText(email, "dd", listing.email);
         contact.append(email);
       }
       if (contact.children.length) main.append(contact);
       card.append(main);
-
-      const status = addText(
-        card,
-        "p",
-        certificationLabel(professional.certificationStatus),
-        "directory-card__status",
-      );
-      if (professional.certificationStatus === "complete") {
-        status.classList.add("is-complete");
-      }
 
       const actions = document.createElement("div");
       actions.className = "directory-card__actions";
@@ -397,22 +310,20 @@ import LocationMap from "./design-system/LocationMap.astro";
       const locate = addText(actions, "button", "Ver en el mapa", "button-quiet") as HTMLButtonElement;
       locate.type = "button";
       locate.dataset.cardLocate = "true";
-      locate.dataset.professionalId = professional.id;
-      locate.dataset.officeId = firstOffice.id;
+      locate.dataset.listingKey = listing.clientKey;
       actions.append(locate);
       card.append(actions);
       return card;
     };
 
     const populateDirectory = () => {
-      cards = professionals.map(createCard);
-      cardsByProfessionalId = new Map(
-        cards.map((card) => [card.dataset.professionalId ?? "", card]),
+      cards = listings.map(createCard);
+      cardsByListingKey = new Map(
+        cards.map((card) => [card.dataset.listingKey ?? "", card]),
       );
       results.replaceChildren(...cards);
 
-      const offices = professionals.flatMap((professional) => professional.offices);
-      const provinces = [...new Set(offices.map((office) => office.province))]
+      const provinces = [...new Set(listings.map((listing) => listing.address.province))]
         .filter(Boolean)
         .sort((first, second) => first.localeCompare(second, "es-AR"));
       provinceSelect.replaceChildren(new Option("Todas", ""));
@@ -420,12 +331,13 @@ import LocationMap from "./design-system/LocationMap.astro";
 
       const localities = [
         ...new Map(
-          offices
-            .filter((office) => office.locality)
+          listings
+            .map((listing) => listing.address)
+            .filter((address) => address.locality)
             .sort((first, second) => first.locality.localeCompare(second.locality, "es-AR"))
-            .map((office) => [
-              `${office.province}:${office.locality}`,
-              { locality: office.locality, province: office.province },
+            .map((address) => [
+              `${address.province}:${address.locality}`,
+              { locality: address.locality, province: address.province },
             ]),
         ).values(),
       ];
@@ -443,38 +355,11 @@ import LocationMap from "./design-system/LocationMap.astro";
         if (!button) return;
         listen(button, "click", () =>
           setActive(
-            button.dataset.professionalId ?? "",
-            button.dataset.officeId ?? "",
+            button.dataset.listingKey ?? "",
             true,
           ),
         );
       });
-    };
-
-    const getMatchingOffices = (
-      professional: Professional,
-      filters: DirectoryFilters,
-    ) =>
-      professional.offices.filter((office) =>
-        matchesOfficeFilters(office, filters),
-      );
-
-    const getPreferredOffice = (
-      professional: Professional,
-      filters: DirectoryFilters,
-    ) => {
-      const matchingOffices = getMatchingOffices(professional, filters);
-      if (!matchingOffices.length) return professional.offices[0];
-      if (!userOrigin) return matchingOffices[0];
-      return (
-        matchingOffices.reduce<ProfessionalOffice | null>((nearest, office) => {
-          if (!nearest) return office;
-          return distanceInKilometres(userOrigin as Coordinates, office) <
-            distanceInKilometres(userOrigin as Coordinates, nearest)
-            ? office
-            : nearest;
-        }, null) ?? matchingOffices[0]
-      );
     };
 
     const formatDistance = (distance: number) =>
@@ -499,12 +384,8 @@ import LocationMap from "./design-system/LocationMap.astro";
     };
 
     const closePopup = () => {
-      activeOfficeId = "";
+      activeListingKey = "";
       if (popup) popup.hidden = true;
-      if (popupPhoto) {
-        popupPhoto.hidden = true;
-        popupPhoto.removeAttribute("src");
-      }
       markerRecords.forEach(({ element }) => {
         element.classList.remove("is-active");
         element.setAttribute("aria-pressed", "false");
@@ -512,13 +393,13 @@ import LocationMap from "./design-system/LocationMap.astro";
       cards.forEach((card) => card.classList.remove("is-active"));
     };
 
-    const fitMapToOffices = (visibleOffices: ProfessionalOffice[]) => {
-      if (!directoryMap || !mapReady || visibleOffices.length === 0) return;
+    const fitMapToOffices = (visibleAddresses: PublicDirectoryAddress[]) => {
+      if (!directoryMap || !mapReady || visibleAddresses.length === 0) return;
 
-      if (visibleOffices.length === 1) {
-        const office = visibleOffices[0];
+      if (visibleAddresses.length === 1) {
+        const address = visibleAddresses[0];
         directoryMap.easeTo({
-          center: [office.longitude, office.latitude],
+          center: [address.longitude, address.latitude],
           zoom: 12,
           duration: prefersReducedMotion.matches ? 0 : 650,
         });
@@ -526,8 +407,8 @@ import LocationMap from "./design-system/LocationMap.astro";
       }
 
       const bounds = new maplibregl.LngLatBounds();
-      visibleOffices.forEach((office) =>
-        bounds.extend([office.longitude, office.latitude]),
+      visibleAddresses.forEach((address) =>
+        bounds.extend([address.longitude, address.latitude]),
       );
       const desktop = window.matchMedia("(min-width: 48rem)").matches;
       directoryMap.fitBounds(bounds, {
@@ -547,52 +428,42 @@ import LocationMap from "./design-system/LocationMap.astro";
       markerRecords.forEach(({ marker }) => marker.remove());
       markerRecords.length = 0;
 
-      professionals.forEach((professional) => {
-        professional.offices.forEach((office) => {
-          const element = document.createElement("button");
-          element.type = "button";
-          element.className = "directory-map-marker";
-          element.dataset.professionalId = professional.id;
-          element.dataset.officeId = office.id;
-          element.setAttribute(
-            "aria-label",
-            `Ver ${professional.name} en ${office.locality}, ${office.province}`,
-          );
-          element.setAttribute("aria-pressed", "false");
-          const markerArtwork = document.createElement("span");
-          markerArtwork.setAttribute("aria-hidden", "true");
-          element.append(markerArtwork);
+      listings.forEach((listing) => {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = "directory-map-marker";
+        element.dataset.listingKey = listing.clientKey;
+        element.setAttribute(
+          "aria-label",
+          `Ver ${listing.displayName} en ${listing.address.locality}, ${listing.address.province}`,
+        );
+        element.setAttribute("aria-pressed", "false");
+        const markerArtwork = document.createElement("span");
+        markerArtwork.setAttribute("aria-hidden", "true");
+        element.append(markerArtwork);
 
-          const marker = new maplibregl.Marker({
-            element,
-            anchor: "bottom",
-          })
-            .setLngLat([office.longitude, office.latitude])
-            .addTo(directoryMap as MapLibreMap);
+        const marker = new maplibregl.Marker({
+          element,
+          anchor: "bottom",
+        })
+          .setLngLat([listing.address.longitude, listing.address.latitude])
+          .addTo(directoryMap as MapLibreMap);
 
-          const markerRecord = { professional, office, marker, element };
-          markerRecords.push(markerRecord);
-          listen(element, "click", () =>
-            setActive(professional.id, office.id),
-          );
-        });
+        markerRecords.push({ listing, marker, element });
+        listen(element, "click", () => setActive(listing.clientKey));
       });
     };
 
-    const setActive = (
-      professionalId: string,
-      officeId: string,
-      scrollToMap = false,
-    ) => {
+    const setActive = (listingKey: string, scrollToMap = false) => {
       const record = markerRecords.find(
-        ({ office }) => office.id === officeId,
+        ({ listing }) => listing.clientKey === listingKey,
       );
-      const card = cardsByProfessionalId.get(professionalId);
+      const card = cardsByListingKey.get(listingKey);
       if (!record || record.element.hidden || !card) return;
 
-      activeOfficeId = officeId;
-      markerRecords.forEach(({ element, office }) => {
-        const active = office.id === officeId;
+      activeListingKey = listingKey;
+      markerRecords.forEach(({ element, listing }) => {
+        const active = listing.clientKey === listingKey;
         element.classList.toggle("is-active", active);
         element.setAttribute("aria-pressed", String(active));
       });
@@ -604,34 +475,22 @@ import LocationMap from "./design-system/LocationMap.astro";
         popup &&
         popupName &&
         popupLocation &&
-        popupProfession &&
-        popupStatus &&
         popupPhone &&
-        popupEmail
+        popupEmail &&
+        popupPhoneRow &&
+        popupEmailRow
       ) {
-        popupName.textContent = record.professional.name;
-        popupLocation.textContent = [
-          record.office.address,
-          [record.office.locality, record.office.province].filter(Boolean).join(", "),
-        ]
-          .filter(Boolean)
-          .join(" · ");
-        popupProfession.textContent = record.professional.profession;
-        popupStatus.textContent = certificationLabel(
-          record.professional.certificationStatus,
-        );
-        popupPhone.textContent = record.professional.phone;
-        popupEmail.textContent = record.professional.email;
-        if (popupPhoto && record.professional.photoUrl) {
-          popupPhoto.src = record.professional.photoUrl;
-          popupPhoto.alt = `Foto de ${record.professional.name}`;
-          popupPhoto.hidden = false;
-        }
+        popupName.textContent = record.listing.displayName;
+        popupLocation.textContent = record.listing.address.formatted;
+        popupPhone.textContent = record.listing.phone;
+        popupPhoneRow.hidden = !record.listing.phone;
+        popupEmail.textContent = record.listing.email;
+        popupEmailRow.hidden = !record.listing.email;
         popup.hidden = false;
       }
 
       directoryMap?.flyTo({
-        center: [record.office.longitude, record.office.latitude],
+        center: [record.listing.address.longitude, record.listing.address.latitude],
         zoom: Math.max(directoryMap.getZoom(), 12),
         duration: prefersReducedMotion.matches ? 0 : 700,
         essential: false,
@@ -649,64 +508,63 @@ import LocationMap from "./design-system/LocationMap.astro";
       }
     };
 
-    const sortCards = (
-      visibleProfessionals: Professional[],
-      filters: DirectoryFilters,
-    ) => {
-      const sortMode = sortSelect?.value ?? "name";
-      const ordered = [...visibleProfessionals].sort((first, second) => {
-        if (sortMode === "distance" && userOrigin) {
-          const firstOffice = getPreferredOffice(first, filters);
-          const secondOffice = getPreferredOffice(second, filters);
-          return (
-            distanceInKilometres(userOrigin, firstOffice) -
-            distanceInKilometres(userOrigin, secondOffice)
-          );
-        }
-        return first.name.localeCompare(second.name, "es-AR");
+    const getVisibleCardRecords = (filters: DirectoryFilters) =>
+      cards.flatMap((card) => {
+        const listing = listings.find(
+          (record) => record.clientKey === card.dataset.listingKey,
+        );
+        return listing && matchesDirectoryListing(listing, filters)
+          ? [{ card, listing }]
+          : [];
       });
 
-      ordered.forEach((professional) => {
-        const card = cardsByProfessionalId.get(professional.id);
-        if (card) results.append(card);
+    const sortCards = (
+      visibleCards: ReturnType<typeof getVisibleCardRecords>,
+    ) => {
+      const ordered = [...visibleCards].sort((first, second) => {
+        if (userOrigin) {
+          return (
+            distanceInKilometres(userOrigin, first.listing.address) -
+            distanceInKilometres(userOrigin, second.listing.address)
+          );
+        }
+        const professionalOrder = first.listing.displayName.localeCompare(
+          second.listing.displayName,
+          "es-AR",
+        );
+        return professionalOrder || first.listing.address.label.localeCompare(
+          second.listing.address.label,
+          "es-AR",
+        );
       });
+
+      ordered.forEach(({ card }) => results.append(card));
     };
 
     const applyFilters = (fitMap = false) => {
       const filters = getFilters();
-      const visibleProfessionals = filterProfessionals(professionals, filters);
-      const visibleProfessionalIds = new Set(
-        visibleProfessionals.map((professional) => professional.id),
-      );
-      const visibleOfficeIds = new Set(
-        visibleProfessionals.flatMap((professional) =>
-          getMatchingOffices(professional, filters).map((office) => office.id),
-        ),
-      );
+      const visibleCards = getVisibleCardRecords(filters);
+      const visibleListingKeys = new Set(visibleCards.map(({ listing }) => listing.clientKey));
 
       cards.forEach((card) => {
-        const professionalId = card.dataset.professionalId ?? "";
-        const professional = professionals.find(
-          (record) => record.id === professionalId,
-        );
-        const visible = visibleProfessionalIds.has(professionalId);
+        const listing = listings.find((record) => record.clientKey === card.dataset.listingKey);
+        const visible = visibleListingKeys.has(card.dataset.listingKey ?? "");
         card.hidden = !visible;
-        if (!visible || !professional) return;
+        if (!visible || !listing) return;
 
-        const preferredOffice = getPreferredOffice(professional, filters);
         const location = card.querySelector<HTMLElement>("[data-card-location]");
         const locateButton = card.querySelector<HTMLButtonElement>(
           "[data-card-locate]",
         );
         const distance = card.querySelector<HTMLElement>("[data-card-distance]");
         if (location) {
-          location.textContent = `${preferredOffice.locality}, ${preferredOffice.province}`;
+          location.textContent = listing.address.formatted;
         }
-        if (locateButton) locateButton.dataset.officeId = preferredOffice.id;
+        if (locateButton) locateButton.dataset.listingKey = listing.clientKey;
         if (distance) {
           if (userOrigin) {
             distance.textContent = `A ${formatDistance(
-              distanceInKilometres(userOrigin, preferredOffice),
+              distanceInKilometres(userOrigin, listing.address),
             )}`;
             distance.hidden = false;
           } else {
@@ -716,24 +574,23 @@ import LocationMap from "./design-system/LocationMap.astro";
         }
       });
 
-      markerRecords.forEach(({ office, element }) => {
-        element.hidden = !visibleOfficeIds.has(office.id);
+      markerRecords.forEach(({ listing, element }) => {
+        element.hidden = !visibleListingKeys.has(listing.clientKey);
       });
 
-      sortCards(visibleProfessionals, filters);
-      count.textContent = String(visibleProfessionals.length);
+      sortCards(visibleCards);
+      count.textContent = String(visibleCards.length);
       countLabel.textContent =
-        visibleProfessionals.length === 1
-          ? " profesional"
-          : " profesionales";
-      empty.hidden = visibleProfessionals.length !== 0;
+        visibleCards.length === 1 ? " consultorio" : " consultorios";
 
-      if (activeOfficeId && !visibleOfficeIds.has(activeOfficeId)) closePopup();
+      empty.hidden = visibleCards.length !== 0;
+
+      if (activeListingKey && !visibleListingKeys.has(activeListingKey)) closePopup();
       if (fitMap) {
         fitMapToOffices(
           markerRecords
-            .filter(({ office }) => visibleOfficeIds.has(office.id))
-            .map(({ office }) => office),
+            .filter(({ listing }) => visibleListingKeys.has(listing.clientKey))
+            .map(({ listing }) => listing.address),
         );
       }
     };
@@ -802,7 +659,7 @@ import LocationMap from "./design-system/LocationMap.astro";
         userOrigin = null;
         userLocationMarker?.remove();
         userLocationMarker = null;
-        if (distanceOption) distanceOption.disabled = true;
+        if (sortSelect) sortSelect.disabled = true;
         updateLocalityOptions();
         closePopup();
         if (geolocationStatus) geolocationStatus.textContent = "";
@@ -814,7 +671,7 @@ import LocationMap from "./design-system/LocationMap.astro";
     bindCardLocateButtons();
     if (popupClose) listen(popupClose, "click", closePopup);
     listen(root, "keydown", (event) => {
-      if ((event as KeyboardEvent).key === "Escape" && activeOfficeId) {
+      if ((event as KeyboardEvent).key === "Escape" && activeListingKey) {
         closePopup();
       }
     });
@@ -852,32 +709,27 @@ import LocationMap from "./design-system/LocationMap.astro";
                 .addTo(directoryMap);
             }
 
-            if (distanceOption) distanceOption.disabled = false;
+            if (sortSelect) sortSelect.disabled = false;
             if (sortSelect) sortSelect.value = "distance";
             applyFilters(false);
 
             const filters = getFilters();
-            const visibleProfessionals = filterProfessionals(
-              professionals,
-              filters,
-            );
-            const nearest = [...visibleProfessionals]
-              .map((professional) => {
-                const office = getPreferredOffice(professional, filters);
-                return {
-                  professional,
-                  office,
-                  distance: distanceInKilometres(userOrigin as Coordinates, office),
-                };
-              })
+            const nearest = getVisibleCardRecords(filters)
+              .map((record) => ({
+                ...record,
+                distance: distanceInKilometres(userOrigin as Coordinates, record.listing.address),
+              }))
               .sort((first, second) => first.distance - second.distance)[0];
 
             if (nearest) {
-              setActive(nearest.professional.id, nearest.office.id);
+              setActive(nearest.listing.clientKey);
               if (directoryMap) {
                 const bounds = new maplibregl.LngLatBounds();
                 bounds.extend([coords.longitude, coords.latitude]);
-                bounds.extend([nearest.office.longitude, nearest.office.latitude]);
+                bounds.extend([
+                  nearest.listing.address.longitude,
+                  nearest.listing.address.latitude,
+                ]);
                 directoryMap.fitBounds(bounds, {
                   padding: 80,
                   maxZoom: 13,
@@ -913,10 +765,7 @@ import LocationMap from "./design-system/LocationMap.astro";
           signal: directoryRequest.signal,
         });
         if (!response.ok) throw new Error("Directory request failed.");
-        professionals = normalizePublicDirectoryResponse(
-          await response.json(),
-          DIRECTORY_API_URL,
-        );
+        listings = normalizePublicDirectoryResponse(await response.json());
         populateDirectory();
         renderMarkers();
         bindCardLocateButtons();
@@ -925,7 +774,7 @@ import LocationMap from "./design-system/LocationMap.astro";
         applyFilters(true);
       } catch (error) {
         if (directoryRequest.signal.aborted) return;
-        professionals = [];
+        listings = [];
         if (loading) {
           loading.textContent =
             "No pudimos cargar el directorio. Intentá nuevamente más tarde.";
@@ -950,7 +799,6 @@ import LocationMap from "./design-system/LocationMap.astro";
     };
   };
 
-  initializeDirectory();
   document.addEventListener("astro:page-load", initializeDirectory);
   document.addEventListener("astro:before-swap", () => cleanupDirectory?.());
 </script>

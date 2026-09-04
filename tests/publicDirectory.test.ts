@@ -2,84 +2,68 @@ import { describe, expect, it } from "vitest";
 import { normalizePublicDirectoryResponse } from "../src/lib/publicDirectory";
 
 describe("normalizePublicDirectoryResponse", () => {
-  it("normalizes published workplaces and resolves R2 photo URLs through the API host", () => {
-    const records = normalizePublicDirectoryResponse(
-      {
-        professionals: [
-          {
-            professionalId: "professional-preview-001",
-            displayName: "Lucía Fernández",
-            profession: "Terapia ocupacional",
-            careModes: ["in_person", "virtual"],
-            populations: ["Infancias"],
-            workplace: {
-              id: "practice-location-preview-001",
-              label: "Consultorio Palermo Demo",
-              street: "Avenida Santa Fe 3253",
-              locality: "Palermo",
-              province: "Ciudad Autónoma de Buenos Aires",
-              latitude: -34.58889,
-              longitude: -58.41135,
-              equipped: true,
-              email: "consultorio.preview@example.test",
-              phone: "+54 11 0000-0128",
-            },
-            certification: null,
-            photoUrl: "/api/professionals/professional-preview-001/photo?v=photo-1",
-          },
-        ],
-      },
-      "http://localhost:8787/api/public/professionals",
-    );
-
-    expect(records).toHaveLength(1);
-    expect(records[0]).toMatchObject({
-      id: "professional-preview-001",
-      name: "Lucía Fernández",
-      certificationStatus: "none",
-      careModes: ["in-person", "virtual"],
-      photoUrl:
-        "http://localhost:8787/api/professionals/professional-preview-001/photo?v=photo-1",
-      offices: [
-        {
-          id: "practice-location-preview-001",
-          equipped: true,
+  it("normalizes one public-safe API row per consultorio", () => {
+    const records = normalizePublicDirectoryResponse({
+      professionals: [{
+        firstName: " Lucía ",
+        lastName: " Fernández ",
+        email: " consultorio.preview@example.test ",
+        phone: "+54 11 0000-0128",
+        address: {
+          label: "Consultorio Palermo",
+          street: "Avenida Santa Fe 3253",
           locality: "Palermo",
+          city: "Ciudad Autónoma de Buenos Aires",
+          province: "Ciudad Autónoma de Buenos Aires",
+          postalCode: "C1425",
+          latitude: -34.58889,
+          longitude: -58.41135,
+        },
+      }],
+    });
+
+    expect(records).toEqual([{
+      clientKey: "directory-listing-0",
+      firstName: "Lucía",
+      lastName: "Fernández",
+      displayName: "Lucía Fernández",
+      email: "consultorio.preview@example.test",
+      phone: "+54 11 0000-0128",
+      address: {
+        label: "Consultorio Palermo",
+        street: "Avenida Santa Fe 3253",
+        locality: "Palermo",
+        city: "Ciudad Autónoma de Buenos Aires",
+        province: "Ciudad Autónoma de Buenos Aires",
+        postalCode: "C1425",
+        formatted: "Avenida Santa Fe 3253 · Palermo, Ciudad Autónoma de Buenos Aires · C1425",
+        latitude: -34.58889,
+        longitude: -58.41135,
+      },
+    }]);
+  });
+
+  it("uses only the fields present and skips malformed coordinates", () => {
+    const records = normalizePublicDirectoryResponse({
+      professionals: [
+        {
+          firstName: "Ana",
+          lastName: "Pérez",
+          address: { label: "Centro", latitude: -34, longitude: -58 },
+        },
+        {
+          firstName: "Dato",
+          lastName: "Inválido",
+          address: { latitude: 250, longitude: -58 },
         },
       ],
     });
-  });
 
-  it("groups multiple published workplaces under one professional", () => {
-    const records = normalizePublicDirectoryResponse(
-      {
-        professionals: [
-          {
-            professionalId: "professional-preview-001",
-            displayName: "Lucía Fernández",
-            workplace: {
-              id: "office-1",
-              latitude: -34,
-              longitude: -58,
-            },
-          },
-          {
-            professionalId: "professional-preview-001",
-            displayName: "Lucía Fernández",
-            workplace: {
-              id: "office-2",
-              latitude: -35,
-              longitude: -59,
-            },
-          },
-        ],
-      },
-      "http://localhost:8787/api/public/professionals",
-    );
-
-    expect(records[0]?.offices.map((office) => office.id)).toEqual([
-      "office-1",
-      "office-2",
-    ]);
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      email: "",
+      phone: "",
+      address: { label: "Centro", formatted: "Centro" },
+    });
   });
 });
