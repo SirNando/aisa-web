@@ -10,7 +10,8 @@ export type PublicMembershipPlan = {
 export type PublicMembershipPlans = {
   currency: "ARS";
   plans: PublicMembershipPlan[];
-  turnstileSiteKey: string;
+  turnstileRequired: boolean;
+  turnstileSiteKey: string | null;
 };
 
 export function normalizeCuit(value: string) {
@@ -40,7 +41,13 @@ export function formatCuit(value: string) {
 export function isPublicMembershipPlans(value: unknown): value is PublicMembershipPlans {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
   const candidate = value as Partial<PublicMembershipPlans>;
-  if (candidate.currency !== "ARS" || typeof candidate.turnstileSiteKey !== "string" || !candidate.turnstileSiteKey) {
+  if (
+    candidate.currency !== "ARS"
+    || typeof candidate.turnstileRequired !== "boolean"
+    || (candidate.turnstileRequired
+      ? typeof candidate.turnstileSiteKey !== "string" || !candidate.turnstileSiteKey
+      : candidate.turnstileSiteKey !== null)
+  ) {
     return false;
   }
   if (!Array.isArray(candidate.plans) || candidate.plans.length !== 2) return false;

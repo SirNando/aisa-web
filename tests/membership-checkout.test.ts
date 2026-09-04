@@ -17,6 +17,7 @@ describe("membership checkout client rules", () => {
   it("accepts only both configured ARS plans with positive integer amounts", () => {
     const valid = {
       currency: "ARS",
+      turnstileRequired: true,
       turnstileSiteKey: "site-key",
       plans: [
         { code: "monthly", label: "Mensual", description: "Mensual", amountCents: 12000 },
@@ -27,5 +28,8 @@ describe("membership checkout client rules", () => {
     expect(isPublicMembershipPlans({ ...valid, plans: [valid.plans[0], valid.plans[0]] })).toBe(false);
     expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], amountCents: 0 }, valid.plans[1]] })).toBe(false);
     expect(isPublicMembershipPlans({ ...valid, currency: "USD" })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, turnstileRequired: false, turnstileSiteKey: null })).toBe(true);
+    expect(isPublicMembershipPlans({ ...valid, turnstileRequired: true, turnstileSiteKey: null })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, turnstileRequired: false, turnstileSiteKey: "site-key" })).toBe(false);
   });
 });

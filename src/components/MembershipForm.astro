@@ -192,6 +192,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     let currentStep = 0;
     let plans: PublicMembershipPlan[] = [];
     let currency = "ARS";
+    let turnstileRequired = true;
     let turnstileSiteKey = "";
     let turnstileApi: TurnstileApi | null = null;
     let turnstileWidgetId: string | null = null;
@@ -264,7 +265,9 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         }
         plans = payload.plans;
         currency = payload.currency;
-        turnstileSiteKey = payload.turnstileSiteKey;
+        turnstileRequired = payload.turnstileRequired;
+        turnstileSiteKey = payload.turnstileSiteKey ?? "";
+        if (turnstileSlot) turnstileSlot.hidden = !turnstileRequired;
         plans.forEach((plan) => {
           const label = form.querySelector<HTMLElement>(`[data-plan-label="${plan.code}"]`);
           const description = form.querySelector<HTMLElement>(`[data-plan-description="${plan.code}"]`);
@@ -282,6 +285,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       }
     };
     const getTurnstileToken = async () => {
+      if (!turnstileRequired) return "";
       if (!turnstileSlot || !turnstileSiteKey) throw new Error("La verificación de seguridad no está disponible.");
       turnstileApi ??= await loadTurnstile();
       if (!turnstileWidgetId) {
