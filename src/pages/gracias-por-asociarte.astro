@@ -1,0 +1,204 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u, "");
+---
+
+<BaseLayout
+  title="Gracias por asociarte"
+  description="Consultá el estado de tu solicitud de asociación a AISA."
+>
+  <section
+    class="membership-result section-space"
+    data-membership-result
+    data-platform-api-url={platformApiUrl}
+  >
+    <div class="site-container">
+      <section class="result-card" aria-labelledby="membership-result-title">
+        <div class="result-icon" data-result-icon aria-hidden="true">…</div>
+        <h1 id="membership-result-title" data-result-title>Consultando tu pago</h1>
+        <p data-result-message aria-live="polite">
+          Estamos verificando el estado informado directamente por PagoTIC.
+        </p>
+        <p class="result-note">
+          La vuelta desde el sitio de pago no confirma por sí sola que el pago
+          se haya acreditado.
+        </p>
+        <div class="result-actions">
+          <a class="button-primary" href="/profesionales/#solicitud" data-retry-link hidden>
+            Volver a intentar
+          </a>
+          <a class="button-quiet" href="/">Volver al inicio</a>
+        </div>
+      </section>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  type CheckoutStatus = "pending" | "paid" | "not_paid";
+
+  const initialiseResult = () => {
+    const root = document.querySelector<HTMLElement>("[data-membership-result]");
+    if (!root || root.dataset.initialised === "true") return;
+    root.dataset.initialised = "true";
+
+    const title = root.querySelector<HTMLElement>("[data-result-title]");
+    const message = root.querySelector<HTMLElement>("[data-result-message]");
+    const icon = root.querySelector<HTMLElement>("[data-result-icon]");
+    const retryLink = root.querySelector<HTMLAnchorElement>("[data-retry-link]");
+    const token = new URLSearchParams(window.location.search).get("token");
+    const apiUrl = root.dataset.platformApiUrl ?? "";
+    let attempts = 0;
+
+    const render = (status: CheckoutStatus, detail?: string, retryUrl?: string) => {
+      root.dataset.status = status;
+      if (icon) icon.textContent = status === "paid" ? "✓" : status === "not_paid" ? "×" : "…";
+      if (title) {
+        title.textContent = status === "paid"
+          ? "Recibimos tu pago"
+          : status === "not_paid"
+            ? "El pago no se completó"
+            : "Tu pago está pendiente";
+      }
+      if (message) {
+        message.textContent = detail || (status === "paid"
+          ? "Tu perfil quedó activado. AISA te enviará las credenciales de acceso posteriormente."
+          : status === "not_paid"
+            ? "No pudimos acreditar el pago. Podés volver a intentarlo desde esta página."
+            : "PagoTIC todavía no confirmó el resultado. Podés volver a consultar esta página en unos minutos.");
+      }
+      if (retryLink && status === "not_paid" && retryUrl) {
+        try {
+          const parsedRetry = new URL(retryUrl);
+          if (parsedRetry.protocol === "https:") {
+            retryLink.href = parsedRetry.toString();
+            retryLink.hidden = false;
+          }
+        } catch {
+          // Never expose a malformed provider link.
+        }
+      }
+    };
+
+    const loadStatus = async () => {
+      if (!token || !/^[A-Za-z0-9_-]{40,200}$/u.test(token)) {
+        render("not_paid", "El enlace de consulta no es válido.");
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${apiUrl}/api/public/membership-checkouts/${encodeURIComponent(token)}/status`,
+          { headers: { Accept: "application/json" }, credentials: "omit" },
+        );
+        const payload = await response.json() as {
+          status?: CheckoutStatus;
+          message?: string;
+          retryCheckoutUrl?: string;
+        };
+        if (!response.ok || !payload.status || !["pending", "paid", "not_paid"].includes(payload.status)) {
+          throw new Error(payload.message || "No pudimos consultar el estado del pago.");
+        }
+        render(payload.status, payload.message, payload.retryCheckoutUrl);
+        attempts += 1;
+        if (payload.status === "pending" && attempts < 12 && root.isConnected) {
+          window.setTimeout(() => void loadStatus(), 5_000);
+        }
+      } catch (error) {
+        render(
+          "pending",
+          error instanceof Error && !/failed to fetch|load failed|networkerror/iu.test(error.message)
+            ? error.message
+            : "No pudimos consultar el estado. Intentá nuevamente en unos minutos.",
+        );
+        attempts += 1;
+        if (attempts < 4 && root.isConnected) {
+          window.setTimeout(() => void loadStatus(), 5_000);
+        }
+      }
+    };
+
+    void loadStatus();
+  };
+
+  document.addEventListener("astro:page-load", initialiseResult);
+  initialiseResult();
+</script>
+
+<style>
+  .membership-result {
+    min-height: min(75vh, 48rem);
+    background: linear-gradient(180deg, var(--color-leaf-wash), var(--color-white));
+  }
+
+  .result-card {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+    padding: clamp(2rem, 7vw, 4rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+    box-shadow: var(--shadow-raised);
+    text-align: center;
+  }
+
+  .result-icon {
+    display: grid;
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.25rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-leaf-wash);
+    color: var(--color-aisa-green-dark);
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  [data-status="paid"] .result-icon {
+    background: var(--color-aisa-green);
+    color: var(--color-on-primary);
+  }
+
+  [data-status="not_paid"] .result-icon {
+    background: color-mix(in srgb, var(--color-danger) 9%, var(--color-white));
+    color: var(--color-danger);
+  }
+
+  .result-card h1 {
+    font-size: var(--text-section-title);
+    line-height: 1.08;
+  }
+
+  .result-card > p {
+    max-width: 34rem;
+    margin: 1rem auto 0;
+    color: var(--color-muted);
+  }
+
+  .result-note {
+    font-size: var(--text-sm);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  @media (max-width: 36rem) {
+    .result-actions > * {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result-card,
+    .result-icon {
+      transition: none;
+    }
+  }
+</style>

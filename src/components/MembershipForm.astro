@@ -1,760 +1,385 @@
 ---
-const provinces = [
-  "Ciudad Autónoma de Buenos Aires",
-  "Buenos Aires",
-  "Catamarca",
-  "Chaco",
-  "Chubut",
-  "Córdoba",
-  "Corrientes",
-  "Entre Ríos",
-  "Formosa",
-  "Jujuy",
-  "La Pampa",
-  "La Rioja",
-  "Mendoza",
-  "Misiones",
-  "Neuquén",
-  "Río Negro",
-  "Salta",
-  "San Juan",
-  "San Luis",
-  "Santa Cruz",
-  "Santa Fe",
-  "Santiago del Estero",
-  "Tierra del Fuego, Antártida e Islas del Atlántico Sur",
-  "Tucumán",
-];
+const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u, "");
 ---
 
 <section
   id="solicitud"
-  class="membership-section section-space scroll-mt-28"
-  aria-labelledby="membership-title"
+  class="membership-section section-space"
+  data-membership-section
+  data-platform-api-url={platformApiUrl}
 >
   <div class="site-container">
-    <div class="membership-heading">
-      <span class="membership-heading__line" aria-hidden="true"></span>
-      <h2 id="membership-title">Asociate a AISA</h2>
+    <header class="membership-heading" data-reveal>
+      <h2>Asociate a AISA</h2>
       <p>
-        Con este formulario daremos de alta tu perfil profesional y podrás
-        acceder a nuestros recursos
+        Completá tus datos, elegí cómo abonar y continuá de forma segura en
+        PagoTIC.
       </p>
-    </div>
+    </header>
 
     <form class="membership-form" data-membership-form novalidate>
-      <header class="membership-form__header">
-        <p class="required-note">
-          <span aria-hidden="true">*</span> Campos obligatorios
-        </p>
-      </header>
+      <div class="membership-form__header">
+        <div>
+          <h3>Solicitud de asociación</h3>
+          <p>Los campos marcados con * son obligatorios.</p>
+        </div>
+      </div>
 
-      <ol class="form-progress" aria-label="Progreso del formulario">
-        <li data-progress-step="0" aria-current="step">
-          <span>1</span>Personales
-        </li>
-        <li data-progress-step="1"><span>2</span>Laborales</li>
-        <li data-progress-step="2"><span>3</span>Formación</li>
-        <li data-progress-step="3"><span>4</span>Práctica</li>
-        <li data-progress-step="4"><span>5</span>Categoría</li>
+      <ol class="form-progress" aria-label="Progreso de la solicitud">
+        <li data-progress-step aria-current="step"><span>1</span> Tus datos</li>
+        <li data-progress-step><span>2</span> Forma de pago</li>
       </ol>
 
-      <div class="form-alert" data-form-alert role="alert" hidden></div>
+      <p class="form-alert" data-form-alert role="alert" tabindex="-1" hidden></p>
 
       <fieldset class="form-panel" data-step-panel="0">
-        <legend>Datos personales</legend>
+        <legend tabindex="-1">Tus datos</legend>
         <p class="panel-intro">
-          Contanos quién sos y cómo podemos contactarte.
+          Usaremos esta información para crear tu acceso y evitar solicitudes
+          duplicadas.
         </p>
 
-        <div class="field-grid field-grid--two">
+        <div class="field-grid">
           <label class="field">
             <span>Nombres <b aria-hidden="true">*</b></span>
-            <input name="firstNames" autocomplete="given-name" required />
+            <input name="firstNames" autocomplete="given-name" maxlength="120" required />
           </label>
           <label class="field">
             <span>Apellidos <b aria-hidden="true">*</b></span>
-            <input name="lastNames" autocomplete="family-name" required />
-          </label>
-          <label class="field">
-            <span
-              >Provincia o lugar de nacimiento <b aria-hidden="true">*</b></span
-            >
-            <input name="birthPlace" autocomplete="off" required />
-          </label>
-          <label class="field">
-            <span>Fecha de nacimiento <b aria-hidden="true">*</b></span>
-            <input type="date" name="birthDate" autocomplete="bday" required />
-          </label>
-          <label class="field">
-            <span>DNI <b aria-hidden="true">*</b></span>
-            <input
-              name="dni"
-              inputmode="numeric"
-              autocomplete="off"
-              pattern="[0-9]{7,8}"
-              maxlength="8"
-              aria-describedby="dni-hint"
-              required
-            />
-          </label>
-          <label class="field">
-            <span>Domicilio <b aria-hidden="true">*</b></span>
-            <input name="homeAddress" autocomplete="street-address" required />
-          </label>
-          <label class="field">
-            <span>Localidad <b aria-hidden="true">*</b></span>
-            <input name="city" autocomplete="address-level2" required />
-          </label>
-          <label class="field">
-            <span>Provincia <b aria-hidden="true">*</b></span>
-            <select name="province" autocomplete="address-level1" required>
-              <option value="">Seleccioná una provincia</option>
-              {
-                provinces.map((province) => (
-                  <option value={province}>{province}</option>
-                ))
-              }
-              <option value="Otra / exterior">Otra / exterior</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Código postal <b aria-hidden="true">*</b></span>
-            <input
-              name="postalCode"
-              autocomplete="postal-code"
-              maxlength="8"
-              required
-            />
-          </label>
-          <label class="field">
-            <span>Teléfono fijo</span>
-            <input type="tel" name="landline" autocomplete="tel-national" />
-          </label>
-          <label class="field">
-            <span>Celular <b aria-hidden="true">*</b></span>
-            <input type="tel" name="mobile" autocomplete="tel" required />
+            <input name="lastNames" autocomplete="family-name" maxlength="120" required />
           </label>
           <label class="field">
             <span>Correo electrónico <b aria-hidden="true">*</b></span>
-            <input type="email" name="email" autocomplete="email" required />
+            <input name="email" type="email" autocomplete="email" maxlength="254" required />
+          </label>
+          <label class="field">
+            <span>CUIT/CUIL <b aria-hidden="true">*</b></span>
+            <input
+              name="cuit"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="20-12345678-3"
+              maxlength="13"
+              aria-describedby="membership-cuit-help"
+              required
+            />
+            <small id="membership-cuit-help">Ingresá los 11 dígitos de tu CUIT o CUIL.</small>
           </label>
         </div>
       </fieldset>
 
       <fieldset class="form-panel" data-step-panel="1" hidden>
-        <legend>Datos laborales</legend>
+        <legend tabindex="-1">Elegí cómo abonar</legend>
         <p class="panel-intro">
-          Ingresá los datos de tu ejercicio profesional y título de grado.
+          El importe se obtiene directamente desde la plataforma antes de
+          generar la orden.
         </p>
 
-        <div class="field-grid field-grid--two">
-          <label class="field field--wide">
-            <span>Domicilio profesional <b aria-hidden="true">*</b></span>
-            <input
-              name="professionalAddress"
-              autocomplete="street-address"
-              required
-            />
-          </label>
-          <label class="field">
-            <span>Teléfono profesional <b aria-hidden="true">*</b></span>
-            <input type="tel" name="professionalPhone" required />
-          </label>
-          <label class="field">
-            <span class="label-with-info">
-              Profesión <b aria-hidden="true">*</b>
-              <span class="info-wrap">
-                <button
-                  type="button"
-                  class="info-button"
-                  aria-label="Más información sobre profesión"
-                  aria-expanded="false"
-                  data-info-button>i</button
-                >
-                <span class="field-help" role="tooltip" data-info-content hidden
-                  >Escribí la denominación exacta del título otorgado por la
-                  entidad educativa; por ejemplo, “Licenciatura en Terapia
-                  Ocupacional”.</span
-                >
-              </span>
+        <div class="plan-loading" data-plan-loading role="status">
+          Cargando planes disponibles…
+        </div>
+
+        <div class="membership-plans" data-membership-plans hidden>
+          <label class="membership-plan">
+            <input type="radio" name="planCode" value="monthly" required />
+            <span class="membership-plan__surface">
+              <span><strong data-plan-label="monthly">Abono mensual</strong><small data-plan-description="monthly"></small></span>
+              <b data-plan-amount="monthly"></b>
             </span>
-            <input name="profession" aria-label="Profesión" required />
           </label>
-          <label class="field">
-            <span
-              >Universidad o entidad educativa <b aria-hidden="true">*</b></span
-            >
-            <input name="university" required />
-          </label>
-          <label class="field">
-            <span>Año de egreso <b aria-hidden="true">*</b></span>
-            <input
-              type="number"
-              name="graduationYear"
-              inputmode="numeric"
-              min="1950"
-              max="2100"
-              required
-            />
-          </label>
-          <label class="field field--wide">
-            <span>Número de matrícula <b aria-hidden="true">*</b></span>
-            <input name="licenseNumber" required />
-          </label>
-        </div>
-      </fieldset>
-
-      <fieldset class="form-panel" data-step-panel="2" hidden>
-        <legend>
-          <span class="label-with-info">
-            Formación en Integración Sensorial
-            <span class="info-wrap">
-              <button
-                type="button"
-                class="info-button"
-                aria-label="Más información sobre cursos de formación"
-                aria-expanded="false"
-                data-info-button>i</button
-              >
-              <span class="field-help" role="tooltip" data-info-content hidden
-                >Cargá cada curso por separado. AISA solicitará los certificados
-                para comprobar la formación teórica y práctica declarada.</span
-              >
+          <label class="membership-plan">
+            <input type="radio" name="planCode" value="six_month" required />
+            <span class="membership-plan__surface">
+              <span><strong data-plan-label="six_month">Seis meses</strong><small data-plan-description="six_month"></small></span>
+              <b data-plan-amount="six_month"></b>
             </span>
-          </span>
-        </legend>
-        <p class="panel-intro">
-          Agregá los cursos a los que asististe. Si todavía no realizaste
-          ninguno, podés continuar sin cargar este apartado.
-        </p>
-
-        <div class="course-list" data-course-list>
-          <article class="course-entry" data-course-entry>
-            <div class="course-entry__header">
-              <h4 data-course-title>Curso 1</h4>
-            </div>
-            <div class="field-grid field-grid--two">
-              <label class="field field--wide"
-                ><span>Título del curso</span><input
-                  name="courses[0][title]"
-                  data-course-key="title"
-                /></label
-              >
-              <label class="field"
-                ><span>Disertante</span><input
-                  name="courses[0][speaker]"
-                  data-course-key="speaker"
-                /></label
-              >
-              <label class="field"
-                ><span>Año</span><input
-                  type="number"
-                  name="courses[0][year]"
-                  min="1950"
-                  max="2100"
-                  inputmode="numeric"
-                  data-course-key="year"
-                /></label
-              >
-              <label class="field"
-                ><span>Cantidad de horas</span><input
-                  type="number"
-                  name="courses[0][hours]"
-                  min="0"
-                  step="0.5"
-                  inputmode="decimal"
-                  data-course-key="hours"
-                  data-course-hours
-                /></label
-              >
-              <label class="field"
-                ><span>Cátedra o institución organizadora</span><input
-                  name="courses[0][chair]"
-                  data-course-key="chair"
-                /></label
-              >
-              <label class="field field--wide"
-                ><span>Lugar</span><input
-                  name="courses[0][place]"
-                  data-course-key="place"
-                /></label
-              >
-            </div>
-          </article>
-        </div>
-
-        <div class="course-actions">
-          <button
-            type="button"
-            class="button-secondary add-course"
-            data-add-course
-            ><span aria-hidden="true">＋</span> Agregar otro curso</button
-          >
-          <p><strong data-hours-total>0 horas</strong> de formación cargadas</p>
-        </div>
-      </fieldset>
-
-      <fieldset class="form-panel" data-step-panel="3" hidden>
-        <legend>Práctica clínica</legend>
-        <p class="panel-intro">
-          Esta información permite conocer tu experiencia y las condiciones de
-          tu práctica actual.
-        </p>
-
-        <div class="field-grid field-grid--two">
-          <label class="field">
-            <span class="label-with-info">
-              ¿Realizaste supervisiones clínicas o pasantías? <b
-                aria-hidden="true">*</b
-              >
-              <span class="info-wrap">
-                <button
-                  type="button"
-                  class="info-button"
-                  aria-label="Más información sobre supervisiones clínicas o pasantías"
-                  aria-expanded="false"
-                  data-info-button>i</button
-                >
-                <span class="field-help" role="tooltip" data-info-content hidden
-                  >Incluí experiencias de observación o práctica clínica
-                  acompañadas por un profesional, aunque hayan formado parte de
-                  una capacitación.</span
-                >
-              </span>
-            </span>
-            <select
-              name="completedSupervision"
-              aria-label="¿Realizaste supervisiones clínicas o pasantías?"
-              data-supervision-select
-              required
-            >
-              <option value="">Seleccioná una opción</option>
-              <option value="Sí">Sí</option>
-              <option value="No">No</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>¿Con qué profesional?</span>
-            <input
-              name="supervisingProfessional"
-              data-supervising-professional
-              disabled
-            />
-            <small data-supervision-hint>Se habilita si seleccionás “Sí”.</small
-            >
-          </label>
-          <label class="field field--wide">
-            <span class="label-with-info">
-              ¿Contás con consultorio equipado para colgar equipamiento
-              suspendido? <b aria-hidden="true">*</b>
-              <span class="info-wrap">
-                <button
-                  type="button"
-                  class="info-button"
-                  aria-label="Más información sobre equipamiento suspendido"
-                  aria-expanded="false"
-                  data-info-button>i</button
-                >
-                <span class="field-help" role="tooltip" data-info-content hidden
-                  >Considerá tanto la disponibilidad de equipamiento como una
-                  estructura segura y preparada específicamente para su
-                  suspensión.</span
-                >
-              </span>
-            </span>
-            <select
-              name="hasEquippedOffice"
-              aria-label="¿Contás con consultorio equipado para colgar equipamiento suspendido?"
-              required
-            >
-              <option value="">Seleccioná una opción</option>
-              <option value="Sí">Sí</option>
-              <option value="No">No</option>
-              <option value="No actualmente">No actualmente</option>
-            </select>
-          </label>
-          <label class="field field--wide">
-            <span class="label-with-info">
-              Población de pacientes que asistís <b aria-hidden="true">*</b>
-              <span class="info-wrap">
-                <button
-                  type="button"
-                  class="info-button"
-                  aria-label="Más información sobre población de pacientes"
-                  aria-expanded="false"
-                  data-info-button>i</button
-                >
-                <span class="field-help" role="tooltip" data-info-content hidden
-                  >Indicá edades y si atendés sólo déficits de Integración
-                  Sensorial o también pacientes con otras patologías primarias.
-                  En ese caso, especificá cuáles.</span
-                >
-              </span>
-            </span>
-            <textarea
-              name="patientPopulation"
-              aria-label="Población de pacientes que asistís"
-              rows="5"
-              required></textarea>
           </label>
         </div>
-      </fieldset>
 
-      <fieldset class="form-panel" data-step-panel="4" hidden>
-        <legend>Categoría de asociación</legend>
-        <p class="panel-intro">
-          La categoría se define según la formación acreditada y la
-          documentación presentada.
-        </p>
-
-        <div class="hours-summary" aria-live="polite">
-          <span aria-hidden="true">✓</span>
-          <p>
-            <strong data-final-hours>Registraste 0 horas</strong><br />La
-            comisión de AISA validará certificados, profesión y edad antes de
-            asignar la categoría.
-          </p>
+        <div class="payment-total" data-payment-total hidden aria-live="polite">
+          <span>Total a pagar</span>
+          <strong data-total-amount></strong>
         </div>
 
-        <div class="membership-types">
-          <article>
-            <p class="membership-type__label">Socio activo</p>
-            <h4>Participación con voz y voto</h4>
-            <p>
-              Terapistas Ocupacionales mayores de 25 años con entrenamiento en
-              terapia de Integración Sensorial y un mínimo de cien (100) horas
-              teóricas y prácticas, comprobadas mediante certificados.
-            </p>
-          </article>
-          <article>
-            <p class="membership-type__label">Socio adherente</p>
-            <h4>Participación con voz</h4>
-            <p>
-              Quienes no reúnan las cualidades para ser socio activo pueden
-              incorporarse como socios adherentes, con derecho a voz pero sin
-              derecho a voto.
-            </p>
-          </article>
-        </div>
+        <div class="turnstile-slot" data-turnstile-slot aria-label="Verificación de seguridad"></div>
 
-        <label class="check-field">
-          <input type="checkbox" name="informationConfirmation" required />
-          <span
-            >Declaro que la información ingresada es correcta y comprendo que
-            AISA deberá verificar la documentación antes de confirmar mi
-            categoría. <b aria-hidden="true">*</b></span
-          >
+        <label class="membership-honeypot" aria-hidden="true">
+          Sitio web
+          <input name="website" tabindex="-1" autocomplete="off" />
         </label>
       </fieldset>
 
-      <div class="form-navigation" data-form-navigation>
-        <button type="button" class="button-quiet" data-previous hidden
-          >Anterior</button
-        >
-        <p data-step-count>Paso 1 de 5</p>
-        <button type="button" class="button-primary" data-next>Continuar</button
-        >
-        <button type="submit" class="button-primary" data-submit hidden
-          >Revisar solicitud</button
-        >
+      <div class="form-navigation">
+        <button type="button" class="button-quiet" data-previous hidden>Anterior</button>
+        <p data-step-count>Paso 1 de 2</p>
+        <button type="button" class="button-primary" data-next>Continuar</button>
+        <button type="submit" class="button-primary" data-submit hidden>
+          Ir a PagoTIC
+        </button>
       </div>
-
-      <section class="form-complete" data-form-complete hidden tabindex="-1">
-        <span class="form-complete__icon" aria-hidden="true">✓</span>
-        <h3>Recibimos tu solicitud</h3>
-        <p>
-          Gracias por tu interés. Vamos a revisar tu información y nos pondremos
-          en contacto dentro de las próximas 48 horas hábiles.
-        </p>
-        <button type="button" class="button-secondary" data-edit-form
-          >Volver a editar</button
-        >
-      </section>
     </form>
   </div>
-
-  <div class="info-scrim" data-info-scrim hidden></div>
-
-  <template data-course-template>
-    <article class="course-entry" data-course-entry>
-      <div class="course-entry__header">
-        <h4 data-course-title>Curso</h4>
-        <button type="button" class="remove-course" data-remove-course
-          >Quitar</button
-        >
-      </div>
-      <div class="field-grid field-grid--two">
-        <label class="field field--wide"
-          ><span>Título del curso</span><input data-course-key="title" /></label
-        >
-        <label class="field"
-          ><span>Disertante</span><input data-course-key="speaker" /></label
-        >
-        <label class="field"
-          ><span>Año</span><input
-            type="number"
-            min="1950"
-            max="2100"
-            inputmode="numeric"
-            data-course-key="year"
-          /></label
-        >
-        <label class="field"
-          ><span>Cantidad de horas</span><input
-            type="number"
-            min="0"
-            step="0.5"
-            inputmode="decimal"
-            data-course-key="hours"
-            data-course-hours
-          /></label
-        >
-        <label class="field"
-          ><span>Cátedra o institución organizadora</span><input
-            data-course-key="chair"
-          /></label
-        >
-        <label class="field field--wide"
-          ><span>Lugar</span><input data-course-key="place" /></label
-        >
-      </div>
-    </article>
-  </template>
 </section>
 
 <script>
+  import {
+    formatCuit,
+    isPublicMembershipPlans,
+    isValidCuit,
+    normalizeCuit,
+    type PublicMembershipPlan,
+  } from "../lib/membershipCheckout";
+
+  type TurnstileApi = {
+    render: (container: HTMLElement, options: Record<string, unknown>) => string;
+    execute: (widgetId: string) => void;
+    reset: (widgetId: string) => void;
+  };
+
+  const TURNSTILE_SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+  const friendlyError = (error: unknown, fallback: string) => {
+    if (!(error instanceof Error)) return fallback;
+    return /failed to fetch|load failed|networkerror/iu.test(error.message)
+      ? fallback
+      : error.message;
+  };
+
+  const loadTurnstile = () =>
+    new Promise<TurnstileApi>((resolve, reject) => {
+      const current = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+      if (current) {
+        resolve(current);
+        return;
+      }
+      const existing = document.querySelector<HTMLScriptElement>(`script[src="${TURNSTILE_SCRIPT}"]`);
+      const script = existing ?? document.createElement("script");
+      const onLoad = () => {
+        const api = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+        if (api) resolve(api);
+        else reject(new Error("Turnstile no quedó disponible."));
+      };
+      script.addEventListener("load", onLoad, { once: true });
+      script.addEventListener("error", () => reject(new Error("No se pudo cargar Turnstile.")), { once: true });
+      if (!existing) {
+        script.src = TURNSTILE_SCRIPT;
+        script.async = true;
+        script.defer = true;
+        document.head.append(script);
+      }
+    });
+
   const initialiseMembershipForm = () => {
-    const form = document.querySelector<HTMLFormElement>(
-      "[data-membership-form]",
-    );
-    if (!form || form.dataset.initialised === "true") return;
+    const section = document.querySelector<HTMLElement>("[data-membership-section]");
+    const form = section?.querySelector<HTMLFormElement>("[data-membership-form]");
+    if (!section || !form || form.dataset.initialised === "true") return;
     form.dataset.initialised = "true";
 
+    const apiUrl = section.dataset.platformApiUrl ?? "";
     const panels = [...form.querySelectorAll<HTMLElement>("[data-step-panel]")];
-    const progressItems = [
-      ...form.querySelectorAll<HTMLElement>("[data-progress-step]"),
-    ];
-    const previousButton =
-      form.querySelector<HTMLButtonElement>("[data-previous]");
-    const nextButton = form.querySelector<HTMLButtonElement>("[data-next]");
-    const submitButton = form.querySelector<HTMLButtonElement>("[data-submit]");
+    const progress = [...form.querySelectorAll<HTMLElement>("[data-progress-step]")];
+    const previous = form.querySelector<HTMLButtonElement>("[data-previous]");
+    const next = form.querySelector<HTMLButtonElement>("[data-next]");
+    const submit = form.querySelector<HTMLButtonElement>("[data-submit]");
     const stepCount = form.querySelector<HTMLElement>("[data-step-count]");
     const alert = form.querySelector<HTMLElement>("[data-form-alert]");
-    const navigation = form.querySelector<HTMLElement>(
-      "[data-form-navigation]",
-    );
-    const complete = form.querySelector<HTMLElement>("[data-form-complete]");
-    const editButton =
-      form.querySelector<HTMLButtonElement>("[data-edit-form]");
+    const plansElement = form.querySelector<HTMLElement>("[data-membership-plans]");
+    const plansLoading = form.querySelector<HTMLElement>("[data-plan-loading]");
+    const total = form.querySelector<HTMLElement>("[data-payment-total]");
+    const totalAmount = form.querySelector<HTMLElement>("[data-total-amount]");
+    const turnstileSlot = form.querySelector<HTMLElement>("[data-turnstile-slot]");
+    const cuitInput = form.elements.namedItem("cuit") as HTMLInputElement | null;
     let currentStep = 0;
+    let plans: PublicMembershipPlan[] = [];
+    let currency = "ARS";
+    let turnstileSiteKey = "";
+    let turnstileApi: TurnstileApi | null = null;
+    let turnstileWidgetId: string | null = null;
+    let tokenResolver: ((token: string) => void) | null = null;
+    let tokenRejecter: ((error: Error) => void) | null = null;
 
-    const showStep = (step: number, focusHeading = true) => {
+    const showAlert = (message: string) => {
+      if (!alert) return;
+      alert.textContent = message;
+      alert.hidden = false;
+      alert.focus({ preventScroll: true });
+    };
+    const clearAlert = () => {
+      if (alert) alert.hidden = true;
+    };
+    const showStep = (step: number, moveFocus = true) => {
       currentStep = Math.max(0, Math.min(step, panels.length - 1));
-      panels.forEach((panel, index) => {
-        panel.hidden = index !== currentStep;
-      });
-      progressItems.forEach((item, index) => {
+      panels.forEach((panel, index) => { panel.hidden = index !== currentStep; });
+      progress.forEach((item, index) => {
         item.toggleAttribute("aria-current", index === currentStep);
         item.classList.toggle("is-complete", index < currentStep);
       });
-      if (previousButton) previousButton.hidden = currentStep === 0;
-      if (nextButton) nextButton.hidden = currentStep === panels.length - 1;
-      if (submitButton) submitButton.hidden = currentStep !== panels.length - 1;
-      if (stepCount)
-        stepCount.textContent = `Paso ${currentStep + 1} de ${panels.length}`;
-      if (alert) alert.hidden = true;
-      if (focusHeading) {
-        panels[currentStep]
-          ?.querySelector<HTMLElement>("legend")
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      if (previous) previous.hidden = currentStep === 0;
+      if (next) next.hidden = currentStep === panels.length - 1;
+      if (submit) submit.hidden = currentStep !== panels.length - 1;
+      if (stepCount) stepCount.textContent = `Paso ${currentStep + 1} de ${panels.length}`;
+      clearAlert();
+      if (moveFocus) panels[currentStep]?.querySelector<HTMLElement>("legend")?.focus();
     };
-
     const validatePanel = (panel: HTMLElement) => {
-      const fields = [
-        ...panel.querySelectorAll<
-          HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >("input, select, textarea"),
-      ].filter((field) => !field.disabled);
+      const fields = [...panel.querySelectorAll<HTMLInputElement>("input")]
+        .filter((field) => !field.disabled && field.tabIndex !== -1);
       const invalid = fields.find((field) => !field.checkValidity());
-      if (!invalid) return true;
-      if (alert) {
-        alert.textContent = "Revisá los campos marcados antes de continuar.";
-        alert.hidden = false;
+      if (invalid) {
+        showAlert("Revisá los campos marcados antes de continuar.");
+        invalid.reportValidity();
+        invalid.focus();
+        return false;
       }
-      invalid.reportValidity();
-      invalid.focus();
-      return false;
+      if (panel.dataset.stepPanel === "0" && cuitInput && !isValidCuit(cuitInput.value)) {
+        cuitInput.setCustomValidity("Ingresá un CUIT/CUIL válido.");
+        showAlert("Revisá el CUIT/CUIL antes de continuar.");
+        cuitInput.reportValidity();
+        cuitInput.focus();
+        return false;
+      }
+      return true;
+    };
+    const formatMoney = (amountCents: number) => new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency,
+    }).format(amountCents / 100);
+    const updateTotal = () => {
+      const selected = form.querySelector<HTMLInputElement>('input[name="planCode"]:checked');
+      const plan = plans.find((candidate) => candidate.code === selected?.value);
+      if (total) total.hidden = !plan;
+      if (totalAmount) totalAmount.textContent = plan ? formatMoney(plan.amountCents) : "";
+    };
+    const loadPlans = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/public/membership-plans`, {
+          headers: { Accept: "application/json" },
+          credentials: "omit",
+        });
+        const payload = await response.json() as unknown;
+        if (!response.ok || !isPublicMembershipPlans(payload)) {
+          const message = payload !== null && typeof payload === "object" && "message" in payload
+            && typeof payload.message === "string" ? payload.message : null;
+          throw new Error(message || "No pudimos cargar los planes disponibles.");
+        }
+        plans = payload.plans;
+        currency = payload.currency;
+        turnstileSiteKey = payload.turnstileSiteKey;
+        plans.forEach((plan) => {
+          const label = form.querySelector<HTMLElement>(`[data-plan-label="${plan.code}"]`);
+          const description = form.querySelector<HTMLElement>(`[data-plan-description="${plan.code}"]`);
+          const amount = form.querySelector<HTMLElement>(`[data-plan-amount="${plan.code}"]`);
+          if (label) label.textContent = plan.label;
+          if (description) description.textContent = plan.description;
+          if (amount) amount.textContent = formatMoney(plan.amountCents);
+        });
+        if (plansLoading) plansLoading.hidden = true;
+        if (plansElement) plansElement.hidden = false;
+      } catch (error) {
+        if (plansLoading) plansLoading.hidden = true;
+        showAlert(friendlyError(error, "No pudimos cargar los planes disponibles. Intentá nuevamente en unos minutos."));
+        if (submit) submit.disabled = true;
+      }
+    };
+    const getTurnstileToken = async () => {
+      if (!turnstileSlot || !turnstileSiteKey) throw new Error("La verificación de seguridad no está disponible.");
+      turnstileApi ??= await loadTurnstile();
+      if (!turnstileWidgetId) {
+        turnstileWidgetId = turnstileApi.render(turnstileSlot, {
+          sitekey: turnstileSiteKey,
+          action: "membership_checkout",
+          execution: "execute",
+          appearance: "interaction-only",
+          callback: (token: string) => tokenResolver?.(token),
+          "error-callback": () => tokenRejecter?.(new Error("No pudimos completar la verificación de seguridad.")),
+          "expired-callback": () => tokenRejecter?.(new Error("La verificación de seguridad venció.")),
+          "timeout-callback": () => tokenRejecter?.(new Error("La verificación de seguridad tardó demasiado.")),
+        });
+      }
+      return new Promise<string>((resolve, reject) => {
+        tokenResolver = resolve;
+        tokenRejecter = reject;
+        turnstileApi?.execute(turnstileWidgetId as string);
+      }).finally(() => {
+        tokenResolver = null;
+        tokenRejecter = null;
+      });
     };
 
-    nextButton?.addEventListener("click", () => {
+    cuitInput?.addEventListener("input", () => {
+      cuitInput.value = formatCuit(cuitInput.value);
+      cuitInput.setCustomValidity("");
+    });
+    form.addEventListener("change", (event) => {
+      if ((event.target as HTMLInputElement).name === "planCode") updateTotal();
+    });
+    next?.addEventListener("click", () => {
       const panel = panels[currentStep];
       if (panel && validatePanel(panel)) showStep(currentStep + 1);
     });
-    previousButton?.addEventListener("click", () => showStep(currentStep - 1));
-
-    const supervisionSelect = form.querySelector<HTMLSelectElement>(
-      "[data-supervision-select]",
-    );
-    const supervisorInput = form.querySelector<HTMLInputElement>(
-      "[data-supervising-professional]",
-    );
-    const supervisionHint = form.querySelector<HTMLElement>(
-      "[data-supervision-hint]",
-    );
-    const updateSupervision = () => {
-      if (!supervisionSelect || !supervisorInput) return;
-      const isRequired = supervisionSelect.value === "Sí";
-      supervisorInput.disabled = !isRequired;
-      supervisorInput.required = isRequired;
-      if (!isRequired) supervisorInput.value = "";
-      if (supervisionHint)
-        supervisionHint.textContent = isRequired
-          ? "Ingresá el nombre y apellido."
-          : "Se habilita si seleccionás “Sí”.";
-    };
-    supervisionSelect?.addEventListener("change", updateSupervision);
-
-    const courseList = form.querySelector<HTMLElement>("[data-course-list]");
-    const courseTemplate = document.querySelector<HTMLTemplateElement>(
-      "[data-course-template]",
-    );
-    const addCourseButton =
-      form.querySelector<HTMLButtonElement>("[data-add-course]");
-    const hoursTotal = form.querySelector<HTMLElement>("[data-hours-total]");
-    const finalHours = form.querySelector<HTMLElement>("[data-final-hours]");
-
-    const calculateHours = () => {
-      const total = [
-        ...form.querySelectorAll<HTMLInputElement>("[data-course-hours]"),
-      ].reduce((sum, input) => sum + (Number.parseFloat(input.value) || 0), 0);
-      const formatted = new Intl.NumberFormat("es-AR", {
-        maximumFractionDigits: 1,
-      }).format(total);
-      if (hoursTotal)
-        hoursTotal.textContent = `${formatted} ${total === 1 ? "hora" : "horas"}`;
-      if (finalHours)
-        finalHours.textContent = `Registraste ${formatted} ${total === 1 ? "hora" : "horas"}`;
-    };
-
-    const renumberCourses = () => {
-      const entries = [
-        ...form.querySelectorAll<HTMLElement>("[data-course-entry]"),
-      ];
-      entries.forEach((entry, index) => {
-        const title = entry.querySelector<HTMLElement>("[data-course-title]");
-        if (title) title.textContent = `Curso ${index + 1}`;
-        entry
-          .querySelectorAll<HTMLInputElement>("[data-course-key]")
-          .forEach((input) => {
-            input.name = `courses[${index}][${input.dataset.courseKey}]`;
-          });
-      });
-    };
-
-    addCourseButton?.addEventListener("click", () => {
-      if (!courseList || !courseTemplate) return;
-      const fragment = courseTemplate.content.cloneNode(
-        true,
-      ) as DocumentFragment;
-      courseList.append(fragment);
-      renumberCourses();
-      const entries = courseList.querySelectorAll<HTMLElement>(
-        "[data-course-entry]",
-      );
-      entries[entries.length - 1]
-        ?.querySelector<HTMLInputElement>("input")
-        ?.focus();
-    });
-
-    courseList?.addEventListener("click", (event) => {
-      const target = event.target as HTMLElement;
-      const removeButton = target.closest<HTMLButtonElement>(
-        "[data-remove-course]",
-      );
-      if (!removeButton) return;
-      removeButton.closest("[data-course-entry]")?.remove();
-      renumberCourses();
-      calculateHours();
-      addCourseButton?.focus();
-    });
-    form.addEventListener("input", (event) => {
-      if ((event.target as HTMLElement).matches("[data-course-hours]"))
-        calculateHours();
-    });
-
-    const scrim = document.querySelector<HTMLElement>("[data-info-scrim]");
-    const closeInfo = (returnFocus = false) => {
-      const openButton = form.querySelector<HTMLButtonElement>(
-        '[data-info-button][aria-expanded="true"]',
-      );
-      form
-        .querySelectorAll<HTMLElement>("[data-info-content]")
-        .forEach((content) => {
-          content.hidden = true;
-        });
-      form
-        .querySelectorAll<HTMLButtonElement>("[data-info-button]")
-        .forEach((button) => button.setAttribute("aria-expanded", "false"));
-      if (scrim) scrim.hidden = true;
-      if (returnFocus) openButton?.focus();
-    };
-
-    form.addEventListener("click", (event) => {
-      const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
-        "[data-info-button]",
-      );
-      if (!button) return;
-      const wasOpen = button.getAttribute("aria-expanded") === "true";
-      closeInfo();
-      if (wasOpen) return;
-      const content = button.parentElement?.querySelector<HTMLElement>(
-        "[data-info-content]",
-      );
-      button.setAttribute("aria-expanded", "true");
-      if (content) content.hidden = false;
-      if (scrim && window.matchMedia("(max-width: 47.99rem)").matches)
-        scrim.hidden = false;
-    });
-    scrim?.addEventListener("click", () => closeInfo(true));
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeInfo(true);
-    });
-
-    form.addEventListener("submit", (event) => {
+    previous?.addEventListener("click", () => showStep(currentStep - 1));
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const invalidPanelIndex = panels.findIndex(
-        (panel) => !validatePanel(panel),
-      );
-      if (invalidPanelIndex >= 0) {
-        showStep(invalidPanelIndex, false);
-        validatePanel(panels[invalidPanelIndex]);
+      const invalidPanel = panels.findIndex((panel) => !validatePanel(panel));
+      if (invalidPanel >= 0) {
+        showStep(invalidPanel, false);
+        validatePanel(panels[invalidPanel]);
         return;
       }
-      panels.forEach((panel) => {
-        panel.hidden = true;
-      });
-      if (navigation) navigation.hidden = true;
-      if (complete) {
-        complete.hidden = false;
-        complete.focus();
+      if (!submit) return;
+      submit.disabled = true;
+      submit.textContent = "Preparando pago…";
+      clearAlert();
+      try {
+        const token = await getTurnstileToken();
+        const formData = new FormData(form);
+        const storageKey = "aisa-membership-checkout-key";
+        const storagePayloadKey = "aisa-membership-checkout-payload";
+        const checkoutIdentity = JSON.stringify({
+          firstNames: String(formData.get("firstNames") ?? "").trim(),
+          lastNames: String(formData.get("lastNames") ?? "").trim(),
+          email: String(formData.get("email") ?? "").trim().toLocaleLowerCase("es-AR"),
+          cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
+          planCode: String(formData.get("planCode") ?? ""),
+        });
+        let idempotencyKey = sessionStorage.getItem(storageKey);
+        if (!idempotencyKey || sessionStorage.getItem(storagePayloadKey) !== checkoutIdentity) {
+          idempotencyKey = globalThis.crypto.randomUUID();
+          sessionStorage.setItem(storageKey, idempotencyKey);
+          sessionStorage.setItem(storagePayloadKey, checkoutIdentity);
+        }
+        const response = await fetch(`${apiUrl}/api/public/membership-checkouts`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          credentials: "omit",
+          body: JSON.stringify({
+            firstNames: String(formData.get("firstNames") ?? ""),
+            lastNames: String(formData.get("lastNames") ?? ""),
+            email: String(formData.get("email") ?? ""),
+            cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
+            planCode: String(formData.get("planCode") ?? ""),
+            website: String(formData.get("website") ?? ""),
+            idempotencyKey,
+            turnstileToken: token,
+          }),
+        });
+        const payload = await response.json() as { checkoutUrl?: string; message?: string };
+        if (!response.ok || !payload.checkoutUrl) {
+          throw new Error(payload.message || "No pudimos iniciar el pago.");
+        }
+        const checkoutUrl = new URL(payload.checkoutUrl);
+        if (checkoutUrl.protocol !== "https:") throw new Error("PagoTIC devolvió una dirección no válida.");
+        window.location.assign(checkoutUrl.toString());
+      } catch (error) {
+        showAlert(friendlyError(error, "No pudimos iniciar el pago. Intentá nuevamente en unos minutos."));
+        if (turnstileApi && turnstileWidgetId) turnstileApi.reset(turnstileWidgetId);
+        submit.disabled = false;
+        submit.textContent = "Ir a PagoTIC";
       }
-      progressItems.forEach((item) => item.classList.add("is-complete"));
-    });
-
-    editButton?.addEventListener("click", () => {
-      if (complete) complete.hidden = true;
-      if (navigation) navigation.hidden = false;
-      showStep(4, false);
-      panels[4]
-        ?.querySelector<HTMLElement>("legend")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
     showStep(0, false);
-    updateSupervision();
-    calculateHours();
+    void loadPlans();
   };
 
   document.addEventListener("astro:page-load", initialiseMembershipForm);
@@ -763,171 +388,108 @@ const provinces = [
 
 <style>
   .membership-section {
-    background:
-      radial-gradient(
-        circle at 10% 5%,
-        rgb(0 174 231 / 0.08),
-        transparent 24rem
-      ),
-      linear-gradient(180deg, var(--color-white), var(--color-mist));
+    background: linear-gradient(180deg, var(--color-white), var(--color-mist));
   }
 
   .membership-heading {
-    width: min(100%, 44rem);
+    width: min(100%, 42rem);
     margin: 0 auto 2rem;
     text-align: center;
   }
 
-  .membership-heading__line {
-    display: block;
-    width: 3rem;
-    height: 0.25rem;
-    margin: 0 auto 1.25rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-aisa-sky-strong);
-  }
-
   .membership-heading h2 {
-    margin-top: 0.7rem;
     font-size: var(--text-section-title);
-    font-weight: 800;
     line-height: 1.12;
   }
 
-  .membership-heading > p:last-child {
-    margin-top: 0.6rem;
+  .membership-heading p {
+    margin-top: 0.65rem;
     color: var(--color-muted);
   }
 
   .membership-form {
-    position: relative;
-    width: min(100%, 58rem);
+    width: min(100%, 52rem);
     margin-inline: auto;
-    overflow: visible;
+    overflow: clip;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-white);
     box-shadow: var(--shadow-raised);
-    isolation: isolate;
   }
 
-  .membership-form::before,
-  .membership-form::after {
-    position: absolute;
-    z-index: 0;
-    pointer-events: none;
-    content: "";
-  }
-
-  .membership-form::before {
-    top: -2.5rem;
-    right: -2rem;
-    width: 9rem;
-    aspect-ratio: 1;
-    border: 1.75rem solid var(--color-aisa-green);
-    border-radius: var(--radius-organic-a);
-    opacity: 0.08;
-    transform: rotate(18deg);
-  }
-
-  .membership-form::after {
-    bottom: 1.5rem;
-    left: -1.8rem;
-    width: 7rem;
-    height: 2.15rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-aisa-cyan);
-    opacity: 0.07;
-    transform: rotate(-20deg);
-  }
-
-  .membership-form > * {
-    position: relative;
-    z-index: 1;
+  .membership-form__header,
+  .form-panel,
+  .form-navigation {
+    padding: 1.4rem clamp(1rem, 4vw, 2rem);
   }
 
   .membership-form__header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.5rem 1.5rem 1.25rem;
     border-bottom: 1px solid var(--color-border);
   }
 
   .membership-form__header h3 {
-    margin-top: 0.35rem;
-    font-size: clamp(1.45rem, 3vw, 1.85rem);
-    font-weight: 800;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
   }
 
-  .required-note {
-    flex: none;
+  .membership-form__header p,
+  .panel-intro,
+  .field small {
     color: var(--color-muted);
-    font-size: var(--text-sm);
   }
 
-  .required-note span,
-  .field b,
-  .check-field b {
-    color: var(--color-danger);
+  .membership-form__header p,
+  .panel-intro {
+    margin-top: 0.35rem;
+    font-size: var(--text-sm);
   }
 
   .form-progress {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     margin: 0;
-    padding: 1.25rem 1.5rem 0;
+    padding: 1.2rem clamp(1rem, 4vw, 2rem) 0;
     list-style: none;
   }
 
   .form-progress li {
-    position: relative;
-    padding-top: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.2rem solid var(--color-border);
     color: var(--color-muted);
-    font-size: 0.72rem;
+    font-size: var(--text-sm);
     font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .form-progress li::before {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 0.2rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-border);
-    content: "";
   }
 
   .form-progress li span {
-    display: none;
+    display: grid;
+    width: 1.65rem;
+    height: 1.65rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-mist);
   }
 
-  .form-progress li[aria-current="step"] {
-    color: var(--color-aisa-sky-strong);
-  }
-
-  .form-progress li[aria-current="step"]::before {
-    background: var(--color-aisa-sky-strong);
-  }
-
+  .form-progress li[aria-current="step"],
   .form-progress li.is-complete {
-    color: var(--color-aisa-green-strong);
+    border-color: var(--color-aisa-green);
+    color: var(--color-ink);
   }
 
-  .form-progress li.is-complete::before {
+  .form-progress li[aria-current="step"] span,
+  .form-progress li.is-complete span {
     background: var(--color-aisa-green);
+    color: var(--color-on-primary);
   }
 
   .form-alert {
-    margin: 1.25rem 1.5rem 0;
-    border-left: 0.25rem solid var(--color-danger);
-    border-radius: 0.5rem;
-    background: rgb(163 58 58 / 0.08);
-    padding: 0.7rem 0.9rem;
+    margin: 1.25rem clamp(1rem, 4vw, 2rem) 0;
+    padding: 0.8rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-danger) 6%, var(--color-white));
     color: var(--color-danger);
     font-size: var(--text-sm);
     font-weight: 700;
@@ -935,465 +497,198 @@ const provinces = [
 
   .form-panel {
     min-width: 0;
-    margin: 0;
     border: 0;
-    padding: 2rem 1.5rem 0.5rem;
   }
 
-  .form-panel[hidden] {
-    display: none;
-  }
-
-  .form-panel > legend {
-    display: block;
-    width: 100%;
+  .form-panel legend {
     padding: 0;
-    color: var(--color-ink);
     font-family: var(--font-heading);
-    font-size: 1.35rem;
+    font-size: clamp(1.3rem, 3vw, 1.6rem);
     font-weight: 800;
-  }
-
-  .panel-intro {
-    margin-top: 0.5rem;
-    color: var(--color-muted);
-    line-height: 1.55;
   }
 
   .field-grid {
     display: grid;
-    gap: 1.1rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
   }
 
   .field {
     display: grid;
-    min-width: 0;
     gap: 0.45rem;
-    color: var(--color-ink);
     font-size: var(--text-sm);
     font-weight: 700;
   }
 
-  .field > span:first-child {
-    min-height: 1.4rem;
+  .field b {
+    color: var(--color-danger);
   }
 
-  .field em {
-    margin-left: 0.35rem;
-    color: var(--color-muted);
-    font-size: 0.72rem;
-    font-style: normal;
-    font-weight: 500;
-  }
-
-  .field small {
-    color: var(--color-muted);
-    font-size: 0.72rem;
-    font-weight: 500;
-  }
-
-  .field :where(input, select, textarea) {
+  .field input {
     width: 100%;
-    border: 1px solid var(--color-border-strong);
+    min-height: 3rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-control);
     background: var(--color-white);
     color: var(--color-ink);
     font: inherit;
-    font-size: 1rem;
+  }
+
+  .field input:focus-visible {
+    border-color: var(--color-aisa-green);
+    outline: 3px solid color-mix(in srgb, var(--color-aisa-green) 22%, transparent);
+  }
+
+  .field small {
+    font-size: 0.72rem;
     font-weight: 500;
-    transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      background-color 160ms ease;
   }
 
-  .field :where(input, select) {
-    min-height: 3rem;
-    padding: 0.65rem 0.8rem;
+  .membership-plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.2rem;
   }
 
-  .field textarea {
-    min-height: 8rem;
-    resize: vertical;
-    padding: 0.8rem;
-    line-height: 1.5;
-  }
-
-  .field :where(input, select, textarea):hover {
-    border-color: var(--color-aisa-sky-strong);
-  }
-
-  .field :where(input, select, textarea):focus {
-    border-color: var(--color-aisa-sky-strong);
-    box-shadow: 0 0 0 3px rgb(2 139 179 / 0.12);
-  }
-
-  .field :where(input, select, textarea):disabled {
-    cursor: not-allowed;
-    border-color: var(--color-border);
-    background: var(--color-mist);
-    color: var(--color-muted);
-  }
-
-  .label-with-info {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .info-wrap {
+  .membership-plan {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    cursor: pointer;
   }
 
-  .info-button {
-    display: inline-flex;
-    width: 1.35rem;
-    height: 1.35rem;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-aisa-sky-strong);
-    border-radius: 50%;
-    background: var(--color-sky-wash);
-    color: var(--color-aisa-sky-strong);
-    font-family: ui-serif, Georgia, serif;
-    font-size: 0.78rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  .info-button:hover,
-  .info-button[aria-expanded="true"] {
-    background: var(--color-aisa-sky-strong);
-    color: var(--color-white);
-  }
-
-  .field-help {
+  .membership-plan input {
     position: absolute;
-    z-index: 30;
-    top: 50%;
-    left: calc(100% + 0.65rem);
-    width: 18rem;
-    transform: translateY(-50%);
-    border-radius: 0.75rem;
-    background: var(--color-ink);
-    box-shadow: var(--shadow-raised);
-    padding: 0.8rem 0.9rem;
-    color: var(--color-white);
-    font-size: 0.78rem;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+
+  .membership-plan__surface {
+    display: flex;
+    min-height: 8rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+    transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  }
+
+  .membership-plan input:checked + .membership-plan__surface {
+    border-color: var(--color-aisa-green);
+    background: var(--color-leaf-wash);
+  }
+
+  .membership-plan input:focus-visible + .membership-plan__surface {
+    outline: 3px solid color-mix(in srgb, var(--color-aisa-green) 22%, transparent);
+    outline-offset: 2px;
+  }
+
+  .membership-plan__surface span,
+  .membership-plan__surface strong,
+  .membership-plan__surface small {
+    display: block;
+  }
+
+  .membership-plan__surface small {
+    margin-top: 0.35rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
     font-weight: 500;
     line-height: 1.45;
   }
 
-  .field-help::before {
-    position: absolute;
-    top: 50%;
-    right: 100%;
-    transform: translateY(-50%);
-    border: 0.4rem solid transparent;
-    border-right-color: var(--color-ink);
-    content: "";
+  .membership-plan__surface > b {
+    color: var(--color-aisa-green-dark);
+    white-space: nowrap;
   }
 
-  .course-list {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-
-  .course-entry {
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    background: var(--color-mist);
-    padding: 1.15rem;
-  }
-
-  .course-entry .field-grid {
+  .plan-loading {
     margin-top: 1rem;
+    color: var(--color-muted);
   }
 
-  .course-entry__header,
-  .course-actions {
+  .payment-total {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-control);
+    background: var(--color-mist);
   }
 
-  .course-entry__header h4 {
-    font-size: 1rem;
-    font-weight: 800;
+  .payment-total strong {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
   }
 
-  .remove-course {
-    border: 0;
-    background: transparent;
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  .course-actions {
+  .turnstile-slot {
+    min-height: 0;
     margin-top: 1rem;
   }
 
-  .course-actions p {
-    color: var(--color-muted);
-    font-size: var(--text-sm);
-  }
-
-  .course-actions strong {
-    color: var(--color-aisa-green-strong);
-  }
-
-  .add-course {
-    min-height: 2.75rem;
-    padding-block: 0.55rem;
-  }
-
-  .hours-summary {
-    display: grid;
-    grid-template-columns: 2rem 1fr;
-    gap: 0.85rem;
-    margin-top: 1.5rem;
-    border-radius: 1rem;
-    background: var(--color-leaf-wash);
-    padding: 1rem;
-  }
-
-  .hours-summary > span {
-    display: flex;
-    width: 2rem;
-    height: 2rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--color-aisa-green);
-    color: var(--color-on-primary);
-    font-weight: 800;
-  }
-
-  .hours-summary p {
-    font-size: var(--text-sm);
-    line-height: 1.55;
-  }
-
-  .hours-summary strong {
-    color: var(--color-aisa-green-dark);
-    font-size: 1rem;
-  }
-
-  .membership-types {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .membership-types article {
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    padding: 1.25rem;
-  }
-
-  .membership-types article:first-child {
-    border-color: var(--color-aisa-green);
-    background: linear-gradient(
-      145deg,
-      var(--color-leaf-wash),
-      var(--color-white)
-    );
-  }
-
-  .membership-types article:last-child {
-    background: linear-gradient(
-      145deg,
-      var(--color-sky-wash),
-      var(--color-white)
-    );
-  }
-
-  .membership-type__label {
-    display: inline-flex;
-    border-radius: var(--radius-pill);
-    background: var(--color-leaf-wash);
-    color: var(--color-aisa-green-strong);
-    padding: 0.25rem 0.65rem;
-    font-size: var(--text-xs);
-    font-weight: 700;
-  }
-
-  .membership-types h4 {
-    margin-top: 0.3rem;
-    font-size: 1.15rem;
-    font-weight: 800;
-  }
-
-  .membership-types article > p:last-child {
-    margin-top: 0.5rem;
-    font-size: var(--text-sm);
-    line-height: 1.6;
-  }
-
-  .check-field {
-    display: grid;
-    grid-template-columns: 1.3rem 1fr;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-    border-radius: 0.8rem;
-    background: var(--color-sand);
-    padding: 1rem;
-    color: var(--color-ink);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    line-height: 1.55;
-  }
-
-  .check-field input {
-    width: 1.15rem;
-    height: 1.15rem;
-    margin-top: 0.2rem;
-    accent-color: var(--color-aisa-green);
+  .membership-honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .form-navigation {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    gap: 0.8rem;
     border-top: 1px solid var(--color-border);
-    padding: 1.25rem 1.5rem 1.5rem;
   }
 
-  .form-navigation > :last-child {
+  .form-navigation p {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .form-navigation button:last-child,
+  .form-navigation [data-next] {
     justify-self: end;
   }
 
-  .form-navigation > p {
-    color: var(--color-muted);
-    font-size: var(--text-sm);
-    font-weight: 700;
-  }
-
-  .form-complete {
-    padding: 3rem 1.5rem;
-    text-align: center;
-  }
-
-  .form-complete__icon {
-    display: flex;
-    width: 3.5rem;
-    height: 3.5rem;
-    margin: 0 auto 1rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--color-leaf-wash);
-    color: var(--color-aisa-green-strong);
-    font-size: 1.5rem;
-    font-weight: 800;
-  }
-
-  .form-complete h3 {
-    margin-top: 0.5rem;
-    font-size: 1.65rem;
-    font-weight: 800;
-  }
-
-  .form-complete > p {
-    width: min(100%, 38rem);
-    margin: 0.7rem auto 1.3rem;
-  }
-
-  .info-scrim {
-    position: fixed;
-    z-index: 90;
-    inset: 0;
-    background: rgb(24 50 58 / 0.48);
-    backdrop-filter: blur(2px);
-  }
-
-  @media (min-width: 40rem) {
-    .field-grid--two,
-    .membership-types {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .field--wide {
-      grid-column: 1 / -1;
+  @media (hover: hover) and (pointer: fine) {
+    .membership-plan:hover .membership-plan__surface {
+      transform: translateY(-2px);
     }
   }
 
   @media (max-width: 47.99rem) {
-    .membership-form__header {
-      align-items: flex-start;
-      flex-direction: column;
+    .field-grid,
+    .membership-plans {
+      grid-template-columns: 1fr;
     }
 
-    .form-progress {
-      gap: 0.25rem;
-      padding-inline: 1rem;
-    }
-
-    .form-progress li {
-      overflow: hidden;
-      font-size: 0;
-      text-align: center;
-    }
-
-    .form-progress li span {
-      display: inline;
-      font-size: 0.72rem;
-    }
-
-    .field-help {
-      position: fixed;
-      z-index: 100;
-      top: 50%;
-      left: 50%;
-      width: min(calc(100vw - 2rem), 22rem);
-      transform: translate(-50%, -50%);
-      border-radius: 1rem;
-      padding: 1.1rem;
-      font-size: var(--text-sm);
-      line-height: 1.55;
-    }
-
-    .field-help::before {
-      display: none;
-    }
-
-    .course-actions {
-      align-items: flex-start;
-      flex-direction: column;
+    .membership-plan__surface {
+      min-height: 0;
     }
 
     .form-navigation {
       grid-template-columns: 1fr 1fr;
     }
 
-    .form-navigation > p {
-      grid-row: 1;
+    .form-navigation p {
       grid-column: 1 / -1;
+      grid-row: 1;
       text-align: center;
-    }
-
-    .form-navigation > :last-child {
-      grid-column: 2;
     }
   }
 
-  @media (min-width: 48rem) {
-    .membership-form__header,
-    .form-progress,
-    .form-panel,
-    .form-navigation {
-      padding-right: 2rem;
-      padding-left: 2rem;
+  @media (prefers-reduced-motion: reduce) {
+    .membership-plan__surface {
+      transition: none;
     }
   }
 </style>

@@ -10,6 +10,7 @@ export default defineConfig({
     sitemap({
       filter: (page) =>
         !page.endsWith("/asociate/") &&
+        !page.endsWith("/gracias-por-asociarte/") &&
         !page.endsWith("/buscar-profesional/") &&
         !page.endsWith("/profesionales/formacion-y-cursos/"),
     }),

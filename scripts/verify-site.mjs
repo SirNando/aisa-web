@@ -14,6 +14,7 @@ const expectedRoutes = [
   "buscar-profesional/index.html",
   "profesionales/certificacion/index.html",
   "profesionales/formacion-y-cursos/index.html",
+  "gracias-por-asociarte/index.html",
   "asociate/index.html",
   "contacto/index.html",
   "404.html",
@@ -101,6 +102,33 @@ for (const [route, html] of pages) {
 const contactHtml = pages.get("contacto/index.html") ?? "";
 if (!contactHtml.includes("mailto:integracion.sensorialargentina@gmail.com")) {
   failures.push("La página de contacto no contiene el correo oficial.");
+}
+
+const membershipHtml = pages.get("profesionales/index.html") ?? "";
+for (const fieldName of ["firstNames", "lastNames", "email", "cuit", "planCode"]) {
+  if (!membershipHtml.includes(`name="${fieldName}"`)) {
+    failures.push(`El formulario de asociación no contiene el campo ${fieldName}.`);
+  }
+}
+for (const forbiddenField of ["phone", "province", "profession", "password"]) {
+  if (membershipHtml.includes(`name="${forbiddenField}"`)) {
+    failures.push(`El formulario de asociación conserva el campo innecesario ${forbiddenField}.`);
+  }
+}
+
+const thankYouHtml = pages.get("gracias-por-asociarte/index.html") ?? "";
+if (!thankYouHtml.includes("/api/public/membership-checkouts/")) {
+  failures.push("La página de agradecimiento no consulta el estado autoritativo de la plataforma.");
+}
+if (!thankYouHtml.includes("no confirma por sí sola")) {
+  failures.push("La página de agradecimiento trata el retorno del navegador como confirmación de pago.");
+}
+
+const sitemapXml = await readFile(new URL("../dist/sitemap-0.xml", import.meta.url), "utf8");
+for (const excludedRoute of ["/asociate/", "/gracias-por-asociarte/"]) {
+  if (sitemapXml.includes(excludedRoute)) {
+    failures.push(`El sitemap incluye la ruta excluida ${excludedRoute}.`);
+  }
 }
 
 const wrangler = await readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8");
