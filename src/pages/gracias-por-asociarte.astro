@@ -25,6 +25,14 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           se haya acreditado.
         </p>
         <div class="result-actions">
+          <button
+            type="button"
+            class="button-quiet"
+            data-membership-status-refresh
+            aria-controls="membership-result-title"
+          >
+            <span data-membership-status-refresh-label>Actualizar estado</span>
+          </button>
           <a class="button-primary" href="/profesionales/#solicitud" data-retry-link hidden>
             Volver a intentar
           </a>
@@ -37,6 +45,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
 <script>
   type CheckoutStatus = "pending" | "paid" | "not_paid";
+  let cleanupResult: (() => void) | undefined;
 
   const initialiseResult = () => {
     const root = document.querySelector<HTMLElement>("[data-membership-result]");
@@ -46,10 +55,26 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     const title = root.querySelector<HTMLElement>("[data-result-title]");
     const message = root.querySelector<HTMLElement>("[data-result-message]");
     const icon = root.querySelector<HTMLElement>("[data-result-icon]");
+    const refreshButton = root.querySelector<HTMLButtonElement>(
+      "[data-membership-status-refresh]",
+    );
+    const refreshLabel = root.querySelector<HTMLElement>(
+      "[data-membership-status-refresh-label]",
+    );
     const retryLink = root.querySelector<HTMLAnchorElement>("[data-retry-link]");
     const token = new URLSearchParams(window.location.search).get("token");
     const apiUrl = root.dataset.platformApiUrl ?? "";
     let attempts = 0;
+    let statusRequest: AbortController | null = null;
+    let statusTimer: number | null = null;
+
+    const setRefreshState = (isRefreshing: boolean) => {
+      if (refreshButton) refreshButton.disabled = isRefreshing;
+      if (refreshLabel) {
+        refreshLabel.textContent = isRefreshing ? "Actualizando…" : "Actualizar estado";
+      }
+      root.setAttribute("aria-busy", String(isRefreshing));
+    };
 
     const render = (status: CheckoutStatus, detail?: string, retryUrl?: string) => {
       root.dataset.status = status;
@@ -66,8 +91,9 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           ? "Tu perfil quedó activado. AISA te enviará las credenciales de acceso posteriormente."
           : status === "not_paid"
             ? "No pudimos acreditar el pago. Podés volver a intentarlo desde esta página."
-            : "PagoTIC todavía no confirmó el resultado. Podés volver a consultar esta página en unos minutos.");
+          : "PagoTIC todavía no confirmó el resultado. Podés volver a consultar esta página en unos minutos.");
       }
+      if (retryLink) retryLink.hidden = true;
       if (retryLink && status === "not_paid" && retryUrl) {
         try {
           const parsedRetry = new URL(retryUrl);
@@ -81,15 +107,31 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       }
     };
 
-    const loadStatus = async () => {
+    const loadStatus = async (isManualRefresh = false) => {
+      if (isManualRefresh) {
+        attempts = 0;
+        if (statusTimer !== null) window.clearTimeout(statusTimer);
+        statusTimer = null;
+        setRefreshState(true);
+      }
+      statusRequest?.abort();
+      const request = new AbortController();
+      statusRequest = request;
       if (!token || !/^[A-Za-z0-9_-]{40,200}$/u.test(token)) {
         render("not_paid", "El enlace de consulta no es válido.");
+        statusRequest = null;
+        if (isManualRefresh) setRefreshState(false);
         return;
       }
       try {
         const response = await fetch(
           `${apiUrl}/api/public/membership-checkouts/${encodeURIComponent(token)}/status`,
-          { headers: { Accept: "application/json" }, credentials: "omit" },
+          {
+            cache: "no-store",
+            headers: { Accept: "application/json" },
+            credentials: "omit",
+            signal: request.signal,
+          },
         );
         const payload = await response.json() as {
           status?: CheckoutStatus;
@@ -99,12 +141,14 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         if (!response.ok || !payload.status || !["pending", "paid", "not_paid"].includes(payload.status)) {
           throw new Error(payload.message || "No pudimos consultar el estado del pago.");
         }
+        if (request !== statusRequest) return;
         render(payload.status, payload.message, payload.retryCheckoutUrl);
         attempts += 1;
         if (payload.status === "pending" && attempts < 12 && root.isConnected) {
-          window.setTimeout(() => void loadStatus(), 5_000);
+          statusTimer = window.setTimeout(() => void loadStatus(), 5_000);
         }
       } catch (error) {
+        if (request.signal.aborted || request !== statusRequest) return;
         render(
           "pending",
           error instanceof Error && !/failed to fetch|load failed|networkerror/iu.test(error.message)
@@ -113,15 +157,31 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         );
         attempts += 1;
         if (attempts < 4 && root.isConnected) {
-          window.setTimeout(() => void loadStatus(), 5_000);
+          statusTimer = window.setTimeout(() => void loadStatus(), 5_000);
         }
+      } finally {
+        if (request !== statusRequest) return;
+        statusRequest = null;
+        if (isManualRefresh) setRefreshState(false);
       }
     };
 
+    if (refreshButton) {
+      refreshButton.addEventListener("click", () => void loadStatus(true));
+    }
+
     void loadStatus();
+    cleanupResult = () => {
+      statusRequest?.abort();
+      statusRequest = null;
+      if (statusTimer !== null) window.clearTimeout(statusTimer);
+      statusTimer = null;
+      cleanupResult = undefined;
+    };
   };
 
   document.addEventListener("astro:page-load", initialiseResult);
+  document.addEventListener("astro:before-swap", () => cleanupResult?.());
   initialiseResult();
 </script>
 
@@ -186,6 +246,12 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     justify-content: center;
     gap: 0.75rem;
     margin-top: 1.75rem;
+  }
+
+  .result-actions button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
   }
 
   @media (max-width: 36rem) {

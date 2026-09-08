@@ -16,10 +16,21 @@ import LocationMap from "./design-system/LocationMap.astro";
         ubicación para ordenar las opciones por cercanía.
       </p>
     </div>
-    <p class="directory-explorer__count" aria-live="polite">
-      <span data-directory-count>0</span>
-      <span data-directory-count-label> consultorios</span>
-    </p>
+    <div class="directory-explorer__meta">
+      <p class="directory-explorer__count" aria-live="polite">
+        <span data-directory-count>0</span>
+        <span data-directory-count-label> consultorios</span>
+      </p>
+      <button
+        type="button"
+        class="button-quiet"
+        data-directory-refresh
+        aria-controls="directory-results"
+      >
+        <span data-directory-refresh-label>Actualizar resultados</span>
+      </button>
+      <p class="directory-explorer__refresh-status" data-directory-refresh-status aria-live="polite"></p>
+    </div>
   </div>
 
   <LocationMap>
@@ -100,7 +111,7 @@ import LocationMap from "./design-system/LocationMap.astro";
     </form>
   </LocationMap>
 
-  <div class="directory-results" data-directory-results>
+  <div id="directory-results" class="directory-results" data-directory-results>
     <p class="directory-empty" data-directory-loading role="status">
       Cargando consultorios…
     </p>
@@ -193,6 +204,15 @@ import LocationMap from "./design-system/LocationMap.astro";
     const countLabel = root.querySelector<HTMLElement>(
       "[data-directory-count-label]",
     );
+    const refreshButton = root.querySelector<HTMLButtonElement>(
+      "[data-directory-refresh]",
+    );
+    const refreshLabel = root.querySelector<HTMLElement>(
+      "[data-directory-refresh-label]",
+    );
+    const refreshStatus = root.querySelector<HTMLElement>(
+      "[data-directory-refresh-status]",
+    );
     const empty = root.querySelector<HTMLElement>("[data-directory-empty]");
     const popup = root.querySelector<HTMLElement>("[data-map-popup]");
     const popupName = root.querySelector<HTMLElement>("[data-map-popup-name]");
@@ -218,8 +238,8 @@ import LocationMap from "./design-system/LocationMap.astro";
       !localitySelect
     ) return;
 
-    const directoryRequest = new AbortController();
-    cleanupDirectory = () => directoryRequest.abort();
+    let directoryRequest: AbortController | null = null;
+    cleanupDirectory = () => directoryRequest?.abort();
     const listenerCleanups: (() => void)[] = [];
     const markerRecords: MarkerRecord[] = [];
     let cardsByListingKey = new Map(
@@ -758,38 +778,88 @@ import LocationMap from "./design-system/LocationMap.astro";
       });
     }
 
-    const loadDirectory = async () => {
+    const setRefreshState = (isRefreshing: boolean) => {
+      if (refreshButton) refreshButton.disabled = isRefreshing;
+      if (refreshLabel) {
+        refreshLabel.textContent = isRefreshing
+          ? "Actualizando…"
+          : "Actualizar resultados";
+      }
+      if (refreshStatus && isRefreshing) refreshStatus.textContent = "";
+      root.setAttribute("aria-busy", String(isRefreshing));
+    };
+
+    const loadDirectory = async (isRefresh = false) => {
+      directoryRequest?.abort();
+      const request = new AbortController();
+      directoryRequest = request;
+      if (isRefresh) setRefreshState(true);
+      else if (loading) {
+        loading.hidden = false;
+        loading.textContent = "Cargando consultorios…";
+        loading.classList.remove("is-error");
+      }
       try {
         const response = await fetch(DIRECTORY_API_URL, {
           headers: { Accept: "application/json" },
-          signal: directoryRequest.signal,
+          cache: "no-store",
+          signal: request.signal,
         });
         if (!response.ok) throw new Error("Directory request failed.");
+        if (request !== directoryRequest) return;
+        const currentFilters = getFilters();
+        const currentActiveListingKey = activeListingKey;
         listings = normalizePublicDirectoryResponse(await response.json());
         populateDirectory();
+        const queryInput = form.querySelector<HTMLInputElement>("#directory-query");
+        if (queryInput) queryInput.value = currentFilters.query;
+        provinceSelect.value = [...provinceSelect.options].some(
+          (option) => option.value === currentFilters.province,
+        ) ? currentFilters.province : "";
+        updateLocalityOptions();
+        localitySelect.value = [...localitySelect.options].some(
+          (option) => option.value === currentFilters.locality && !option.disabled,
+        ) ? currentFilters.locality : "";
         renderMarkers();
         bindCardLocateButtons();
         if (loading) loading.hidden = true;
-        updateLocalityOptions();
         applyFilters(true);
+        if (currentActiveListingKey) setActive(currentActiveListingKey);
+        if (refreshStatus) refreshStatus.textContent = isRefresh
+          ? "Resultados actualizados."
+          : "";
       } catch (error) {
-        if (directoryRequest.signal.aborted) return;
-        listings = [];
+        if (request.signal.aborted || request !== directoryRequest) return;
         if (loading) {
-          loading.textContent =
-            "No pudimos cargar el directorio. Intentá nuevamente más tarde.";
-          loading.classList.add("is-error");
+          if (!listings.length) {
+            loading.textContent =
+              "No pudimos cargar el directorio. Intentá nuevamente más tarde.";
+            loading.classList.add("is-error");
+          }
+          loading.hidden = Boolean(listings.length);
         }
-        applyFilters(false);
+        if (!listings.length) applyFilters(false);
+        if (isRefresh && refreshStatus) {
+          refreshStatus.textContent = "No pudimos actualizar los resultados. Conservamos los datos anteriores.";
+        }
+      } finally {
+        if (request !== directoryRequest) return;
+        directoryRequest = null;
+        if (isRefresh) setRefreshState(false);
       }
     };
+
+    if (refreshButton) {
+      listen(refreshButton, "click", () => void loadDirectory(true));
+    }
 
     updateLocalityOptions();
     applyFilters(false);
     void loadDirectory();
 
     cleanupDirectory = () => {
-      directoryRequest.abort();
+      directoryRequest?.abort();
+      directoryRequest = null;
       window.clearTimeout(searchTimer);
       listenerCleanups.forEach((cleanup) => cleanup());
       markerRecords.forEach(({ marker }) => marker.remove());

@@ -2674,6 +2674,12 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   font-size: clamp(1rem, 1.2vw, 1.125rem);
 }
 
+.directory-explorer__meta {
+  display: grid;
+  justify-items: end;
+  gap: 0.65rem;
+}
+
 .directory-explorer__count {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
@@ -2801,10 +2807,17 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
 }
 
 .directory-filters__actions .button-primary,
-.directory-filters__actions .button-quiet {
+.directory-filters__actions .button-quiet,
+.directory-explorer__meta .button-quiet {
   min-height: 3rem;
   padding: 0.65rem 1rem;
   font-size: 0.88rem;
+}
+
+.directory-explorer__meta .button-quiet:disabled {
+  cursor: wait;
+  opacity: 0.7;
+  transform: none;
 }
 
 .directory-filters__status {

@@ -75,11 +75,22 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           generar la orden.
         </p>
 
+        <div class="plan-actions">
+          <button
+            type="button"
+            class="button-quiet"
+            data-membership-refresh
+            aria-controls="membership-plans"
+          >
+            <span data-membership-refresh-label>Actualizar planes</span>
+          </button>
+        </div>
+
         <div class="plan-loading" data-plan-loading role="status">
           Cargando planes disponibles…
         </div>
 
-        <div class="membership-plans" data-membership-plans hidden>
+        <div id="membership-plans" class="membership-plans" data-membership-plans hidden>
           <label class="membership-plan">
             <input type="radio" name="planCode" value="monthly" required />
             <span class="membership-plan__surface">
@@ -137,6 +148,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
   };
 
   const TURNSTILE_SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  let cleanupMembership: (() => void) | undefined;
 
   const friendlyError = (error: unknown, fallback: string) => {
     if (!(error instanceof Error)) return fallback;
@@ -185,6 +197,12 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     const alert = form.querySelector<HTMLElement>("[data-form-alert]");
     const plansElement = form.querySelector<HTMLElement>("[data-membership-plans]");
     const plansLoading = form.querySelector<HTMLElement>("[data-plan-loading]");
+    const refreshButton = form.querySelector<HTMLButtonElement>(
+      "[data-membership-refresh]",
+    );
+    const refreshLabel = form.querySelector<HTMLElement>(
+      "[data-membership-refresh-label]",
+    );
     const total = form.querySelector<HTMLElement>("[data-payment-total]");
     const totalAmount = form.querySelector<HTMLElement>("[data-total-amount]");
     const turnstileSlot = form.querySelector<HTMLElement>("[data-turnstile-slot]");
@@ -198,6 +216,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     let turnstileWidgetId: string | null = null;
     let tokenResolver: ((token: string) => void) | null = null;
     let tokenRejecter: ((error: Error) => void) | null = null;
+    let plansRequest: AbortController | null = null;
 
     const showAlert = (message: string) => {
       if (!alert) return;
@@ -251,11 +270,31 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       if (total) total.hidden = !plan;
       if (totalAmount) totalAmount.textContent = plan ? formatMoney(plan.amountCents) : "";
     };
-    const loadPlans = async () => {
+    const setRefreshState = (isRefreshing: boolean) => {
+      if (refreshButton) refreshButton.disabled = isRefreshing;
+      if (refreshLabel) {
+        refreshLabel.textContent = isRefreshing ? "Actualizando…" : "Actualizar planes";
+      }
+      form.setAttribute("aria-busy", String(isRefreshing));
+    };
+    const loadPlans = async (isRefresh = false) => {
+      plansRequest?.abort();
+      const request = new AbortController();
+      plansRequest = request;
+      if (isRefresh) setRefreshState(true);
+      else {
+        if (plansLoading) {
+          plansLoading.hidden = false;
+          plansLoading.textContent = "Cargando planes disponibles…";
+        }
+        if (plansElement) plansElement.hidden = true;
+      }
       try {
         const response = await fetch(`${apiUrl}/api/public/membership-plans`, {
           headers: { Accept: "application/json" },
+          cache: "no-store",
           credentials: "omit",
+          signal: request.signal,
         });
         const payload = await response.json() as unknown;
         if (!response.ok || !isPublicMembershipPlans(payload)) {
@@ -263,6 +302,10 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             && typeof payload.message === "string" ? payload.message : null;
           throw new Error(message || "No pudimos cargar los planes disponibles.");
         }
+        if (request !== plansRequest) return;
+        const selectedPlanCode = form.querySelector<HTMLInputElement>(
+          'input[name="planCode"]:checked',
+        )?.value;
         plans = payload.plans;
         currency = payload.currency;
         turnstileRequired = payload.turnstileRequired;
@@ -276,14 +319,33 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           if (description) description.textContent = plan.description;
           if (amount) amount.textContent = formatMoney(plan.amountCents);
         });
+        const selectedInput = form.querySelector<HTMLInputElement>(
+          'input[name="planCode"]',
+        );
+        if (selectedPlanCode && plans.some((plan) => plan.code === selectedPlanCode)) {
+          form.querySelector<HTMLInputElement>(
+            `input[name="planCode"][value="${selectedPlanCode}"]`,
+          )?.click();
+        } else if (selectedInput && !plans.some((plan) => plan.code === selectedInput.value)) {
+          selectedInput.checked = false;
+        }
+        updateTotal();
         if (plansLoading) plansLoading.hidden = true;
         if (plansElement) plansElement.hidden = false;
       } catch (error) {
+        if (request.signal.aborted || request !== plansRequest) return;
         if (plansLoading) plansLoading.hidden = true;
         showAlert(friendlyError(error, "No pudimos cargar los planes disponibles. Intentá nuevamente en unos minutos."));
-        if (submit) submit.disabled = true;
+        if (submit) submit.disabled = plans.length === 0;
+      } finally {
+        if (request !== plansRequest) return;
+        plansRequest = null;
+        if (isRefresh) setRefreshState(false);
       }
     };
+    if (refreshButton) {
+      refreshButton.addEventListener("click", () => void loadPlans(true));
+    }
     const getTurnstileToken = async () => {
       if (!turnstileRequired) return "";
       if (!turnstileSlot || !turnstileSiteKey) throw new Error("La verificación de seguridad no está disponible.");
@@ -384,9 +446,15 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
     showStep(0, false);
     void loadPlans();
+    cleanupMembership = () => {
+      plansRequest?.abort();
+      plansRequest = null;
+      cleanupMembership = undefined;
+    };
   };
 
   document.addEventListener("astro:page-load", initialiseMembershipForm);
+  document.addEventListener("astro:before-swap", () => cleanupMembership?.());
   initialiseMembershipForm();
 </script>
 
@@ -614,6 +682,24 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
   .plan-loading {
     margin-top: 1rem;
     color: var(--color-muted);
+  }
+
+  .plan-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+
+  .plan-actions .button-quiet {
+    min-height: 2.75rem;
+    padding: 0.55rem 0.9rem;
+    font-size: var(--text-sm);
+  }
+
+  .plan-actions .button-quiet:disabled {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
   }
 
   .payment-total {
