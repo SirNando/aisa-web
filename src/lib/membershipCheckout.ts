@@ -1,6 +1,7 @@
 export type MembershipPlanCode = "monthly" | "six_month";
 
 export type PublicMembershipPlan = {
+  id?: string;
   code: MembershipPlanCode;
   label: string;
   description: string;
@@ -50,8 +51,8 @@ export function isPublicMembershipPlans(value: unknown): value is PublicMembersh
   ) {
     return false;
   }
-  if (!Array.isArray(candidate.plans) || candidate.plans.length !== 2) return false;
-  const codes = new Set<MembershipPlanCode>();
+  if (!Array.isArray(candidate.plans) || candidate.plans.length > 100) return false;
+  const codes = new Set<string>();
   for (const plan of candidate.plans) {
     if (
       plan === null
@@ -63,7 +64,9 @@ export function isPublicMembershipPlans(value: unknown): value is PublicMembersh
       || !Number.isSafeInteger(plan.amountCents)
       || plan.amountCents <= 0
     ) return false;
-    codes.add(plan.code);
+    const id = plan.id ?? plan.code;
+    if (typeof id !== "string" || !id || id.length > 120 || codes.has(id)) return false;
+    codes.add(id);
   }
-  return codes.size === 2;
+  return codes.size === candidate.plans.length;
 }

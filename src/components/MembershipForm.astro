@@ -90,22 +90,16 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           Cargando planes disponibles…
         </div>
 
-        <div id="membership-plans" class="membership-plans" data-membership-plans hidden>
+        <div id="membership-plans" class="membership-plans" data-membership-plans hidden></div>
+        <template data-membership-plan-template>
           <label class="membership-plan">
-            <input type="radio" name="planCode" value="monthly" required />
+            <input type="radio" name="planCode" required />
             <span class="membership-plan__surface">
-              <span><strong data-plan-label="monthly">Abono mensual</strong><small data-plan-description="monthly"></small></span>
-              <b data-plan-amount="monthly"></b>
+              <span><strong data-plan-label></strong><small data-plan-description></small></span>
+              <b data-plan-amount></b>
             </span>
           </label>
-          <label class="membership-plan">
-            <input type="radio" name="planCode" value="six_month" required />
-            <span class="membership-plan__surface">
-              <span><strong data-plan-label="six_month">Seis meses</strong><small data-plan-description="six_month"></small></span>
-              <b data-plan-amount="six_month"></b>
-            </span>
-          </label>
-        </div>
+        </template>
 
         <div class="payment-total" data-payment-total hidden aria-live="polite">
           <span>Total a pagar</span>
@@ -196,6 +190,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     const stepCount = form.querySelector<HTMLElement>("[data-step-count]");
     const alert = form.querySelector<HTMLElement>("[data-form-alert]");
     const plansElement = form.querySelector<HTMLElement>("[data-membership-plans]");
+    const planTemplate = form.querySelector<HTMLTemplateElement>("[data-membership-plan-template]");
     const plansLoading = form.querySelector<HTMLElement>("[data-plan-loading]");
     const refreshButton = form.querySelector<HTMLButtonElement>(
       "[data-membership-refresh]",
@@ -231,7 +226,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       currentStep = Math.max(0, Math.min(step, panels.length - 1));
       panels.forEach((panel, index) => { panel.hidden = index !== currentStep; });
       progress.forEach((item, index) => {
-        item.toggleAttribute("aria-current", index === currentStep);
+        if (index === currentStep) item.setAttribute("aria-current", "step");
+        else item.removeAttribute("aria-current");
         item.classList.toggle("is-complete", index < currentStep);
       });
       if (previous) previous.hidden = currentStep === 0;
@@ -266,7 +262,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     }).format(amountCents / 100);
     const updateTotal = () => {
       const selected = form.querySelector<HTMLInputElement>('input[name="planCode"]:checked');
-      const plan = plans.find((candidate) => candidate.code === selected?.value);
+      const plan = plans.find((candidate) => (candidate.id ?? candidate.code) === selected?.value);
       if (total) total.hidden = !plan;
       if (totalAmount) totalAmount.textContent = plan ? formatMoney(plan.amountCents) : "";
     };
@@ -311,23 +307,20 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         turnstileRequired = payload.turnstileRequired;
         turnstileSiteKey = payload.turnstileSiteKey ?? "";
         if (turnstileSlot) turnstileSlot.hidden = !turnstileRequired;
-        plans.forEach((plan) => {
-          const label = form.querySelector<HTMLElement>(`[data-plan-label="${plan.code}"]`);
-          const description = form.querySelector<HTMLElement>(`[data-plan-description="${plan.code}"]`);
-          const amount = form.querySelector<HTMLElement>(`[data-plan-amount="${plan.code}"]`);
-          if (label) label.textContent = plan.label;
-          if (description) description.textContent = plan.description;
-          if (amount) amount.textContent = formatMoney(plan.amountCents);
-        });
-        const selectedInput = form.querySelector<HTMLInputElement>(
-          'input[name="planCode"]',
-        );
-        if (selectedPlanCode && plans.some((plan) => plan.code === selectedPlanCode)) {
-          form.querySelector<HTMLInputElement>(
-            `input[name="planCode"][value="${selectedPlanCode}"]`,
-          )?.click();
-        } else if (selectedInput && !plans.some((plan) => plan.code === selectedInput.value)) {
-          selectedInput.checked = false;
+        if (plansElement) {
+          const labels = plans.map((plan) => {
+            // Cloning retains Astro's scoped attributes on every element.
+            const label = planTemplate?.content.firstElementChild?.cloneNode(true) as HTMLLabelElement | undefined;
+            if (!label) throw new Error("No pudimos mostrar los planes disponibles.");
+            const input = label.querySelector<HTMLInputElement>("input")!;
+            input.value = plan.id ?? plan.code;
+            input.checked = input.value === selectedPlanCode;
+            label.querySelector<HTMLElement>("[data-plan-label]")!.textContent = plan.label;
+            label.querySelector<HTMLElement>("[data-plan-description]")!.textContent = plan.description;
+            label.querySelector<HTMLElement>("[data-plan-amount]")!.textContent = formatMoney(plan.amountCents);
+            return label;
+          });
+          plansElement.replaceChildren(...labels);
         }
         updateTotal();
         if (plansLoading) plansLoading.hidden = true;
@@ -406,7 +399,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           lastNames: String(formData.get("lastNames") ?? "").trim(),
           email: String(formData.get("email") ?? "").trim().toLocaleLowerCase("es-AR"),
           cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
-          planCode: String(formData.get("planCode") ?? ""),
+          planCode: plans.find(plan => (plan.id ?? plan.code) === String(formData.get("planCode")))?.code ?? "",
+          planId: String(formData.get("planCode") ?? ""),
         });
         let idempotencyKey = sessionStorage.getItem(storageKey);
         if (!idempotencyKey || sessionStorage.getItem(storagePayloadKey) !== checkoutIdentity) {
@@ -423,7 +417,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             lastNames: String(formData.get("lastNames") ?? ""),
             email: String(formData.get("email") ?? ""),
             cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
-            planCode: String(formData.get("planCode") ?? ""),
+            planCode: plans.find(plan => (plan.id ?? plan.code) === String(formData.get("planCode")))?.code ?? "",
+          planId: String(formData.get("planCode") ?? ""),
             website: String(formData.get("website") ?? ""),
             idempotencyKey,
             turnstileToken: token,
