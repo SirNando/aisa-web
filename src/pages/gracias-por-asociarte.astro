@@ -16,13 +16,13 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     <div class="site-container">
       <section class="result-card" aria-labelledby="membership-result-title">
         <div class="result-icon" data-result-icon aria-hidden="true">…</div>
-        <h1 id="membership-result-title" data-result-title>Consultando tu pago</h1>
+        <h1 id="membership-result-title" data-result-title>Consultando tu suscripción</h1>
         <p data-result-message aria-live="polite">
           Estamos verificando el estado informado directamente por PagoTIC.
         </p>
         <p class="result-note">
-          La vuelta desde el sitio de pago no confirma por sí sola que el pago
-          se haya acreditado.
+          La vuelta desde PagoTIC no confirma por sí sola la activación. Esta
+          página consulta el estado verificado de la suscripción.
         </p>
         <div class="result-actions">
           <button
@@ -44,7 +44,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 </BaseLayout>
 
 <script>
-  type CheckoutStatus = "pending" | "paid" | "not_paid";
+  type CheckoutStatus = "pending" | "active" | "not_active";
   let cleanupResult: (() => void) | undefined;
 
   const initialiseResult = () => {
@@ -78,23 +78,23 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
     const render = (status: CheckoutStatus, detail?: string, retryUrl?: string) => {
       root.dataset.status = status;
-      if (icon) icon.textContent = status === "paid" ? "✓" : status === "not_paid" ? "×" : "…";
+      if (icon) icon.textContent = status === "active" ? "✓" : status === "not_active" ? "×" : "…";
       if (title) {
-        title.textContent = status === "paid"
-          ? "Recibimos tu pago"
-          : status === "not_paid"
-            ? "El pago no se completó"
-            : "Tu pago está pendiente";
+        title.textContent = status === "active"
+          ? "Tu membresía está activa"
+          : status === "not_active"
+            ? "La suscripción no quedó activa"
+            : "Tu suscripción está pendiente";
       }
       if (message) {
-        message.textContent = detail || (status === "paid"
+        message.textContent = detail || (status === "active"
           ? "Tu perfil quedó activado. AISA te enviará las credenciales de acceso posteriormente."
-          : status === "not_paid"
-            ? "No pudimos acreditar el pago. Podés volver a intentarlo desde esta página."
-          : "PagoTIC todavía no confirmó el resultado. Podés volver a consultar esta página en unos minutos.");
+          : status === "not_active"
+            ? "PagoTIC informó que la suscripción no está activa. Podés volver a intentarlo desde esta página."
+            : "PagoTIC todavía no confirmó la activación. Podés volver a consultar esta página en unos minutos.");
       }
       if (retryLink) retryLink.hidden = true;
-      if (retryLink && status === "not_paid" && retryUrl) {
+      if (retryLink && status === "not_active" && retryUrl) {
         try {
           const parsedRetry = new URL(retryUrl);
           if (parsedRetry.protocol === "https:") {
@@ -118,7 +118,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       const request = new AbortController();
       statusRequest = request;
       if (!token || !/^[A-Za-z0-9_-]{40,200}$/u.test(token)) {
-        render("not_paid", "El enlace de consulta no es válido.");
+        render("not_active", "El enlace de consulta no es válido.");
         statusRequest = null;
         if (isManualRefresh) setRefreshState(false);
         return;
@@ -138,8 +138,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           message?: string;
           retryCheckoutUrl?: string;
         };
-        if (!response.ok || !payload.status || !["pending", "paid", "not_paid"].includes(payload.status)) {
-          throw new Error(payload.message || "No pudimos consultar el estado del pago.");
+        if (!response.ok || !payload.status || !["pending", "active", "not_active"].includes(payload.status)) {
+          throw new Error(payload.message || "No pudimos consultar el estado de la suscripción.");
         }
         if (request !== statusRequest) return;
         render(payload.status, payload.message, payload.retryCheckoutUrl);
@@ -215,12 +215,12 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     font-weight: 800;
   }
 
-  [data-status="paid"] .result-icon {
+  [data-status="active"] .result-icon {
     background: var(--color-aisa-green);
     color: var(--color-on-primary);
   }
 
-  [data-status="not_paid"] .result-icon {
+  [data-status="not_active"] .result-icon {
     background: color-mix(in srgb, var(--color-danger) 9%, var(--color-white));
     color: var(--color-danger);
   }
