@@ -12,6 +12,8 @@ describe("normalizePublicDirectoryResponse", () => {
         address: {
           label: "Consultorio Palermo",
           street: "Avenida Santa Fe 3253",
+          floor: "4",
+          apartment: "B",
           locality: "Palermo",
           city: "Ciudad Autónoma de Buenos Aires",
           province: "Ciudad Autónoma de Buenos Aires",
@@ -32,11 +34,13 @@ describe("normalizePublicDirectoryResponse", () => {
       address: {
         label: "Consultorio Palermo",
         street: "Avenida Santa Fe 3253",
+        floor: "4",
+        apartment: "B",
         locality: "Palermo",
         city: "Ciudad Autónoma de Buenos Aires",
         province: "Ciudad Autónoma de Buenos Aires",
         postalCode: "C1425",
-        formatted: "Avenida Santa Fe 3253 · Palermo, Ciudad Autónoma de Buenos Aires · C1425",
+        formatted: "Avenida Santa Fe 3253 · Piso 4 · Departamento B · Palermo, Ciudad Autónoma de Buenos Aires · C1425",
         latitude: -34.58889,
         longitude: -58.41135,
       },

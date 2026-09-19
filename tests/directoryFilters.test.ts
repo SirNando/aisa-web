@@ -25,6 +25,8 @@ const listing = (
   address: {
     label: `Consultorio ${locality}`,
     street: "",
+    floor: "",
+    apartment: "",
     locality,
     city: locality,
     province,

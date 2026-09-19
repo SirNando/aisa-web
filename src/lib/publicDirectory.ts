@@ -3,6 +3,9 @@ type UnknownRecord = Record<string, unknown>;
 export interface PublicDirectoryAddress {
   label: string;
   street: string;
+  /** Piso and departamento arrive only when the street is published; shown with their prefix. */
+  floor: string;
+  apartment: string;
   locality: string;
   city: string;
   province: string;
@@ -38,6 +41,8 @@ const formattedAddress = (address: Omit<PublicDirectoryAddress, "formatted">) =>
   ]).join(", ");
   const parts = uniqueText([
     address.street,
+    address.floor ? `Piso ${address.floor}` : "",
+    address.apartment ? `Departamento ${address.apartment}` : "",
     localityCityAndProvince,
     address.postalCode,
   ]);
@@ -64,6 +69,8 @@ const normalizeListing = (
   const addressWithoutDisplay = {
     label: textValue(value.address.label) || "Consultorio",
     street: textValue(value.address.street),
+    floor: textValue(value.address.floor),
+    apartment: textValue(value.address.apartment),
     locality: textValue(value.address.locality),
     city: textValue(value.address.city),
     province: textValue(value.address.province),
