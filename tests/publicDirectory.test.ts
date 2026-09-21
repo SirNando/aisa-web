@@ -9,6 +9,7 @@ describe("normalizePublicDirectoryResponse", () => {
         lastName: " Fernández ",
         email: " consultorio.preview@example.test ",
         phone: "+54 11 0000-0128",
+        certificationLevel: 3,
         address: {
           label: "Consultorio Palermo",
           street: "Avenida Santa Fe 3253",
@@ -31,6 +32,8 @@ describe("normalizePublicDirectoryResponse", () => {
       displayName: "Lucía Fernández",
       email: "consultorio.preview@example.test",
       phone: "+54 11 0000-0128",
+      certificationLevel: 3,
+      certificationLabel: "Nivel 3",
       address: {
         label: "Consultorio Palermo",
         street: "Avenida Santa Fe 3253",
@@ -67,7 +70,28 @@ describe("normalizePublicDirectoryResponse", () => {
     expect(records[0]).toMatchObject({
       email: "",
       phone: "",
+      certificationLevel: null,
+      certificationLabel: "",
       address: { label: "Centro", formatted: "Centro" },
     });
+  });
+
+  it("keeps only a whole Nivel 3 or 4 for the badge", () => {
+    const listing = (certificationLevel: unknown) =>
+      normalizePublicDirectoryResponse({
+        professionals: [{
+          firstName: "Ana",
+          lastName: "Pérez",
+          certificationLevel,
+          address: { latitude: -34, longitude: -58 },
+        }],
+      })[0];
+
+    expect(listing(4)).toMatchObject({ certificationLevel: 4, certificationLabel: "Nivel 4" });
+    expect(listing("3")).toMatchObject({ certificationLevel: 3, certificationLabel: "Nivel 3" });
+    expect(listing(2)).toMatchObject({ certificationLevel: null, certificationLabel: "" });
+    expect(listing(5)).toMatchObject({ certificationLevel: null, certificationLabel: "" });
+    expect(listing(3.5)).toMatchObject({ certificationLevel: null, certificationLabel: "" });
+    expect(listing("Nivel 3")).toMatchObject({ certificationLevel: null, certificationLabel: "" });
   });
 });

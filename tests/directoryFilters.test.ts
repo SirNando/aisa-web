@@ -22,6 +22,8 @@ const listing = (
   displayName,
   email: "",
   phone: "",
+  certificationLevel: 3,
+  certificationLabel: "Nivel 3",
   address: {
     label: `Consultorio ${locality}`,
     street: "",

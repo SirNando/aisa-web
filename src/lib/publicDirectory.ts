@@ -22,6 +22,10 @@ export interface PublicDirectoryListing {
   displayName: string;
   email: string;
   phone: string;
+  /** The qualifying Nivel (3 or 4) the platform publishes; null when the field is missing or malformed. */
+  certificationLevel: number | null;
+  /** Badge copy next to the name: "Nivel 3"; empty when there is no Nivel to show. */
+  certificationLabel: string;
   address: PublicDirectoryAddress;
 }
 
@@ -32,6 +36,15 @@ const textValue = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 
 const uniqueText = (values: string[]) => [...new Set(values.filter(Boolean))];
+
+/** The platform only publishes a qualifying Nivel 3 or 4; anything else is not a badge. */
+const certificationLevelValue = (value: unknown) => {
+  const level = typeof value === "number" || typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isInteger(level) && level >= 3 && level <= 4 ? level : null;
+};
+
+const certificationLabelFor = (level: number | null) =>
+  level === null ? "" : `Nivel ${level}`;
 
 const formattedAddress = (address: Omit<PublicDirectoryAddress, "formatted">) => {
   const localityCityAndProvince = uniqueText([
@@ -57,6 +70,7 @@ const normalizeListing = (
 
   const firstName = textValue(value.firstName);
   const lastName = textValue(value.lastName);
+  const certificationLevel = certificationLevelValue(value.certificationLevel);
   const latitude = Number(value.address.latitude);
   const longitude = Number(value.address.longitude);
   if (!firstName || !lastName || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -86,6 +100,8 @@ const normalizeListing = (
     displayName: `${firstName} ${lastName}`,
     email: textValue(value.email),
     phone: textValue(value.phone),
+    certificationLevel,
+    certificationLabel: certificationLabelFor(certificationLevel),
     address: {
       ...addressWithoutDisplay,
       formatted: formattedAddress(addressWithoutDisplay),

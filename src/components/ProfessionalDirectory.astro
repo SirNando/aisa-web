@@ -223,6 +223,7 @@ import LocationMap from "./design-system/LocationMap.astro";
     const popupEmail = root.querySelector<HTMLElement>("[data-map-popup-email]");
     const popupPhoneRow = root.querySelector<HTMLElement>("[data-map-popup-phone-row]");
     const popupEmailRow = root.querySelector<HTMLElement>("[data-map-popup-email-row]");
+    const popupLevel = root.querySelector<HTMLElement>("[data-map-popup-level]");
     const popupClose = root.querySelector<HTMLButtonElement>(
       "[data-map-popup-close]",
     );
@@ -296,7 +297,13 @@ import LocationMap from "./design-system/LocationMap.astro";
         listing.address.label,
         "directory-card__office",
       );
-      addText(identityText, "h3", listing.displayName);
+      const heading = document.createElement("div");
+      heading.className = "directory-heading";
+      addText(heading, "h3", listing.displayName);
+      if (listing.certificationLabel) {
+        addText(heading, "span", listing.certificationLabel, "directory-level-badge");
+      }
+      identityText.append(heading);
       addText(
         identityText,
         "p",
@@ -501,6 +508,10 @@ import LocationMap from "./design-system/LocationMap.astro";
         popupEmailRow
       ) {
         popupName.textContent = record.listing.displayName;
+        if (popupLevel) {
+          popupLevel.textContent = record.listing.certificationLabel;
+          popupLevel.hidden = !record.listing.certificationLabel;
+        }
         popupLocation.textContent = record.listing.address.formatted;
         popupPhone.textContent = record.listing.phone;
         popupPhoneRow.hidden = !record.listing.phone;
