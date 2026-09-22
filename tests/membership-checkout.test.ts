@@ -14,19 +14,28 @@ describe("membership checkout client rules", () => {
     expect(isValidCuit("20-12345678-3")).toBe(false);
   });
 
-  it("accepts only both configured ARS plans with positive integer amounts", () => {
+  it("accepts any público plan the platform publishes, identified by its ID", () => {
     const valid = {
       currency: "ARS",
       turnstileRequired: true,
       turnstileSiteKey: "site-key",
       plans: [
-        { code: "monthly", label: "Mensual", description: "Mensual", amountCents: 12000 },
-        { code: "six_month", label: "Seis meses", description: "Semestral", amountCents: 60000 },
+        { id: "monthly", label: "Mensual", description: "Mensual", billingKind: "recurring", periodMonths: 1, amountCents: 12000 },
+        { id: "plan-trimestral", label: "Trimestral", description: "Cada 3 meses", billingKind: "recurring", periodMonths: 3, amountCents: 33000 },
       ],
     };
     expect(isPublicMembershipPlans(valid)).toBe(true);
+    expect(isPublicMembershipPlans({ ...valid, plans: [] })).toBe(true);
     expect(isPublicMembershipPlans({ ...valid, plans: [valid.plans[0], valid.plans[0]] })).toBe(false);
-    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], amountCents: 0 }, valid.plans[1]] })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], amountCents: 0 }] })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], id: "" }] })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], id: "p".repeat(121) }] })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], billingKind: "weekly" }] })).toBe(false);
+    expect(isPublicMembershipPlans({ ...valid, plans: [{ ...valid.plans[0], periodMonths: 0 }] })).toBe(false);
+    expect(isPublicMembershipPlans({
+      ...valid,
+      plans: [{ code: "monthly", label: "Mensual", description: "Mensual", amountCents: 12000 }],
+    })).toBe(false);
     expect(isPublicMembershipPlans({ ...valid, currency: "USD" })).toBe(false);
     expect(isPublicMembershipPlans({ ...valid, turnstileRequired: false, turnstileSiteKey: null })).toBe(true);
     expect(isPublicMembershipPlans({ ...valid, turnstileRequired: true, turnstileSiteKey: null })).toBe(false);

@@ -105,7 +105,7 @@ if (!contactHtml.includes("mailto:integracion.sensorialargentina@gmail.com")) {
 }
 
 const membershipHtml = pages.get("profesionales/index.html") ?? "";
-for (const fieldName of ["firstNames", "lastNames", "email", "cuit", "planCode"]) {
+for (const fieldName of ["firstNames", "lastNames", "email", "cuit", "planId"]) {
   if (!membershipHtml.includes(`name="${fieldName}"`)) {
     failures.push(`El formulario de asociación no contiene el campo ${fieldName}.`);
   }
