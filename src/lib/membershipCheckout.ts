@@ -1,10 +1,9 @@
-export type MembershipPlanCode = "monthly" | "six_month";
-
 export type PublicMembershipPlan = {
-  id?: string;
-  code: MembershipPlanCode;
+  id: string;
   label: string;
   description: string;
+  billingKind: "one_time" | "recurring";
+  periodMonths: number;
   amountCents: number;
 };
 
@@ -52,21 +51,25 @@ export function isPublicMembershipPlans(value: unknown): value is PublicMembersh
     return false;
   }
   if (!Array.isArray(candidate.plans) || candidate.plans.length > 100) return false;
-  const codes = new Set<string>();
+  const ids = new Set<string>();
   for (const plan of candidate.plans) {
     if (
       plan === null
       || typeof plan !== "object"
-      || !["monthly", "six_month"].includes(plan.code)
+      || typeof plan.id !== "string"
+      || !plan.id
+      || plan.id.length > 120
+      || ids.has(plan.id)
+      || !["one_time", "recurring"].includes(plan.billingKind)
+      || !Number.isSafeInteger(plan.periodMonths)
+      || plan.periodMonths < 1
       || typeof plan.label !== "string"
       || !plan.label
       || typeof plan.description !== "string"
       || !Number.isSafeInteger(plan.amountCents)
       || plan.amountCents <= 0
     ) return false;
-    const id = plan.id ?? plan.code;
-    if (typeof id !== "string" || !id || id.length > 120 || codes.has(id)) return false;
-    codes.add(id);
+    ids.add(plan.id);
   }
-  return codes.size === candidate.plans.length;
+  return true;
 }

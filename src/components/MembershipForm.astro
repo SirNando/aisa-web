@@ -93,7 +93,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         <div id="membership-plans" class="membership-plans" data-membership-plans hidden></div>
         <template data-membership-plan-template>
           <label class="membership-plan">
-            <input type="radio" name="planCode" required />
+            <input type="radio" name="planId" required />
             <span class="membership-plan__surface">
               <span><strong data-plan-label></strong><small data-plan-description></small></span>
               <b data-plan-amount></b>
@@ -261,8 +261,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       currency,
     }).format(amountCents / 100);
     const updateTotal = () => {
-      const selected = form.querySelector<HTMLInputElement>('input[name="planCode"]:checked');
-      const plan = plans.find((candidate) => (candidate.id ?? candidate.code) === selected?.value);
+      const selected = form.querySelector<HTMLInputElement>('input[name="planId"]:checked');
+      const plan = plans.find((candidate) => candidate.id === selected?.value);
       if (total) total.hidden = !plan;
       if (totalAmount) totalAmount.textContent = plan ? formatMoney(plan.amountCents) : "";
     };
@@ -299,8 +299,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           throw new Error(message || "No pudimos cargar los planes disponibles.");
         }
         if (request !== plansRequest) return;
-        const selectedPlanCode = form.querySelector<HTMLInputElement>(
-          'input[name="planCode"]:checked',
+        const selectedPlanId = form.querySelector<HTMLInputElement>(
+          'input[name="planId"]:checked',
         )?.value;
         plans = payload.plans;
         currency = payload.currency;
@@ -313,8 +313,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             const label = planTemplate?.content.firstElementChild?.cloneNode(true) as HTMLLabelElement | undefined;
             if (!label) throw new Error("No pudimos mostrar los planes disponibles.");
             const input = label.querySelector<HTMLInputElement>("input")!;
-            input.value = plan.id ?? plan.code;
-            input.checked = input.value === selectedPlanCode;
+            input.value = plan.id;
+            input.checked = input.value === selectedPlanId;
             label.querySelector<HTMLElement>("[data-plan-label]")!.textContent = plan.label;
             label.querySelector<HTMLElement>("[data-plan-description]")!.textContent = plan.description;
             label.querySelector<HTMLElement>("[data-plan-amount]")!.textContent = formatMoney(plan.amountCents);
@@ -370,7 +370,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       cuitInput.setCustomValidity("");
     });
     form.addEventListener("change", (event) => {
-      if ((event.target as HTMLInputElement).name === "planCode") updateTotal();
+      if ((event.target as HTMLInputElement).name === "planId") updateTotal();
     });
     next?.addEventListener("click", () => {
       const panel = panels[currentStep];
@@ -399,8 +399,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           lastNames: String(formData.get("lastNames") ?? "").trim(),
           email: String(formData.get("email") ?? "").trim().toLocaleLowerCase("es-AR"),
           cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
-          planCode: plans.find(plan => (plan.id ?? plan.code) === String(formData.get("planCode")))?.code ?? "",
-          planId: String(formData.get("planCode") ?? ""),
+          planId: String(formData.get("planId") ?? ""),
         });
         let idempotencyKey = sessionStorage.getItem(storageKey);
         if (!idempotencyKey || sessionStorage.getItem(storagePayloadKey) !== checkoutIdentity) {
@@ -417,8 +416,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             lastNames: String(formData.get("lastNames") ?? ""),
             email: String(formData.get("email") ?? ""),
             cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
-            planCode: plans.find(plan => (plan.id ?? plan.code) === String(formData.get("planCode")))?.code ?? "",
-          planId: String(formData.get("planCode") ?? ""),
+            planId: String(formData.get("planId") ?? ""),
             website: String(formData.get("website") ?? ""),
             idempotencyKey,
             turnstileToken: token,
