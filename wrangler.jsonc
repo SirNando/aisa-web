@@ -2,8 +2,13 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aisa-web",
   "compatibility_date": "2026-07-19",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "aisa-web.nandinc.dev", "custom_domain": true }
+  ],
   "vars": {
-    "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma.nandinc.workers.dev"
+    "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma.nandinc.dev"
   },
   "assets": {
     "directory": "./dist",
@@ -12,10 +17,13 @@
   "env": {
     "preview": {
       "name": "aisa-web-preview",
-      "workers_dev": true,
-      "preview_urls": true,
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [
+        { "pattern": "aisa-web-preview.nandinc.dev", "custom_domain": true }
+      ],
       "vars": {
-        "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma-preview.nandinc.workers.dev"
+        "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma-preview.nandinc.dev"
       }
     }
   }
