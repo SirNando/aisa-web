@@ -88,7 +88,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       }
       if (message) {
         message.textContent = detail || (status === "active"
-          ? "Tu perfil quedó activado. AISA te enviará las credenciales de acceso posteriormente."
+          ? "Tu perfil quedó activado. Vas a recibir un correo en la dirección que indicaste para elegir tu contraseña."
           : status === "not_active"
             ? "PagoTIC informó que la suscripción no está activa. Podés volver a intentarlo desde esta página."
             : "PagoTIC todavía no confirmó la activación. Podés volver a consultar esta página en unos minutos.");
