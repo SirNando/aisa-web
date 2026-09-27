@@ -180,12 +180,12 @@ const courseLevels: CourseLevel[] = [
   <section id="cursos" class="section-space scroll-mt-28">
     <div class="site-container">
       <div class="max-w-3xl">
-        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+        <h2 class="font-aisa-heading text-aisa-section-title">
           Cursos avalados por AISA
         </h2>
         <p class="mt-5 text-lg leading-8">
           Estos cursos cumplen con los estándares definidos por AISA y son
-          válidas para el proceso de certificación.
+          válidos para el proceso de certificación.
         </p>
       </div>
       <div class="mt-10 grid gap-10">
@@ -196,7 +196,7 @@ const courseLevels: CourseLevel[] = [
             >
               <h3
                 id={`curso-${courseLevel.level.replace(" ", "-")}`}
-                class="font-aisa-heading text-2xl font-bold text-aisa-ink"
+                class="font-aisa-heading text-2xl text-aisa-ink"
               >
                 {courseLevel.level}
               </h3>
@@ -207,12 +207,13 @@ const courseLevels: CourseLevel[] = [
                       <p class="inline-flex w-fit rounded-full bg-aisa-sky-wash px-3 py-1 text-sm font-semibold text-aisa-sky-strong">
                         {course.provider}
                       </p>
-                      <h4 class="mt-4 font-aisa-heading text-2xl font-bold text-aisa-ink">
+                      <h4 class="mt-4 font-aisa-heading text-2xl text-aisa-ink">
                         {course.title}
                       </h4>
                       <a
-                        class="mt-auto inline-flex min-h-11 items-center gap-2 pt-8 font-semibold text-aisa-green-strong underline underline-offset-4 hover:text-aisa-ink"
+                        class="text-link mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-8"
                         href={course.href}
+                        aria-label={`${course.href.startsWith("http") ? "Sitio web" : "Enviar mail"}: ${course.provider}`}
                         target={
                           course.href.startsWith("http") ? "_blank" : undefined
                         }
@@ -256,7 +257,7 @@ const courseLevels: CourseLevel[] = [
                       {course.image ? (
                         <Image
                           src={course.image}
-                          alt="Actividad de Integración Sensorial"
+                          alt=""
                           widths={[180, 280, 360]}
                           sizes="(min-width: 768px) 9rem, 7rem"
                           class="h-full w-full object-cover"
@@ -283,7 +284,7 @@ const courseLevels: CourseLevel[] = [
   <section class="section-space bg-aisa-sand">
     <div class="site-container">
       <div class="max-w-3xl">
-        <h2 class="mt-4 font-aisa-heading text-aisa-section-title font-bold">
+        <h2 class="font-aisa-heading text-aisa-section-title">
           ¿Ya contás con formación en Integración Sensorial?
         </h2>
       </div>

@@ -140,8 +140,8 @@ const interestLinkGroups = [
   <section class="section-space bg-white">
     <div class="site-container">
       <div class="max-w-3xl">
-        <h2 class="font-aisa-heading text-aisa-section-title font-bold">
-          Cómo podemos ayudarte?
+        <h2 class="font-aisa-heading text-aisa-section-title">
+          ¿Cómo podemos ayudarte?
         </h2>
       </div>
       <div class="mt-10 grid gap-6 lg:grid-cols-3">
@@ -229,7 +229,7 @@ const interestLinkGroups = [
       <div class="mt-10 grid gap-5 lg:grid-cols-2" data-reveal-group>
         {interestLinkGroups.map((group) => (
           <article class="surface-card p-6 sm:p-8" data-reveal-item>
-            <h3 class="font-aisa-heading text-2xl font-bold text-aisa-ink">
+            <h3 class="font-aisa-heading text-2xl text-aisa-ink">
               {group.title}
             </h3>
             <ul class="mt-6 grid gap-3">
@@ -241,7 +241,7 @@ const interestLinkGroups = [
                   />
                   {link.href ? (
                     <a
-                      class="font-semibold text-aisa-green-strong underline underline-offset-4 hover:text-aisa-ink"
+                      class="text-link"
                       href={link.href}
                       target={link.href.startsWith("http") ? "_blank" : undefined}
                       rel={link.href.startsWith("http") ? "noreferrer" : undefined}
