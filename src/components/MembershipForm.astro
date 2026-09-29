@@ -1,4 +1,6 @@
 ---
+import { MEMBERSHIP_COUNTRY_CODES, countryName } from "../lib/membershipCheckout";
+
 const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u, "");
 ---
 
@@ -53,17 +55,33 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             <input name="email" type="email" autocomplete="email" maxlength="254" required />
           </label>
           <label class="field">
-            <span>CUIT/CUIL <b aria-hidden="true">*</b></span>
+            <span>País de residencia <b aria-hidden="true">*</b></span>
+            <select name="residenceCountry" autocomplete="country" data-residence-country required>
+              {MEMBERSHIP_COUNTRY_CODES.map((code) => (
+                <option value={code} selected={code === "AR"}>{countryName(code)}</option>
+              ))}
+            </select>
+          </label>
+          <label class="field" data-document-type-field hidden>
+            <span>Tipo de documento <b aria-hidden="true">*</b></span>
+            <select name="documentType" data-document-type disabled>
+              <option value="national_id">Documento nacional</option>
+              <option value="passport">Pasaporte</option>
+            </select>
+          </label>
+          <label class="field">
+            <span><span data-document-label>CUIL/CUIT</span> <b aria-hidden="true">*</b></span>
             <input
-              name="cuit"
+              name="documentNumber"
               inputmode="numeric"
               autocomplete="off"
               placeholder="20-12345678-3"
-              maxlength="13"
-              aria-describedby="membership-cuit-help"
+              maxlength="24"
+              aria-describedby="membership-document-help"
+              data-document-number
               required
             />
-            <small id="membership-cuit-help">Ingresá los 11 dígitos de tu CUIT o CUIL.</small>
+            <small id="membership-document-help" data-document-help>Ingresá los 11 dígitos de tu CUIL o CUIT.</small>
           </label>
         </div>
       </fieldset>
@@ -128,10 +146,10 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
 <script>
   import {
+    documentFieldFor,
     formatCuit,
     isPublicMembershipPlans,
-    isValidCuit,
-    normalizeCuit,
+    parseMembershipDocument,
     type PublicMembershipPlan,
   } from "../lib/membershipCheckout";
 
@@ -201,7 +219,34 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     const total = form.querySelector<HTMLElement>("[data-payment-total]");
     const totalAmount = form.querySelector<HTMLElement>("[data-total-amount]");
     const turnstileSlot = form.querySelector<HTMLElement>("[data-turnstile-slot]");
-    const cuitInput = form.elements.namedItem("cuit") as HTMLInputElement | null;
+    const residenceSelect = form.querySelector<HTMLSelectElement>("[data-residence-country]");
+    const documentTypeField = form.querySelector<HTMLElement>("[data-document-type-field]");
+    const documentTypeSelect = form.querySelector<HTMLSelectElement>("[data-document-type]");
+    const documentInput = form.querySelector<HTMLInputElement>("[data-document-number]");
+    const documentLabel = form.querySelector<HTMLElement>("[data-document-label]");
+    const documentHelp = form.querySelector<HTMLElement>("[data-document-help]");
+    // Residents of Argentina give their CUIL/CUIT; elsewhere the national document or passport.
+    const currentDocument = () => {
+      const residenceCountry = residenceSelect?.value ?? "AR";
+      return {
+        residenceCountry,
+        documentType: documentFieldFor(residenceCountry).fixedType ?? documentTypeSelect?.value ?? "",
+        documentNumber: documentInput?.value ?? "",
+      };
+    };
+    const applyResidence = () => {
+      const field = documentFieldFor(residenceSelect?.value ?? "AR");
+      if (documentTypeField) documentTypeField.hidden = field.fixedType !== null;
+      if (documentTypeSelect) documentTypeSelect.disabled = field.fixedType !== null;
+      if (documentLabel) documentLabel.textContent = field.label;
+      if (documentHelp) documentHelp.textContent = field.help;
+      if (documentInput) {
+        documentInput.inputMode = field.inputMode;
+        documentInput.placeholder = field.placeholder;
+        documentInput.setCustomValidity("");
+        if (field.fixedType) documentInput.value = formatCuit(documentInput.value);
+      }
+    };
     let currentStep = 0;
     let plans: PublicMembershipPlan[] = [];
     let currency = "ARS";
@@ -238,7 +283,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       if (moveFocus) panels[currentStep]?.querySelector<HTMLElement>("legend")?.focus();
     };
     const validatePanel = (panel: HTMLElement) => {
-      const fields = [...panel.querySelectorAll<HTMLInputElement>("input")]
+      const fields = [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select")]
         .filter((field) => !field.disabled && field.tabIndex !== -1);
       const invalid = fields.find((field) => !field.checkValidity());
       if (invalid) {
@@ -247,11 +292,12 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         invalid.focus();
         return false;
       }
-      if (panel.dataset.stepPanel === "0" && cuitInput && !isValidCuit(cuitInput.value)) {
-        cuitInput.setCustomValidity("Ingresá un CUIT/CUIL válido.");
-        showAlert("Revisá el CUIT/CUIL antes de continuar.");
-        cuitInput.reportValidity();
-        cuitInput.focus();
+      const document = panel.dataset.stepPanel === "0" && documentInput ? parseMembershipDocument(currentDocument()) : null;
+      if (document && !document.ok && documentInput) {
+        documentInput.setCustomValidity(document.message);
+        showAlert(document.message);
+        documentInput.reportValidity();
+        documentInput.focus();
         return false;
       }
       return true;
@@ -365,10 +411,12 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       });
     };
 
-    cuitInput?.addEventListener("input", () => {
-      cuitInput.value = formatCuit(cuitInput.value);
-      cuitInput.setCustomValidity("");
+    documentInput?.addEventListener("input", () => {
+      if (documentFieldFor(residenceSelect?.value ?? "AR").fixedType) documentInput.value = formatCuit(documentInput.value);
+      documentInput.setCustomValidity("");
     });
+    residenceSelect?.addEventListener("change", applyResidence);
+    applyResidence();
     form.addEventListener("change", (event) => {
       if ((event.target as HTMLInputElement).name === "planId") updateTotal();
     });
@@ -394,11 +442,16 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         const formData = new FormData(form);
         const storageKey = "aisa-membership-checkout-key";
         const storagePayloadKey = "aisa-membership-checkout-payload";
+        const parsedDocument = parseMembershipDocument(currentDocument());
+        if (!parsedDocument.ok) throw new Error(parsedDocument.message);
+        const { residenceCountry, documentType, documentNumber } = parsedDocument;
         const checkoutIdentity = JSON.stringify({
           firstNames: String(formData.get("firstNames") ?? "").trim(),
           lastNames: String(formData.get("lastNames") ?? "").trim(),
           email: String(formData.get("email") ?? "").trim().toLocaleLowerCase("es-AR"),
-          cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
+          residenceCountry,
+          documentType,
+          documentNumber,
           planId: String(formData.get("planId") ?? ""),
         });
         let idempotencyKey = sessionStorage.getItem(storageKey);
@@ -415,7 +468,9 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             firstNames: String(formData.get("firstNames") ?? ""),
             lastNames: String(formData.get("lastNames") ?? ""),
             email: String(formData.get("email") ?? ""),
-            cuit: normalizeCuit(String(formData.get("cuit") ?? "")),
+            residenceCountry,
+            documentType,
+            documentNumber,
             planId: String(formData.get("planId") ?? ""),
             website: String(formData.get("website") ?? ""),
             idempotencyKey,
@@ -590,7 +645,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     color: var(--color-danger);
   }
 
-  .field input {
+  .field input,
+  .field select {
     width: 100%;
     min-height: 3rem;
     padding: 0.75rem 0.85rem;
@@ -601,7 +657,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     font: inherit;
   }
 
-  .field input:focus-visible {
+  .field input:focus-visible,
+  .field select:focus-visible {
     border-color: var(--color-aisa-green);
     outline: 3px solid color-mix(in srgb, var(--color-aisa-green) 22%, transparent);
   }

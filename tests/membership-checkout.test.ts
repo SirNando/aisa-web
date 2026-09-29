@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  MEMBERSHIP_COUNTRY_CODES,
+  countryName,
+  documentFieldFor,
   formatCuit,
   isPublicMembershipPlans,
   isValidCuit,
   normalizeCuit,
+  parseMembershipDocument,
 } from "../src/lib/membershipCheckout";
 
 describe("membership checkout client rules", () => {
@@ -40,5 +44,27 @@ describe("membership checkout client rules", () => {
     expect(isPublicMembershipPlans({ ...valid, turnstileRequired: false, turnstileSiteKey: null })).toBe(true);
     expect(isPublicMembershipPlans({ ...valid, turnstileRequired: true, turnstileSiteKey: null })).toBe(false);
     expect(isPublicMembershipPlans({ ...valid, turnstileRequired: false, turnstileSiteKey: "site-key" })).toBe(false);
+  });
+
+  it("asks residents of Argentina for the CUIL/CUIT and everyone else for a national document or passport", () => {
+    expect(documentFieldFor("AR")).toMatchObject({ fixedType: "cuit_cuil", label: "CUIL/CUIT" });
+    expect(documentFieldFor("CL")).toMatchObject({ fixedType: null, label: "Número de documento" });
+  });
+
+  it("validates the Documento de identidad by País de residencia like the platform does", () => {
+    expect(parseMembershipDocument({ residenceCountry: "AR", documentType: "cuit_cuil", documentNumber: "20-12345678-6" }))
+      .toEqual({ ok: true, residenceCountry: "AR", documentType: "cuit_cuil", documentNumber: "20123456786" });
+    expect(parseMembershipDocument({ residenceCountry: "AR", documentType: "cuit_cuil", documentNumber: "20-12345678-3" }).ok).toBe(false);
+    expect(parseMembershipDocument({ residenceCountry: "CL", documentType: "national_id", documentNumber: "12.345.678-k" }))
+      .toEqual({ ok: true, residenceCountry: "CL", documentType: "national_id", documentNumber: "12345678K" });
+    expect(parseMembershipDocument({ residenceCountry: "CL", documentType: "passport", documentNumber: "123" }).ok).toBe(false);
+    expect(parseMembershipDocument({ residenceCountry: "CL", documentType: "cuit_cuil", documentNumber: "20123456786" }).ok).toBe(false);
+    expect(parseMembershipDocument({ residenceCountry: "ZZ", documentType: "passport", documentNumber: "C123456" }).ok).toBe(false);
+  });
+
+  it("lists the countries with Argentina first, in Spanish", () => {
+    expect(MEMBERSHIP_COUNTRY_CODES[0]).toBe("AR");
+    expect(MEMBERSHIP_COUNTRY_CODES).toContain("CL");
+    expect(countryName("CL")).toBe("Chile");
   });
 });
