@@ -8,6 +8,7 @@ import {
   isValidCuit,
   normalizeCuit,
   parseMembershipDocument,
+  parseMembershipProfile,
 } from "../src/lib/membershipCheckout";
 
 describe("membership checkout client rules", () => {
@@ -66,5 +67,12 @@ describe("membership checkout client rules", () => {
     expect(MEMBERSHIP_COUNTRY_CODES[0]).toBe("AR");
     expect(MEMBERSHIP_COUNTRY_CODES).toContain("CL");
     expect(countryName("CL")).toBe("Chile");
+  });
+});
+
+const applicant = { mobile: "+54 9 11 5555-1234", nationality: "AR", profession: "Licenciatura en Terapia Ocupacional", university: "Universidad de Buenos Aires", postgraduateStudies: "" };
+describe("Formulario private personal and academic fields", () => {
+  it.each(["mobile", "nationality", "profession", "university"])("identifies missing %s before requesting payment", (field) => {
+    expect(parseMembershipProfile({ ...applicant, [field]: " " })).toMatchObject({ ok: false, field });
   });
 });

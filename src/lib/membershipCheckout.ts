@@ -146,3 +146,30 @@ export function isPublicMembershipPlans(value: unknown): value is PublicMembersh
   }
   return true;
 }
+
+export type MembershipProfile = {
+  mobile: string;
+  nationality: string;
+  profession: string;
+  university: string;
+  postgraduateStudies: string;
+};
+
+/** Private fields sent to the platform, with the same limits as its Formulario validator. */
+export function parseMembershipProfile(input: MembershipProfile):
+  | { ok: true; profile: MembershipProfile }
+  | { ok: false; field: keyof MembershipProfile; message: string } {
+  const profile = Object.fromEntries(Object.entries(input).map(([key, value]) => [key, value.trim().replace(/\s+/gu, " ")])) as MembershipProfile;
+  const fields = [
+    ["mobile", "el celular", 60], ["nationality", "la nacionalidad", 2],
+    ["profession", "el título", 180], ["university", "la universidad", 220],
+    ["postgraduateStudies", "la maestría o doctorado", 300],
+  ] as const;
+  for (const [field, label, maximum] of fields) {
+    if (field !== "postgraduateStudies" && !profile[field]) return { ok: false, field, message: `Completá ${label}.` };
+    if (profile[field].length > maximum) return { ok: false, field, message: `Revisá ${label}: admite hasta ${maximum} caracteres.` };
+  }
+  profile.nationality = profile.nationality.toUpperCase();
+  if (!COUNTRY_CODES.includes(profile.nationality)) return { ok: false, field: "nationality", message: "Elegí tu nacionalidad." };
+  return { ok: true, profile };
+}

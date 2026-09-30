@@ -29,7 +29,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
       <ol class="form-progress" aria-label="Progreso de la solicitud">
         <li data-progress-step aria-current="step"><span>1</span> Tus datos</li>
-        <li data-progress-step><span>2</span> Forma de pago</li>
+        <li data-progress-step><span>2</span> Estudios</li>
+        <li data-progress-step><span>3</span> Forma de pago</li>
       </ol>
 
       <p class="form-alert" data-form-alert role="alert" tabindex="-1" hidden></p>
@@ -53,6 +54,17 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
           <label class="field">
             <span>Correo electrónico <b aria-hidden="true">*</b></span>
             <input name="email" type="email" autocomplete="email" maxlength="254" required />
+          </label>
+          <label class="field">
+            <span>Celular <b aria-hidden="true">*</b></span>
+            <input name="mobile" type="tel" autocomplete="tel" maxlength="60" required />
+          </label>
+          <label class="field">
+            <span>Nacionalidad <b aria-hidden="true">*</b></span>
+            <select name="nationality" required>
+              <option value="">Seleccioná un país</option>
+              {MEMBERSHIP_COUNTRY_CODES.map((code) => <option value={code}>{countryName(code)}</option>)}
+            </select>
           </label>
           <label class="field">
             <span>País de residencia <b aria-hidden="true">*</b></span>
@@ -87,6 +99,16 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       </fieldset>
 
       <fieldset class="form-panel" data-step-panel="1" hidden>
+        <legend tabindex="-1">Estudios universitarios</legend>
+        <p class="panel-intro">Estos datos son privados y se guardarán en tu Perfil.</p>
+        <div class="field-grid">
+          <label class="field"><span>Título <b aria-hidden="true">*</b></span><input name="profession" maxlength="180" required /></label>
+          <label class="field"><span>Universidad <b aria-hidden="true">*</b></span><input name="university" maxlength="220" required /></label>
+          <label class="field"><span>Maestría o doctorado (opcional)</span><input name="postgraduateStudies" maxlength="300" /></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-panel" data-step-panel="2" hidden>
         <legend tabindex="-1">Elegí cómo abonar</legend>
         <p class="panel-intro">
           El importe se obtiene directamente desde la plataforma antes de
@@ -134,7 +156,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
       <div class="form-navigation">
         <button type="button" class="button-quiet" data-previous hidden>Anterior</button>
-        <p data-step-count>Paso 1 de 2</p>
+        <p data-step-count>Paso 1 de 3</p>
         <button type="button" class="button-primary" data-next>Continuar</button>
         <button type="submit" class="button-primary" data-submit hidden>
           Ir a PagoTIC
@@ -150,6 +172,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     formatCuit,
     isPublicMembershipPlans,
     parseMembershipDocument,
+    parseMembershipProfile,
     type PublicMembershipPlan,
   } from "../lib/membershipCheckout";
 
@@ -282,9 +305,32 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       clearAlert();
       if (moveFocus) panels[currentStep]?.querySelector<HTMLElement>("legend")?.focus();
     };
+    const currentProfile = () => {
+      const data = new FormData(form);
+      return parseMembershipProfile({
+        mobile: String(data.get("mobile") ?? ""), nationality: String(data.get("nationality") ?? ""),
+        profession: String(data.get("profession") ?? ""), university: String(data.get("university") ?? ""),
+        postgraduateStudies: String(data.get("postgraduateStudies") ?? ""),
+      });
+    };
+    const showFieldError = (name: string, message: string) => {
+      const field = form.elements.namedItem(name);
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) return;
+      const panel = field.closest<HTMLElement>("[data-step-panel]");
+      if (panel) showStep(panels.indexOf(panel), false);
+      field.setCustomValidity(message);
+      showAlert(message);
+      field.reportValidity();
+      field.focus();
+    };
     const validatePanel = (panel: HTMLElement) => {
       const fields = [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select")]
         .filter((field) => !field.disabled && field.tabIndex !== -1);
+      const profile = currentProfile();
+      if (!profile.ok && fields.some((field) => field.name === profile.field)) {
+        showFieldError(profile.field, profile.message);
+        return false;
+      }
       const invalid = fields.find((field) => !field.checkValidity());
       if (invalid) {
         showAlert("Revisá los campos marcados antes de continuar.");
@@ -417,6 +463,10 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     });
     residenceSelect?.addEventListener("change", applyResidence);
     applyResidence();
+    form.addEventListener("input", (event) => {
+      const field = event.target;
+      if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.setCustomValidity("");
+    });
     form.addEventListener("change", (event) => {
       if ((event.target as HTMLInputElement).name === "planId") updateTotal();
     });
@@ -445,10 +495,14 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
         const parsedDocument = parseMembershipDocument(currentDocument());
         if (!parsedDocument.ok) throw new Error(parsedDocument.message);
         const { residenceCountry, documentType, documentNumber } = parsedDocument;
+        const parsedProfile = currentProfile();
+        if (!parsedProfile.ok) throw new Error(parsedProfile.message);
+        const privateProfile = parsedProfile.profile;
         const checkoutIdentity = JSON.stringify({
           firstNames: String(formData.get("firstNames") ?? "").trim(),
           lastNames: String(formData.get("lastNames") ?? "").trim(),
           email: String(formData.get("email") ?? "").trim().toLocaleLowerCase("es-AR"),
+          ...privateProfile,
           residenceCountry,
           documentType,
           documentNumber,
@@ -468,6 +522,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             firstNames: String(formData.get("firstNames") ?? ""),
             lastNames: String(formData.get("lastNames") ?? ""),
             email: String(formData.get("email") ?? ""),
+            ...privateProfile,
             residenceCountry,
             documentType,
             documentNumber,
@@ -477,8 +532,9 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
             turnstileToken: token,
           }),
         });
-        const payload = await response.json() as { checkoutUrl?: string; message?: string };
+        const payload = await response.json() as { checkoutUrl?: string; message?: string; field?: string };
         if (!response.ok || !payload.checkoutUrl) {
+          if (payload.field && payload.message) showFieldError(payload.field, payload.message);
           throw new Error(payload.message || "No pudimos iniciar el pago.");
         }
         const checkoutUrl = new URL(payload.checkoutUrl);
@@ -565,7 +621,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
   .form-progress {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
     margin: 0;
     padding: 1.2rem clamp(1rem, 4vw, 2rem) 0;
@@ -584,6 +640,7 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
   }
 
   .form-progress li span {
+    flex-shrink: 0;
     display: grid;
     width: 1.65rem;
     height: 1.65rem;

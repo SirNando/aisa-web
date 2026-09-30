@@ -105,12 +105,12 @@ if (!contactHtml.includes("mailto:integracion.sensorialargentina@gmail.com")) {
 }
 
 const membershipHtml = pages.get("profesionales/index.html") ?? "";
-for (const fieldName of ["firstNames", "lastNames", "email", "residenceCountry", "documentType", "documentNumber", "planId"]) {
+for (const fieldName of ["firstNames", "lastNames", "email", "mobile", "nationality", "profession", "university", "postgraduateStudies", "residenceCountry", "documentType", "documentNumber", "planId"]) {
   if (!membershipHtml.includes(`name="${fieldName}"`)) {
     failures.push(`El formulario de asociación no contiene el campo ${fieldName}.`);
   }
 }
-for (const forbiddenField of ["phone", "province", "profession", "password"]) {
+for (const forbiddenField of ["phone", "province", "password"]) {
   if (membershipHtml.includes(`name="${forbiddenField}"`)) {
     failures.push(`El formulario de asociación conserva el campo innecesario ${forbiddenField}.`);
   }
