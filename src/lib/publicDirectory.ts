@@ -22,9 +22,9 @@ export interface PublicDirectoryListing {
   displayName: string;
   email: string;
   phone: string;
-  /** The qualifying Nivel (3 or 4) the platform publishes; null when the field is missing or malformed. */
+  /** The qualifying Nivel (3 or 4) the platform publishes; null for a Socio Honorífico or when the field is missing or malformed. */
   certificationLevel: number | null;
-  /** Badge copy next to the name: "Nivel 3"; empty when there is no Nivel to show. */
+  /** Badge copy next to the name: "Nivel 3" or "Socio Honorífico"; empty when neither applies. */
   certificationLabel: string;
   address: PublicDirectoryAddress;
 }
@@ -70,7 +70,8 @@ const normalizeListing = (
 
   const firstName = textValue(value.firstName);
   const lastName = textValue(value.lastName);
-  const certificationLevel = certificationLevelValue(value.certificationLevel);
+  const honoraryMember = value.honoraryMember === true;
+  const certificationLevel = honoraryMember ? null : certificationLevelValue(value.certificationLevel);
   const latitude = Number(value.address.latitude);
   const longitude = Number(value.address.longitude);
   if (!firstName || !lastName || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -101,7 +102,7 @@ const normalizeListing = (
     email: textValue(value.email),
     phone: textValue(value.phone),
     certificationLevel,
-    certificationLabel: certificationLabelFor(certificationLevel),
+    certificationLabel: honoraryMember ? "Socio Honorífico" : certificationLabelFor(certificationLevel),
     address: {
       ...addressWithoutDisplay,
       formatted: formattedAddress(addressWithoutDisplay),
