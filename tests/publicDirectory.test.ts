@@ -95,3 +95,10 @@ describe("normalizePublicDirectoryResponse", () => {
     expect(listing("Nivel 3")).toMatchObject({ certificationLevel: null, certificationLabel: "" });
   });
 });
+
+
+it("renders Socio Honorífico instead of a Nivel, only for an explicit honorary badge", () => {
+  const entry = (honoraryMember: unknown) => normalizePublicDirectoryResponse({ professionals: [{ firstName: "Ana", lastName: "Docente", honoraryMember, certificationLevel: 3, address: { latitude: -34.6, longitude: -58.4 } }] })[0];
+  expect(entry(true)).toMatchObject({ certificationLevel: null, certificationLabel: "Socio Honorífico" });
+  expect(entry("true")).toMatchObject({ certificationLevel: 3, certificationLabel: "Nivel 3" });
+});
