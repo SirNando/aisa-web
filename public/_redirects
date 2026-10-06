@@ -1,0 +1,2 @@
+# The QR on each Certificado leads to /verificar/<token>; the page reads the token from the URL.
+/verificar/* /verificar-certificado/ 200
