@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ResultCard from "../components/ResultCard.astro";
 
 // The QR on each Certificado leads to /verificar/<token>; public/_redirects serves this page there.
 const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u, "");
@@ -10,56 +11,48 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
   description="Consultá si un Certificado de AISA sigue siendo válido."
   noindex={true}
 >
-  <section
-    class="certificate-verification section-space"
+  <ResultCard
     data-certificate-verification
     data-platform-api-url={platformApiUrl}
-    data-status="loading"
     aria-busy="true"
+    titleId="certificate-verification-title"
+    title="Verificando el Certificado"
+    message="Estamos consultando el estado del Certificado en AISA."
   >
-    <div class="site-container">
-      <section class="verification-card" aria-labelledby="certificate-verification-title">
-        <div class="verification-icon" data-verification-icon aria-hidden="true">…</div>
-        <h1 id="certificate-verification-title" data-verification-title>Verificando el Certificado</h1>
-        <p data-verification-message aria-live="polite">
-          Estamos consultando el estado del Certificado en AISA.
-        </p>
-        <dl class="verification-details" data-verification-details hidden>
-          <div>
-            <dt>Nombres y apellidos</dt>
-            <dd data-field="fullName"></dd>
-          </div>
-          <div>
-            <dt>Nivel</dt>
-            <dd data-field="levelLabel"></dd>
-          </div>
-          <div data-member-number-row>
-            <dt>Número de socio</dt>
-            <dd data-field="memberNumber"></dd>
-          </div>
-          <div>
-            <dt>Generado el</dt>
-            <dd data-field="generatedOn"></dd>
-          </div>
-          <div>
-            <dt>Válido hasta</dt>
-            <dd data-field="validUntil"></dd>
-          </div>
-          <div>
-            <dt>Estado</dt>
-            <dd data-field="status"></dd>
-          </div>
-        </dl>
-        <p class="verification-note">
-          El estado se consulta en el momento: un Certificado vale sólo hasta la
-          fecha indicada y mientras la Certificación siga activa.
-        </p>
-        <div class="verification-actions">
-          <a class="button-quiet" href="/">Volver al inicio</a>
-        </div>
-      </section>
+    <dl class="verification-details" data-verification-details hidden>
+      <div>
+        <dt>Nombres y apellidos</dt>
+        <dd data-field="fullName"></dd>
+      </div>
+      <div>
+        <dt>Nivel</dt>
+        <dd data-field="levelLabel"></dd>
+      </div>
+      <div data-member-number-row>
+        <dt>Número de socio</dt>
+        <dd data-field="memberNumber"></dd>
+      </div>
+      <div>
+        <dt>Generado el</dt>
+        <dd data-field="generatedOn"></dd>
+      </div>
+      <div>
+        <dt>Válido hasta</dt>
+        <dd data-field="validUntil"></dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd data-field="status"></dd>
+      </div>
+    </dl>
+    <p class="result-note">
+      El estado se consulta en el momento: un Certificado vale sólo hasta la
+      fecha indicada y mientras la Certificación siga activa.
+    </p>
+    <div class="result-actions">
+      <a class="button-quiet" href="/">Volver al inicio</a>
     </div>
-  </section>
+  </ResultCard>
 </BaseLayout>
 
 <script>
@@ -71,18 +64,44 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
   } from "../lib/certificateVerification";
 
   type VerificationStatus = "valid" | "invalid" | "not_found" | "error";
-  let cleanupVerification: (() => void) | undefined;
 
-  const NOT_FOUND_TITLE = "Este Certificado no existe o ya no es válido";
+  const STATES: Record<VerificationStatus, { tone: "success" | "danger"; icon: string; title: string; message: string }> = {
+    valid: {
+      tone: "success",
+      icon: "✓",
+      title: "Certificado válido",
+      message: "La Certificación de este Certificado está activa en AISA.",
+    },
+    invalid: {
+      tone: "danger",
+      icon: "×",
+      title: "Certificado no válido",
+      message: "La Certificación de este Certificado no está activa en este momento.",
+    },
+    not_found: {
+      tone: "danger",
+      icon: "×",
+      title: "Este Certificado no existe o ya no es válido",
+      message: "Revisá que el enlace o el código QR sea el que figura en el Certificado.",
+    },
+    error: {
+      tone: "danger",
+      icon: "!",
+      title: "No pudimos verificar el Certificado",
+      message: "Intentá nuevamente en unos minutos.",
+    },
+  };
+
+  let cleanupVerification: (() => void) | undefined;
 
   const initialiseVerification = () => {
     const root = document.querySelector<HTMLElement>("[data-certificate-verification]");
     if (!root || root.dataset.initialised === "true") return;
     root.dataset.initialised = "true";
 
-    const title = root.querySelector<HTMLElement>("[data-verification-title]");
-    const message = root.querySelector<HTMLElement>("[data-verification-message]");
-    const icon = root.querySelector<HTMLElement>("[data-verification-icon]");
+    const title = root.querySelector<HTMLElement>("[data-result-title]");
+    const message = root.querySelector<HTMLElement>("[data-result-message]");
+    const icon = root.querySelector<HTMLElement>("[data-result-icon]");
     const details = root.querySelector<HTMLElement>("[data-verification-details]");
     const memberNumberRow = root.querySelector<HTMLElement>("[data-member-number-row]");
     const apiUrl = root.dataset.platformApiUrl ?? "";
@@ -94,27 +113,13 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     };
 
     const render = (status: VerificationStatus, certificate?: CertificateVerificationView) => {
+      const state = STATES[status];
       root.dataset.status = status;
+      root.dataset.resultTone = state.tone;
       root.setAttribute("aria-busy", "false");
-      if (icon) icon.textContent = status === "valid" ? "✓" : status === "error" ? "!" : "×";
-      if (title) {
-        title.textContent = status === "valid"
-          ? "Certificado válido"
-          : status === "invalid"
-            ? "Certificado no válido"
-            : status === "not_found"
-              ? NOT_FOUND_TITLE
-              : "No pudimos verificar el Certificado";
-      }
-      if (message) {
-        message.textContent = status === "valid"
-          ? "La Certificación de este Certificado está activa en AISA."
-          : status === "invalid"
-            ? "La Certificación de este Certificado no está activa en este momento."
-            : status === "not_found"
-              ? "Revisá que el enlace o el código QR sea el que figura en el Certificado."
-              : "Intentá nuevamente en unos minutos.";
-      }
+      if (icon) icon.textContent = state.icon;
+      if (title) title.textContent = state.title;
+      if (message) message.textContent = state.message;
       if (details) details.hidden = !certificate;
       if (!certificate) return;
       setField("fullName", certificate.fullName);
@@ -166,58 +171,6 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 </script>
 
 <style>
-  .certificate-verification {
-    min-height: min(75vh, 48rem);
-    background: linear-gradient(180deg, var(--color-leaf-wash), var(--color-white));
-  }
-
-  .verification-card {
-    width: min(100%, 42rem);
-    margin-inline: auto;
-    padding: clamp(2rem, 7vw, 4rem);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-    background: var(--color-white);
-    box-shadow: var(--shadow-raised);
-    text-align: center;
-  }
-
-  .verification-icon {
-    display: grid;
-    width: 4rem;
-    height: 4rem;
-    margin: 0 auto 1.25rem;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--color-leaf-wash);
-    color: var(--color-aisa-green-dark);
-    font-size: 2rem;
-    font-weight: 800;
-  }
-
-  [data-status="valid"] .verification-icon {
-    background: var(--color-aisa-green);
-    color: var(--color-on-primary);
-  }
-
-  [data-status="invalid"] .verification-icon,
-  [data-status="not_found"] .verification-icon,
-  [data-status="error"] .verification-icon {
-    background: color-mix(in srgb, var(--color-danger) 9%, var(--color-white));
-    color: var(--color-danger);
-  }
-
-  .verification-card h1 {
-    font-size: var(--text-section-title);
-    line-height: 1.08;
-  }
-
-  .verification-card > p {
-    max-width: 34rem;
-    margin: 1rem auto 0;
-    color: var(--color-muted);
-  }
-
   .verification-details {
     display: grid;
     gap: 0.75rem;
@@ -249,27 +202,10 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     overflow-wrap: anywhere;
   }
 
-  .verification-note {
-    font-size: var(--text-sm);
-  }
-
-  .verification-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1.75rem;
-  }
-
-  @media (max-width: 36rem) {
+  @media (max-width: 40rem) {
     .verification-details > div {
       grid-template-columns: minmax(0, 1fr);
       gap: 0.25rem;
-    }
-
-    .verification-actions > * {
-      width: 100%;
-      justify-content: center;
     }
   }
 </style>

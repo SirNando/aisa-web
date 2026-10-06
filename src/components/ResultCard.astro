@@ -1,0 +1,113 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+/**
+ * A full-section status card whose state a page script fills in: the page
+ * sets `data-result-tone` ("success" | "danger") on the root and writes into
+ * `[data-result-icon]`, `[data-result-title]` and `[data-result-message]`.
+ * Slotted `.result-note` and `.result-actions` get the shared spacing.
+ */
+interface Props extends HTMLAttributes<"section"> {
+  titleId: string;
+  title: string;
+  message: string;
+}
+
+const { titleId, title, message, class: className, ...attributes } = Astro.props;
+---
+
+<section class:list={["result-page section-space", className]} {...attributes}>
+  <div class="site-container">
+    <section class="result-card" aria-labelledby={titleId}>
+      <div class="result-icon" data-result-icon aria-hidden="true">…</div>
+      <h1 id={titleId} data-result-title>{title}</h1>
+      <p data-result-message aria-live="polite">{message}</p>
+      <slot />
+    </section>
+  </div>
+</section>
+
+<style>
+  .result-page {
+    min-height: min(75vh, 48rem);
+    background: linear-gradient(180deg, var(--color-leaf-wash), var(--color-white));
+  }
+
+  .result-card {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+    padding: clamp(2rem, 7vw, 4rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+    box-shadow: var(--shadow-raised);
+    text-align: center;
+  }
+
+  .result-icon {
+    display: grid;
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.25rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-leaf-wash);
+    color: var(--color-aisa-green-dark);
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  [data-result-tone="success"] .result-icon {
+    background: var(--color-aisa-green);
+    color: var(--color-on-primary);
+  }
+
+  [data-result-tone="danger"] .result-icon {
+    background: color-mix(in srgb, var(--color-danger) 9%, var(--color-white));
+    color: var(--color-danger);
+  }
+
+  .result-card h1 {
+    font-size: var(--text-section-title);
+    line-height: 1.08;
+  }
+
+  .result-card > p,
+  .result-card > :global(p) {
+    max-width: 34rem;
+    margin: 1rem auto 0;
+    color: var(--color-muted);
+  }
+
+  .result-card > :global(.result-note) {
+    font-size: var(--text-sm);
+  }
+
+  .result-card > :global(.result-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .result-card > :global(.result-actions) :global(button:disabled) {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
+  }
+
+  @media (max-width: 36rem) {
+    .result-card > :global(.result-actions > *) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result-card,
+    .result-icon {
+      transition: none;
+    }
+  }
+</style>
