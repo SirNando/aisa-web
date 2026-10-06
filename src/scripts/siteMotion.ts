@@ -409,28 +409,27 @@ const setupTiltCards = () => {
 
   document.querySelectorAll<HTMLElement>("[data-tilt-card]").forEach((card) => {
     const surface = card.querySelector<HTMLElement>("[data-tilt-surface]") ?? card;
+    // quickTo reuses one tween per axis instead of creating a tween for every
+    // pointermove event.
+    const tiltX = gsap.quickTo(surface, "rotationX", { duration: 0.45, ease: "power3.out" });
+    const tiltY = gsap.quickTo(surface, "rotationY", { duration: 0.45, ease: "power3.out" });
+
+    const onEnter = () => {
+      gsap.set(surface, { transformPerspective: 900, transformOrigin: "center" });
+    };
     const onMove = (event: PointerEvent) => {
       const bounds = card.getBoundingClientRect();
       const x = (event.clientX - bounds.left) / bounds.width - 0.5;
       const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-      gsap.to(surface, {
-        rotationX: y * -3.5,
-        rotationY: x * 3.5,
-        transformPerspective: 900,
-        transformOrigin: "center",
-        duration: 0.35,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
+      tiltX(y * -3.5);
+      tiltY(x * 3.5);
     };
-    const reset = () => gsap.to(surface, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.55,
-      ease: "power3.out",
-      overwrite: "auto",
-    });
+    const reset = () => {
+      tiltX(0);
+      tiltY(0);
+    };
 
+    addListener(card, "pointerenter", onEnter);
     addListener(card, "pointermove", onMove as (event: Event) => void);
     addListener(card, "pointerleave", reset);
   });
@@ -856,14 +855,27 @@ const initialize = () => {
     setupSectionShapeMotion();
     setupSectionTransitionMotion();
 
-    const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(
-      "[data-reveal], main .surface-card, main section h2:not(.page-hero__title)",
-    ));
-    const uniqueRevealTargets = [...new Set(revealTargets)].filter(
-      (element) => !element.closest("[data-page-hero]") && !element.closest("[hidden]"),
-    );
+    // On desktop the sticky footer is uncovered by the page itself and its
+    // content is driven by the scrubbed parallax below, so it must not also
+    // receive entrance tweens that compete for the same transform.
+    const footerOwnsMotion = desktop.matches;
+    const isRevealCandidate = (element: HTMLElement) =>
+      !element.closest("[data-page-hero]") &&
+      !element.closest("[hidden]") &&
+      !(footerOwnsMotion && element.closest("[data-site-footer]"));
+    // An element revealed by an ancestor, or by a reveal group, would
+    // otherwise animate twice and drift further than its neighbours.
+    const hasRevealOwner = (element: HTMLElement) =>
+      Boolean(
+        element.parentElement?.closest("[data-reveal], [data-reveal-group]") ||
+          element.matches("[data-reveal-item]"),
+      );
 
-    uniqueRevealTargets.forEach((element) => {
+    const revealTargets = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-reveal]"),
+    ).filter((element) => isRevealCandidate(element) && !hasRevealOwner(element));
+
+    revealTargets.forEach((element) => {
       gsap.fromTo(element, { autoAlpha: 0, y: 28 }, {
         autoAlpha: 1,
         y: 0,
@@ -878,7 +890,61 @@ const initialize = () => {
       });
     });
 
+    // Page-owned section headings enter together with their lead paragraph.
+    Array.from(
+      document.querySelectorAll<HTMLElement>("main section h2:not(.page-hero__title)"),
+    )
+      .filter((heading) => isRevealCandidate(heading) && !hasRevealOwner(heading))
+      .forEach((heading) => {
+        const lead = heading.nextElementSibling;
+        const items = lead instanceof HTMLParagraphElement ? [heading, lead] : [heading];
+        gsap.fromTo(items, { autoAlpha: 0, y: 28 }, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.72,
+          stagger: 0.08,
+          ease: "power3.out",
+          clearProps: "transform,opacity,visibility,willChange",
+          scrollTrigger: {
+            trigger: heading,
+            start: "top 88%",
+            once: true,
+          },
+        });
+      });
+
+    // Cards that share a row enter as one staggered wave instead of popping
+    // in individually.
+    const revealCards = Array.from(
+      document.querySelectorAll<HTMLElement>("main .surface-card"),
+    ).filter((card) => isRevealCandidate(card) && !hasRevealOwner(card));
+
+    if (revealCards.length > 0) {
+      gsap.set(revealCards, { autoAlpha: 0, y: 28 });
+      ScrollTrigger.batch(revealCards, {
+        start: "top 88%",
+        once: true,
+        onEnter: (batch) => {
+          const enter = () =>
+            gsap.to(batch, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.72,
+              stagger: 0.08,
+              ease: "power3.out",
+              overwrite: true,
+              clearProps: "transform,opacity,visibility,willChange",
+            });
+          // Batches resolve after setup, so record the tween in the live
+          // context to keep Astro navigation cleanup complete.
+          if (motionContext) motionContext.add(enter);
+          else enter();
+        },
+      });
+    }
+
     document.querySelectorAll<HTMLElement>("[data-reveal-group]").forEach((group) => {
+      if (!isRevealCandidate(group)) return;
       const items = Array.from(group.querySelectorAll<HTMLElement>("[data-reveal-item]"));
       if (items.length === 0) return;
       gsap.fromTo(items, { autoAlpha: 0, y: 34 }, {

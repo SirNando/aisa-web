@@ -4,9 +4,11 @@ interface Props {
   label: string;
   className?: string;
   external?: boolean;
+  /** Accessible name when the visible label repeats across a group of links. */
+  ariaLabel?: string;
 }
 
-const { href, label, className, external = false } = Astro.props;
+const { href, label, className, external = false, ariaLabel } = Astro.props;
 ---
 
 <a
@@ -14,6 +16,7 @@ const { href, label, className, external = false } = Astro.props;
   href={href}
   target={external ? "_blank" : undefined}
   rel={external ? "noreferrer" : undefined}
+  aria-label={ariaLabel}
 >
   <span>{label}</span>
   <span class="arrow-link__icon" aria-hidden="true">

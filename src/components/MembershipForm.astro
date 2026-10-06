@@ -619,6 +619,10 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     font-size: var(--text-sm);
   }
 
+  .panel-intro {
+    clear: both;
+  }
+
   .form-progress {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -677,11 +681,16 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     border: 0;
   }
 
+  /* A floated legend joins the panel's content flow, so the panel padding
+     sits above the title instead of between the title and its intro. */
   .form-panel legend {
+    float: left;
+    width: 100%;
     padding: 0;
+    color: var(--color-ink);
     font-family: var(--font-heading);
     font-size: clamp(1.3rem, 3vw, 1.6rem);
-    font-weight: 800;
+    font-weight: 500;
   }
 
   .field-grid {
@@ -693,6 +702,8 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
 
   .field {
     display: grid;
+    /* Keep inputs on a shared baseline when a neighbour has helper text. */
+    align-content: start;
     gap: 0.45rem;
     font-size: var(--text-sm);
     font-weight: 700;
@@ -712,12 +723,6 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     background: var(--color-white);
     color: var(--color-ink);
     font: inherit;
-  }
-
-  .field input:focus-visible,
-  .field select:focus-visible {
-    border-color: var(--color-aisa-green);
-    outline: 3px solid color-mix(in srgb, var(--color-aisa-green) 22%, transparent);
   }
 
   .field small {
@@ -851,8 +856,23 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
     font-size: var(--text-sm);
   }
 
-  .form-navigation button:last-child,
-  .form-navigation [data-next] {
+  /* Explicit columns keep "Continuar" on the right even while "Anterior" is
+     hidden, instead of sliding into the centre column. */
+  .form-navigation > * {
+    grid-row: 1;
+  }
+
+  .form-navigation [data-previous] {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .form-navigation p {
+    grid-column: 2;
+  }
+
+  .form-navigation :is([data-next], [data-submit]) {
+    grid-column: 3;
     justify-self: end;
   }
 
@@ -880,6 +900,23 @@ const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u,
       grid-column: 1 / -1;
       grid-row: 1;
       text-align: center;
+    }
+
+    .form-navigation :is([data-previous], [data-next], [data-submit]) {
+      grid-row: 2;
+    }
+
+    .form-navigation [data-previous] {
+      justify-self: stretch;
+    }
+
+    .form-navigation :is([data-next], [data-submit]) {
+      grid-column: 2;
+      justify-self: stretch;
+    }
+
+    .form-navigation:has([data-previous][hidden]) :is([data-next], [data-submit]) {
+      grid-column: 1 / -1;
     }
   }
 

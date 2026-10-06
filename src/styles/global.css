@@ -92,6 +92,15 @@
       0 0 0 6px var(--color-white);
   }
 
+  /* Text fields keep their own radius and show one consistent focus ring. */
+  :where(input:not([type="radio"], [type="checkbox"]), select, textarea):focus-visible {
+    border-color: var(--color-focus);
+    box-shadow:
+      0 0 0 1px var(--color-focus),
+      0 0 0 5px rgb(0 95 204 / 0.16);
+    outline: none;
+  }
+
   ::selection {
     background: var(--color-sky-wash);
     color: var(--color-ink);
@@ -467,7 +476,12 @@ section.section-transition-host {
     border-color 220ms ease,
     color 220ms ease,
     box-shadow 220ms ease,
-    transform 220ms ease;
+    transform 260ms cubic-bezier(.2, .8, .2, 1);
+}
+
+:is(.button-primary, .button-secondary, .button-quiet):active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 90ms;
 }
 
 .button-primary {
@@ -526,10 +540,12 @@ section.section-transition-host {
 
 .text-link {
   color: var(--color-aisa-green-dark);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
-  text-decoration-color: rgb(76 167 81 / 0.38);
+  text-decoration-color: rgb(76 167 81 / 0.45);
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.3em;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
 }
 
 .text-link:hover {
@@ -557,13 +573,30 @@ section.section-transition-host {
   background: rgb(255 255 255 / 0.86);
   box-shadow: 0 12px 24px rgb(24 50 58 / 0.1);
   color: var(--color-aisa-green-dark);
-  transition: transform 240ms ease, background-color 240ms ease, color 240ms ease;
+  transition:
+    transform 320ms cubic-bezier(.2, .8, .2, 1),
+    background-color 240ms ease,
+    border-color 240ms ease,
+    color 240ms ease;
 }
 
-.arrow-link:hover .arrow-link__icon {
+/* Fully clickable cards animate their arrow like the link itself, so the
+   whole surface reads as one action on hover and keyboard focus. */
+:is(
+  .arrow-link:hover,
+  .arrow-link:focus-visible,
+  .journey-card:hover,
+  .resource-card:hover
+) .arrow-link__icon {
   transform: translateX(4px) rotate(-8deg);
+  border-color: var(--color-aisa-green);
   background: var(--color-aisa-green);
   color: var(--color-on-primary);
+}
+
+.arrow-link:active .arrow-link__icon {
+  transform: translateX(2px) scale(0.92);
+  transition-duration: 90ms;
 }
 
 .surface-card {
@@ -582,11 +615,17 @@ section.section-transition-host {
     transform 320ms cubic-bezier(.2, .8, .2, 1);
 }
 
-.surface-card:hover,
 .resource-card:hover {
   border-color: rgb(76 167 81 / 0.28);
   box-shadow: var(--shadow-raised);
   transform: translateY(-8px) scale(1.01);
+}
+
+/* Informational cards stay still; only cards that contain actions respond,
+   and without lifting, because the card itself is not a link. */
+.surface-card:has(a[href]):hover {
+  border-color: rgb(76 167 81 / 0.28);
+  box-shadow: var(--shadow-raised);
 }
 
 :is(.surface-card, .info-card, .resource-card, .directory-card, .organic-panel) {
@@ -1268,31 +1307,53 @@ section.section-transition-host {
   justify-self: center;
 }
 
-.rich-copy h2 {
-  margin-top: 3rem;
-  font-size: clamp(1.8rem, 3vw, 2.65rem);
-  line-height: 1.05;
-}
+/* Long-form copy lives in the components layer so page utilities such as
+   mt-0 or pl-5 can still adjust individual elements. */
+@layer components {
+  .rich-copy h2 {
+    margin-top: 3rem;
+    font-size: clamp(1.8rem, 3vw, 2.65rem);
+    line-height: 1.05;
+  }
 
-.rich-copy h3 {
-  margin-top: 2.25rem;
-  font-size: clamp(1.35rem, 1.8vw, 1.7rem);
-  line-height: 1.15;
-}
+  .rich-copy h3 {
+    margin-top: 2.25rem;
+    font-size: clamp(1.35rem, 1.8vw, 1.7rem);
+    line-height: 1.15;
+  }
 
-.rich-copy p,
-.rich-copy ul,
-.rich-copy ol {
-  margin-top: 1.15rem;
-}
+  .rich-copy p,
+  .rich-copy ul,
+  .rich-copy ol {
+    margin-top: 1.15rem;
+  }
 
-.rich-copy ul,
-.rich-copy ol {
-  padding-left: 1.35rem;
-}
+  .rich-copy ul,
+  .rich-copy ol {
+    padding-left: 1.35rem;
+  }
 
-.rich-copy li + li {
-  margin-top: 0.65rem;
+  .rich-copy ul {
+    list-style: disc;
+  }
+
+  .rich-copy ol {
+    list-style: decimal;
+  }
+
+  .rich-copy li::marker {
+    color: var(--color-aisa-green-dark);
+    font-weight: 600;
+  }
+
+  .rich-copy li + li {
+    margin-top: 0.65rem;
+  }
+
+  /* Lists that already space their items with a grid gap. */
+  .rich-copy :is(ul, ol).grid > li + li {
+    margin-top: 0;
+  }
 }
 
 /* Floating navigation */
@@ -1462,7 +1523,6 @@ section.section-transition-host {
   padding: calc(2.75rem + 0.65rem) 0.35rem 0.35rem;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(20px);
   transition:
     opacity 150ms ease,
     transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1578,10 +1638,12 @@ section.section-transition-host {
   overflow-y: auto;
   border: 1px solid rgb(255 255 255 / 0.78);
   border-radius: 2rem;
-  background: rgb(255 255 255 / 0.94);
+  /* Opaque on purpose: a backdrop-filter nested inside the header shell's own
+     backdrop-filter does not blur, which let page text show through. */
+  background: var(--color-white);
   box-shadow: var(--shadow-raised);
   padding: 1rem;
-  backdrop-filter: blur(24px);
+  overscroll-behavior: contain;
 }
 
 .mobile-nav[hidden] {
@@ -2207,7 +2269,7 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
 }
 
 .journey-card__title {
-  max-width: 15ch;
+  max-width: 20ch;
   margin-top: 1.4rem;
   font-size: var(--text-card-title);
   line-height: 1.05;
@@ -2261,7 +2323,11 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   opacity: 0.8;
 }
 
+/* The reserved illustration space replaces the measure cap; with border-box
+   sizing both together squeezed titles such as "Movimiento y coordinación"
+   into three lines. */
 .info-card:has(.info-card__illustration) .info-card__title {
+  max-width: none;
   padding-right: clamp(3.5rem, 7vw, 5rem);
 }
 
@@ -2787,13 +2853,6 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   font-weight: 500;
 }
 
-.directory-filters input:focus-visible,
-.directory-filters select:focus-visible {
-  border-color: var(--color-aisa-sky-strong);
-  outline: 3px solid rgb(2 139 179 / 0.16);
-  outline-offset: 1px;
-}
-
 .directory-filters__pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3276,7 +3335,8 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   color: var(--color-white);
 }
 .callout-card--green h2 { color: var(--color-white); }
-.callout-card--green .arrow-link:hover .arrow-link__icon {
+.callout-card--green .arrow-link:is(:hover, :focus-visible) .arrow-link__icon {
+  border-color: var(--color-aisa-green-dark);
   background: var(--color-aisa-green-dark);
   color: var(--color-white);
 }
@@ -3325,10 +3385,10 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
 }
 
 .site-footer__shapes {
-  top: clamp(2rem, 7vw, 6rem);
-  right: clamp(0rem, 6vw, 6rem);
-  width: clamp(10rem, 19vw, 17rem);
-  opacity: 0.75;
+  top: clamp(1rem, 2.5vw, 2.25rem);
+  right: clamp(0rem, 4vw, 4rem);
+  width: clamp(8rem, 14vw, 13rem);
+  opacity: 0.5;
 }
 
 .site-footer__brand,
@@ -3388,6 +3448,12 @@ html[data-hero-layout="5"] .page-hero__shape--eight {
   color: var(--color-ink);
   font-size: 1rem;
   text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.site-footer__column a:hover,
+.site-footer__column a:focus-visible {
+  color: var(--color-aisa-green-dark);
 }
 
 .site-footer__column a::before {
