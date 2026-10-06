@@ -15,6 +15,7 @@ const expectedRoutes = [
   "profesionales/certificacion/index.html",
   "profesionales/formacion-y-cursos/index.html",
   "gracias-por-asociarte/index.html",
+  "verificar-certificado/index.html",
   "asociate/index.html",
   "contacto/index.html",
   "404.html",
@@ -124,8 +125,17 @@ if (!thankYouHtml.includes("no confirma por sí sola")) {
   failures.push("La página de agradecimiento trata el retorno del navegador como confirmación de pago.");
 }
 
+const verificationHtml = pages.get("verificar-certificado/index.html") ?? "";
+if (!verificationHtml.includes("noindex")) {
+  failures.push("La página de verificación del Certificado es indexable.");
+}
+const redirects = await readFile(new URL("_redirects", dist), "utf8").catch(() => "");
+if (!/^\/verificar\/\* \/verificar-certificado\/ 200$/mu.test(redirects)) {
+  failures.push("Los enlaces /verificar/<token> de los Certificados no llevan a la página de verificación.");
+}
+
 const sitemapXml = await readFile(new URL("../dist/sitemap-0.xml", import.meta.url), "utf8");
-for (const excludedRoute of ["/asociate/", "/gracias-por-asociarte/"]) {
+for (const excludedRoute of ["/asociate/", "/gracias-por-asociarte/", "/verificar-certificado/"]) {
   if (sitemapXml.includes(excludedRoute)) {
     failures.push(`El sitemap incluye la ruta excluida ${excludedRoute}.`);
   }

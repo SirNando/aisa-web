@@ -11,6 +11,7 @@ export default defineConfig({
       filter: (page) =>
         !page.endsWith("/asociate/") &&
         !page.endsWith("/gracias-por-asociarte/") &&
+        !page.endsWith("/verificar-certificado/") &&
         !page.endsWith("/buscar-profesional/") &&
         !page.endsWith("/profesionales/formacion-y-cursos/"),
     }),

@@ -1,0 +1,211 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ResultCard from "../components/ResultCard.astro";
+
+// The QR on each Certificado leads to /verificar/<token>; public/_redirects serves this page there.
+const platformApiUrl = import.meta.env.PUBLIC_DIRECTORY_API_URL.replace(/\/+$/u, "");
+---
+
+<BaseLayout
+  title="Verificar Certificado"
+  description="Consultá si un Certificado de AISA sigue siendo válido."
+  noindex={true}
+>
+  <ResultCard
+    data-certificate-verification
+    data-platform-api-url={platformApiUrl}
+    aria-busy="true"
+    titleId="certificate-verification-title"
+    title="Verificando el Certificado"
+    message="Estamos consultando el estado del Certificado en AISA."
+  >
+    <dl class="verification-details" data-verification-details hidden>
+      <div>
+        <dt>Nombres y apellidos</dt>
+        <dd data-field="fullName"></dd>
+      </div>
+      <div>
+        <dt>Nivel</dt>
+        <dd data-field="levelLabel"></dd>
+      </div>
+      <div data-member-number-row>
+        <dt>Número de socio</dt>
+        <dd data-field="memberNumber"></dd>
+      </div>
+      <div>
+        <dt>Generado el</dt>
+        <dd data-field="generatedOn"></dd>
+      </div>
+      <div>
+        <dt>Válido hasta</dt>
+        <dd data-field="validUntil"></dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd data-field="status"></dd>
+      </div>
+    </dl>
+    <p class="result-note">
+      El estado se consulta en el momento: un Certificado vale sólo hasta la
+      fecha indicada y mientras la Certificación siga activa.
+    </p>
+    <div class="result-actions">
+      <a class="button-quiet" href="/">Volver al inicio</a>
+    </div>
+  </ResultCard>
+</BaseLayout>
+
+<script>
+  import {
+    certificateVerificationUrl,
+    parseCertificateVerification,
+    verificationTokenFromPath,
+    type CertificateVerificationView,
+  } from "../lib/certificateVerification";
+
+  type VerificationStatus = "valid" | "invalid" | "not_found" | "error";
+
+  const STATES: Record<VerificationStatus, { tone: "success" | "danger"; icon: string; title: string; message: string }> = {
+    valid: {
+      tone: "success",
+      icon: "✓",
+      title: "Certificado válido",
+      message: "La Certificación de este Certificado está activa en AISA.",
+    },
+    invalid: {
+      tone: "danger",
+      icon: "×",
+      title: "Certificado no válido",
+      message: "La Certificación de este Certificado no está activa en este momento.",
+    },
+    not_found: {
+      tone: "danger",
+      icon: "×",
+      title: "Este Certificado no existe o ya no es válido",
+      message: "Revisá que el enlace o el código QR sea el que figura en el Certificado.",
+    },
+    error: {
+      tone: "danger",
+      icon: "!",
+      title: "No pudimos verificar el Certificado",
+      message: "Intentá nuevamente en unos minutos.",
+    },
+  };
+
+  let cleanupVerification: (() => void) | undefined;
+
+  const initialiseVerification = () => {
+    const root = document.querySelector<HTMLElement>("[data-certificate-verification]");
+    if (!root || root.dataset.initialised === "true") return;
+    root.dataset.initialised = "true";
+
+    const title = root.querySelector<HTMLElement>("[data-result-title]");
+    const message = root.querySelector<HTMLElement>("[data-result-message]");
+    const icon = root.querySelector<HTMLElement>("[data-result-icon]");
+    const details = root.querySelector<HTMLElement>("[data-verification-details]");
+    const memberNumberRow = root.querySelector<HTMLElement>("[data-member-number-row]");
+    const apiUrl = root.dataset.platformApiUrl ?? "";
+    const request = new AbortController();
+
+    const setField = (name: string, value: string) => {
+      const field = root.querySelector<HTMLElement>(`[data-field="${name}"]`);
+      if (field) field.textContent = value;
+    };
+
+    const render = (status: VerificationStatus, certificate?: CertificateVerificationView) => {
+      const state = STATES[status];
+      root.dataset.status = status;
+      root.dataset.resultTone = state.tone;
+      root.setAttribute("aria-busy", "false");
+      if (icon) icon.textContent = state.icon;
+      if (title) title.textContent = state.title;
+      if (message) message.textContent = state.message;
+      if (details) details.hidden = !certificate;
+      if (!certificate) return;
+      setField("fullName", certificate.fullName);
+      setField("levelLabel", certificate.levelLabel);
+      setField("memberNumber", certificate.memberNumber);
+      setField("generatedOn", certificate.generatedOn);
+      setField("validUntil", certificate.validUntil);
+      setField("status", certificate.valid ? "Válido" : "No válido");
+      if (memberNumberRow) memberNumberRow.hidden = !certificate.memberNumber;
+    };
+
+    const verify = async () => {
+      const token = verificationTokenFromPath(window.location.pathname);
+      if (!token) {
+        render("not_found");
+        return;
+      }
+      try {
+        const response = await fetch(certificateVerificationUrl(apiUrl, token), {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+          credentials: "omit",
+          signal: request.signal,
+        });
+        if (response.status === 404) {
+          render("not_found");
+          return;
+        }
+        if (!response.ok) throw new Error("Verification unavailable");
+        const certificate = parseCertificateVerification(await response.json());
+        if (!certificate) throw new Error("Malformed verification");
+        render(certificate.valid ? "valid" : "invalid", certificate);
+      } catch {
+        if (request.signal.aborted) return;
+        render("error");
+      }
+    };
+
+    void verify();
+    cleanupVerification = () => {
+      request.abort();
+      cleanupVerification = undefined;
+    };
+  };
+
+  document.addEventListener("astro:page-load", initialiseVerification);
+  document.addEventListener("astro:before-swap", () => cleanupVerification?.());
+  initialiseVerification();
+</script>
+
+<style>
+  .verification-details {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    text-align: start;
+  }
+
+  .verification-details > div {
+    display: grid;
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .verification-details > div[hidden] {
+    display: none;
+  }
+
+  .verification-details dt {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .verification-details dd {
+    margin: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 40rem) {
+    .verification-details > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.25rem;
+    }
+  }
+</style>
