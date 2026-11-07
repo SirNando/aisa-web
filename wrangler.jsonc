@@ -1,14 +1,20 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aisa-web",
+  // AISA's own Cloudflare account ("AISA"), zone aisaargentina.com.ar.
+  "account_id": "eda4673d6c35be6ad032cfc0cb11e3f5",
   "compatibility_date": "2026-07-19",
   "workers_dev": false,
   "preview_urls": false,
+  // PENDING DECISION: the production hostname (apex and/or www) is not decided
+  // yet, and both still serve the WordPress site on cPanel. Do not deploy
+  // production until it is decided; this legacy route is kept only so the
+  // config stays valid and must be replaced before the next production deploy.
   "routes": [
     { "pattern": "aisa-web.nandinc.dev", "custom_domain": true }
   ],
   "vars": {
-    "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma.nandinc.dev"
+    "PUBLIC_DIRECTORY_API_URL": "https://plataforma.aisaargentina.com.ar"
   },
   "assets": {
     "directory": "./dist",
@@ -20,10 +26,10 @@
       "workers_dev": false,
       "preview_urls": false,
       "routes": [
-        { "pattern": "aisa-web-preview.nandinc.dev", "custom_domain": true }
+        { "pattern": "web-preview.aisaargentina.com.ar", "custom_domain": true }
       ],
       "vars": {
-        "PUBLIC_DIRECTORY_API_URL": "https://aisa-plataforma-preview.nandinc.dev"
+        "PUBLIC_DIRECTORY_API_URL": "https://plataforma-preview.aisaargentina.com.ar"
       }
     }
   }
