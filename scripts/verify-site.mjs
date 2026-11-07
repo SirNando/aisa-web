@@ -146,7 +146,15 @@ for (const forbidden of ["d1_databases", "kv_namespaces", "r2_buckets", "\"main\
   if (wrangler.includes(forbidden)) failures.push(`wrangler.jsonc contiene una declaración no permitida: ${forbidden}`);
 }
 
-await stat(join(rootPath, "public", "robots.txt"));
+const robots = await readFile(new URL("robots.txt", dist), "utf8").catch(() => "");
+const homeCanonical = (await readFile(new URL("index.html", dist), "utf8")).match(
+  /<link rel="canonical" href="([^"]+)"/u,
+)?.[1];
+if (!homeCanonical) {
+  failures.push("La página de inicio no declara una URL canónica.");
+} else if (!robots.includes(`Sitemap: ${new URL("/sitemap-index.xml", homeCanonical)}`)) {
+  failures.push("robots.txt no apunta al sitemap del mismo dominio que las URLs canónicas.");
+}
 await stat(join(rootPath, "public", "og.png"));
 for (const cursorAsset of [
   "cursor-default.svg",

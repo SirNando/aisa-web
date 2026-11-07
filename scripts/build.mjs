@@ -22,6 +22,13 @@ if (!(["http:", "https:"].includes(parsedUrl.protocol))) {
   throw new Error(`Invalid directory API URL: ${apiBaseUrl}`);
 }
 
+const siteUrl = environmentConfig?.vars?.PUBLIC_SITE_URL;
+if (!siteUrl || new URL(siteUrl).protocol !== "https:") {
+  throw new Error(
+    `Missing an https PUBLIC_SITE_URL for the ${environment || "production"} build.`,
+  );
+}
+
 const child = spawn(
   process.platform === "win32" ? "astro.cmd" : "astro",
   ["build"],
@@ -29,6 +36,7 @@ const child = spawn(
     env: {
       ...process.env,
       PUBLIC_DIRECTORY_API_URL: apiBaseUrl.replace(/\/+$/, ""),
+      PUBLIC_SITE_URL: new URL(siteUrl).origin,
     },
     stdio: "inherit",
   },

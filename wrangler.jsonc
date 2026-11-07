@@ -14,7 +14,9 @@
     { "pattern": "aisa-web.nandinc.dev", "custom_domain": true }
   ],
   "vars": {
-    "PUBLIC_DIRECTORY_API_URL": "https://plataforma.aisaargentina.com.ar"
+    "PUBLIC_DIRECTORY_API_URL": "https://plataforma.aisaargentina.com.ar",
+    // Canonical origin baked into the build (canonical, og, sitemap, robots).
+    "PUBLIC_SITE_URL": "https://www.aisaargentina.com.ar"
   },
   "assets": {
     "directory": "./dist",
@@ -26,10 +28,11 @@
       "workers_dev": false,
       "preview_urls": false,
       "routes": [
-        { "pattern": "web-preview.aisaargentina.com.ar", "custom_domain": true }
+        { "pattern": "preview.aisaargentina.com.ar", "custom_domain": true }
       ],
       "vars": {
-        "PUBLIC_DIRECTORY_API_URL": "https://plataforma-preview.aisaargentina.com.ar"
+        "PUBLIC_DIRECTORY_API_URL": "https://plataforma-preview.aisaargentina.com.ar",
+        "PUBLIC_SITE_URL": "https://preview.aisaargentina.com.ar"
       }
     }
   }

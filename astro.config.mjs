@@ -4,7 +4,8 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://www.aisaargentina.com.ar",
+  // scripts/build.mjs sets PUBLIC_SITE_URL from wrangler.jsonc per environment.
+  site: process.env.PUBLIC_SITE_URL ?? "https://www.aisaargentina.com.ar",
   output: "static",
   integrations: [
     sitemap({
